@@ -3,109 +3,127 @@
 **Verifiable ERC-20 historical holder proof for retrospective airdrops.**
 
 HolderProof recomputes an address's historical ERC-20 balance from `Transfer`
-events and turns the result into a certificate that a downstream Lyquid can
-consume for airdrop/gating decisions.
+events and turns the result into a committee-certified Lyquor fact that a
+consumer Lyquid can use for airdrop or governance gating.
 
 ## Documentation
 
 - [Scenario 1 execution plan](docs/HolderProof_Scenario1_Plan.pdf)
 - [Step 2–3 operation log](docs/HolderProof_Step2-3_Operation_Log.pdf)
 - [Collaboration guide](COLLABORATOR_GUIDE.md)
+- [Step 2 certified-call record](docs/step2-certified-call.md)
+- [Step 3 fixture replay record](docs/step3-fixture-replay.md)
 
-## Environment verified (2026-11-11)
+## Status: Step 3 complete (2026-11-11)
 
-- Rust 1.99.0 + wasm32 target
+Verified environment:
+
+- Rust 1.99.0 + `wasm32-unknown-unknown`
 - Foundry 1.7.1
 - Lyquor LDK 0.8.4
-- single-node native devnet started successfully
-- official `hello` Lyquid deployed successfully
-- official `price-feed` example identified as the committee/certified-call reference
+- local 4-node Lyquor devnet
+- official `hello` and `price-feed` examples
 
-Platform adjustment: the native multi-node devnet has 4 nodes. HolderProof will use a
-**3-of-4** committee threshold instead of the earlier 2-of-3 assumption.
+Current working flow:
 
-See `docs/lyquor-step1.md` for commands, IDs, confirmed APIs, and the next integration gate.
+```text
+ERC-20 Transfer fixture
+  -> Rust balance replay
+  -> 4-node committee proposal
+  -> 3-of-4 certified update
+  -> Consumer Lyquid call!
+  -> eligible / not eligible
+```
 
-## Step 2 verified (2026-11-11)
+Current fixtures:
 
-- Four-node localnet started successfully.
-- Indexer and Consumer Lyquids deployed and updated.
-- Four-node committee configured with threshold `3`.
-- `report_balance()` produced a certified balance with `3` signers.
-- Consumer used `call!` to read the certified balance instead of the plain snapshot.
-- Consumer returned `eligible=true` for balance `62685` against threshold `60000`.
+- 308 deterministic `Transfer` events
+- Alice at block 900 = 47685
+- Alice at block 950 = 57685
+- Alice at block 1000 = 62685
+- Bob at block 1000 = 51886
+- all certified results use 3 committee signers
 
-See `docs/step2-certified-call.md` for IDs, contracts, diagnostics, and environment notes.
+The current data source is a **local deterministic fixture**, not Sepolia live
+data. The Lyquor committee execution and cross-Lyquid call are real within the
+local devnet.
 
-## Current implementation status
+## Repository layout
 
-This repository currently contains WP1 and the independent ground-truth layer:
+```text
+lyquid-indexer/       historical balance indexer and committee flow
+lyquid-consumer/      consumer using call! against the certified balance
+fixtures/             deterministic Transfer fixture and expected results
+scripts/              devnet and fixture verification scripts
+tests/                Python ground-truth tests
+docs/                 architecture, operation logs and reports
+```
 
-- deterministic ERC-20 `Transfer` fixture
-- exact balance replay at selected historical blocks
-- time-weighted average balance (TWAB) ground truth
-- canonical event hashing and Merkle root/proofs
-- tamper-detection tests
+## Requirements
 
-The Lyquor/Rust integration is the next layer. Keeping the Python ground truth
-independent makes it useful for cross-checking the Rust implementation.
-
-## Scope freeze (P0)
-
-- one standard ERC-20 token
-- one holder and one historical block per query
-- `balance(holder, blockN)`
-- 3 nodes, 2/3 agreement
-- certificate includes block hash, event Merkle root and node signatures
-- `AirdropGateLyquid` returns eligible / not eligible
-- local fixture is the primary reproducible demo; Sepolia is optional
-
-Out of scope for P0: generic SQL, arbitrary ABI parsing, DeFi credit scoring,
-price/P&L, ZK proofs, cross-chain, mainnet-scale indexing.
+- Rust 1.99.0
+- Lyquor LDK 0.8.4
+- Foundry
+- Python 3.12+
 
 ## Commands
 
 ```bash
-# Regenerate fixtures
+# Regenerate and verify the fixture
 python3 fixtures/generate_fixture.py
-
-# Verify the fixture and Merkle proofs
 python3 scripts/verify_fixture.py
 
-# Run the standard-library test suite
+# Run Python ground-truth tests
 python3 -m unittest discover -s tests -v
+
+# Compile both Lyquids
+cargo check --workspace
+
+# Run the complete local check suite
+make check
+
+# Run Lyquid guest tests
+shaker test lyquid-indexer/Cargo.toml
+shaker test lyquid-consumer/Cargo.toml
+
+# Start the four-node devnet
+./scripts/start-devnet.sh multi
 ```
-
-Expected result:
-
-```text
-All checks passed.
-```
-
-## Fixture layout
-
-- `fixtures/transfers.json`: canonical ERC-20 Transfer events
-- `fixtures/expected_results.json`: balances, TWAB, Merkle root and proof
-- `fixtures/generate_fixture.py`: deterministic generator and algorithms
-- `scripts/verify_fixture.py`: ground-truth verifier
-- `tests/test_ground_truth.py`: correctness and tamper tests
 
 ## Core invariant
 
 ```text
 sum(inbound amounts) - sum(outbound amounts)
-= balance_at(holder, block_number)
+= balance(holder, block_number)
 ```
 
-The reconstructed balance must match an independent Python replay and, in the
-Sepolia integration, the archive node's historical `balanceOf(holder)` at the
-same block.
+The Rust Indexer result is checked against the independent Python fixture
+answer. Both data sources must pass through the same replay, committee,
+certificate and consumer path.
 
-## Next implementation steps
+## Scope
 
-1. Port `event_leaf`, `balance_at` and Merkle verification to Rust.
-2. Run the same fixture through one Lyquid node and compare with
-   `expected_results.json`.
-3. Extend to 3 nodes with a 2/3 signed quorum.
-4. Add certificate validation and `AirdropGateLyquid`.
-5. Add a one-command end-to-end demo and README reproduction script.
+P0:
+
+- one standard ERC-20 token
+- one holder and one historical block per query
+- four-node committee with threshold `3`
+- certified balance reads through `call!`
+- consumer eligibility result
+
+Not yet implemented:
+
+- complete certificate fields (`queryHash`, `blockHash`, event Merkle root)
+- AirdropGateLyquid / GovernanceGateLyquid as separate Lyquids
+- Sepolia live data adapter
+- UI
+- E3 adversarial tests
+- final report and recorded demo
+
+## Next steps
+
+1. Step 4: full query certificate and on-chain verification.
+2. Step 5: AirdropGateLyquid and GovernanceGateLyquid.
+3. Step 6: E3 tamper, missing-signature and wrong-block tests.
+4. Step 7: minimal UI and user testing.
+5. Step 8: report, slides and recorded demo.
