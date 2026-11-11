@@ -161,3 +161,19 @@ Observed:
 - Data source is still the deterministic local fixture, not Sepolia live data.
 - AirdropGateLyquid and GovernanceGateLyquid are not yet separate Lyquids.
 - UI and E3 adversarial test suite are not yet complete.
+
+## One-command reproduction
+
+```bash
+make check
+./scripts/reproduce-step4.sh
+```
+
+Stop the running devnet and proxies with:
+
+```bash
+./scripts/stop-step4.sh
+```
+
+The script is designed for a clean machine: it requires ports `10087`, `11087`,
+`12087`, `13087`, `8080`, and `8081` to be free.

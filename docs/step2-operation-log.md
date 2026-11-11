@@ -385,3 +385,37 @@ Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block �
 - parserVersion: holderproof-fixture-v1
 
 完整技术记录见 `docs/step4-certificate.md`。
+
+## 13. 一键复现脚本
+
+在安装 Lyquor LDK 后，执行：
+
+```bash
+make check
+./scripts/reproduce-step4.sh
+```
+
+脚本自动完成：
+
+- 启动 4 节点 devnet
+- 部署 Indexer 和 Consumer
+- 配置 3-of-4 委员会
+- 激活并 finalize oracle epoch
+- 设置 Alice / block 1000 查询
+- 生成完整 QueryCertificate
+- 配置 Consumer 并执行 check_eligible
+- 启动 8080/8081 诊断代理
+- 输出证书和资格 JSON
+
+查看结果：
+
+```text
+http://127.0.0.1:8081/api/certificate
+http://127.0.0.1:8080/api/result
+```
+
+停止：
+
+```bash
+./scripts/stop-step4.sh
+```

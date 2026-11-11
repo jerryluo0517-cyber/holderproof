@@ -13,3 +13,9 @@ rust-check:
 	cargo check --workspace
 
 check: fixture verify test rust-check
+
+demo:
+	./scripts/reproduce-step4.sh
+
+stop-demo:
+	./scripts/stop-step4.sh

@@ -70,7 +70,31 @@ Node 4: 127.0.0.1:13087
 
 该命令会占用当前终端，按 `Ctrl-C` 停止。
 
-## 5. 部署
+## 5. 一键复现
+
+安装 LDK 后，在仓库根目录执行：
+
+```bash
+make check
+./scripts/reproduce-step4.sh
+```
+
+脚本会自动完成 4 节点启动、两 Lyquid 部署、委员会配置、证书生成和 Consumer 验证。
+
+查看结果：
+
+```text
+http://127.0.0.1:8081/api/certificate
+http://127.0.0.1:8080/api/result
+```
+
+停止：
+
+```bash
+./scripts/stop-step4.sh
+```
+
+## 6. 手动部署（参考）
 
 ```bash
 shaker deploy \

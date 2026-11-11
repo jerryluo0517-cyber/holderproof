@@ -68,6 +68,40 @@ docs/                 architecture, operation logs and reports
 - Foundry
 - Python 3.12+
 
+## One-command reproduction
+
+After installing the Lyquor LDK:
+
+```bash
+make check
+./scripts/reproduce-step4.sh
+```
+
+The script automatically:
+
+1. starts the four-node devnet
+2. deploys Indexer and Consumer
+3. configures the 3-of-4 committee
+4. activates/finalizes the oracle epoch
+5. sets the Alice/block-1000 query
+6. generates the full certificate
+7. configures Consumer and executes `check_eligible`
+8. starts the two HTTP diagnostic proxies
+9. prints the certificate and eligibility JSON
+
+The services stay running for inspection:
+
+```text
+http://127.0.0.1:8081/api/certificate
+http://127.0.0.1:8080/api/result
+```
+
+Stop them with:
+
+```bash
+./scripts/stop-step4.sh
+```
+
 ## Commands
 
 ```bash
