@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
-<title>HolderProof Step 2/3 操作记录</title>
+<title>HolderProof Step 2–4 操作记录</title>
 <style>
   @page { size: A4; margin: 15mm 14mm 16mm 14mm; }
   * { box-sizing: border-box; }
@@ -72,7 +72,7 @@ h3 { margin-top: 8pt; }
 </style></head><body>
 <section class="cover">
   <div class="eyebrow">CS5298 FINAL PROJECT · HOLDERPROOF</div>
-  <div class="cover-title">Step 2/3</div>
+  <div class="cover-title">Step 2–4</div>
   <div class="cover-subtitle">操作记录与后续步骤</div>
   <div class="cover-desc">4 节点委员会 · 3-of-4 认证 · 跨 Lyquid call!<br>从测试余额到可验证历史持仓事实</div>
   <div class="cover-meta">记录日期：2026-11-11<br>当前状态：Step 2 PASS</div>
@@ -159,6 +159,6 @@ Consumer result: eligible=true</pre><h2>7. 已知限制</h2><ol><li><code>propos
 <tr><td>11-17</td><td>报告主体与图表</td></tr>
 <tr><td>11-18</td><td>Demo 录制、README、复现脚本</td></tr>
 <tr><td>11-19 上午</td><td>最终检查并提交</td></tr>
-</table><h2>10. 操作注意事项</h2><ul><li>当前 devnet 和两个 <code>shaker serve</code> 仍在运行，便于查看结果。</li><li>如果要停止：在对应终端按 <code>Ctrl-C</code>。</li><li>localnet 重启后，Lyquid ID 和 contract address 可能变化，必须重新部署并记录新地址。</li><li>不要直接沿用旧 contract address 调用新 devnet。</li><li>后续每次改完 Rust 代码，先运行 <code>make check</code>，再部署。</li></ul><h2>11. Step 3 完成记录</h2><h3>实现</h3><ul><li>Indexer 通过 include_str! 嵌入 fixtures/transfers.json</li><li>Rust 按 block_number / log_index 排序事件</li><li>Rust 重算 holder 在指定区块的余额</li><li>新增 set_query(holder, block)</li><li>委员会 propose 使用真实重算结果</li></ul><h3>测试</h3><ul><li>fixture 事件数：308</li><li>Alice @ 900：47685</li><li>Alice @ 950：57685</li><li>Alice @ 1000：62685</li><li>Bob @ 1000：51886</li><li>Rust guest tests：3 passed</li></ul><h3>Live 认证结果</h3><p>Alice：</p><pre>{&quot;holder&quot;:&quot;0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa&quot;,&quot;block&quot;:1000,&quot;balance&quot;:&quot;62685&quot;,&quot;signerCount&quot;:3}</pre><p>Bob：</p><pre>{&quot;holder&quot;:&quot;0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB&quot;,&quot;block&quot;:1000,&quot;balance&quot;:&quot;51886&quot;,&quot;signerCount&quot;:3}</pre><p>Consumer 最终结果：</p><pre>{&quot;balance&quot;:&quot;62685&quot;,&quot;block&quot;:1000,&quot;checkCount&quot;:3,&quot;eligible&quot;:true,&quot;holder&quot;:&quot;0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa&quot;,&quot;indexer&quot;:&quot;0x01D26E1e96A840dD86A7BD09F88820b718D5CEd8&quot;,&quot;threshold&quot;:&quot;60000&quot;}</pre><p>Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block 重放真实 fixture。</p>
+</table><h2>10. 操作注意事项</h2><ul><li>当前 devnet 和两个 <code>shaker serve</code> 仍在运行，便于查看结果。</li><li>如果要停止：在对应终端按 <code>Ctrl-C</code>。</li><li>localnet 重启后，Lyquid ID 和 contract address 可能变化，必须重新部署并记录新地址。</li><li>不要直接沿用旧 contract address 调用新 devnet。</li><li>后续每次改完 Rust 代码，先运行 <code>make check</code>，再部署。</li></ul><h2>11. Step 3 完成记录</h2><h3>实现</h3><ul><li>Indexer 通过 include_str! 嵌入 fixtures/transfers.json</li><li>Rust 按 block_number / log_index 排序事件</li><li>Rust 重算 holder 在指定区块的余额</li><li>新增 set_query(holder, block)</li><li>委员会 propose 使用真实重算结果</li></ul><h3>测试</h3><ul><li>fixture 事件数：308</li><li>Alice @ 900：47685</li><li>Alice @ 950：57685</li><li>Alice @ 1000：62685</li><li>Bob @ 1000：51886</li><li>Rust guest tests：3 passed</li></ul><h3>Live 认证结果</h3><p>Alice：</p><pre>{&quot;holder&quot;:&quot;0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa&quot;,&quot;block&quot;:1000,&quot;balance&quot;:&quot;62685&quot;,&quot;signerCount&quot;:3}</pre><p>Bob：</p><pre>{&quot;holder&quot;:&quot;0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB&quot;,&quot;block&quot;:1000,&quot;balance&quot;:&quot;51886&quot;,&quot;signerCount&quot;:3}</pre><p>Consumer 最终结果：</p><pre>{&quot;balance&quot;:&quot;62685&quot;,&quot;block&quot;:1000,&quot;checkCount&quot;:3,&quot;eligible&quot;:true,&quot;holder&quot;:&quot;0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa&quot;,&quot;indexer&quot;:&quot;0x01D26E1e96A840dD86A7BD09F88820b718D5CEd8&quot;,&quot;threshold&quot;:&quot;60000&quot;}</pre><p>Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block 重放真实 fixture。</p><h2>12. Step 4 完成记录</h2><h3>完成内容</h3><ul><li>Rust TransferEvent 全字段模型</li><li>QuerySpec、Checkpoint、QueryCertificate</li><li>SHA-256 事件叶子</li><li>与 Python 一致的 Merkle root</li><li>queryHash 生成</li><li>blockHash 绑定</li><li>证书按 queryHash 保存</li><li>完整 signer ID 列表</li><li>Consumer 读取并校验完整证书</li><li>Rust TWAB 对照测试</li></ul><h3>验证结果</h3><ul><li>Rust guest tests：5 passed</li><li>Python tests：6 passed</li><li>Fixture checks：9 passed</li><li>Certificate status：Finalized</li><li>Signer count：3</li><li>Consumer eligible：true</li></ul><h3>证书关键字段</h3><ul><li>queryHash: aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed</li><li>blockHash: 0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e</li><li>eventMerkleRoot: 2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b</li><li>eventCount: 308</li><li>parserVersion: holderproof-fixture-v1</li></ul><p>完整技术记录见 <code>docs/step4-certificate.md</code>。</p>
 </section>
 </body></html>

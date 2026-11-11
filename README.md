@@ -9,12 +9,12 @@ consumer Lyquid can use for airdrop or governance gating.
 ## Documentation
 
 - [Scenario 1 execution plan](docs/HolderProof_Scenario1_Plan.pdf)
-- [Step 2–3 operation log](docs/HolderProof_Step2-3_Operation_Log.pdf)
+- [Step 2–4 operation log](docs/HolderProof_Step2-4_Operation_Log.pdf)
 - [Collaboration guide](COLLABORATOR_GUIDE.md)
 - [Step 2 certified-call record](docs/step2-certified-call.md)
 - [Step 3 fixture replay record](docs/step3-fixture-replay.md)
 
-## Status: Step 3 complete (2026-11-11)
+## Status: Step 4 complete (2026-11-11)
 
 Verified environment:
 
@@ -31,7 +31,8 @@ ERC-20 Transfer fixture
   -> Rust balance replay
   -> 4-node committee proposal
   -> 3-of-4 certified update
-  -> Consumer Lyquid call!
+  -> full QueryCertificate
+  -> Consumer call! and certificate validation
   -> eligible / not eligible
 ```
 
@@ -46,7 +47,8 @@ Current fixtures:
 
 The current data source is a **local deterministic fixture**, not Sepolia live
 data. The Lyquor committee execution and cross-Lyquid call are real within the
-local devnet.
+local devnet. Certificates bind the query hash, block hash, event Merkle root,
+parser version, signer IDs and finality status.
 
 ## Repository layout
 
@@ -113,7 +115,6 @@ P0:
 
 Not yet implemented:
 
-- complete certificate fields (`queryHash`, `blockHash`, event Merkle root)
 - AirdropGateLyquid / GovernanceGateLyquid as separate Lyquids
 - Sepolia live data adapter
 - UI
@@ -122,8 +123,7 @@ Not yet implemented:
 
 ## Next steps
 
-1. Step 4: full query certificate and on-chain verification.
-2. Step 5: AirdropGateLyquid and GovernanceGateLyquid.
-3. Step 6: E3 tamper, missing-signature and wrong-block tests.
-4. Step 7: minimal UI and user testing.
-5. Step 8: report, slides and recorded demo.
+1. Step 5: AirdropGateLyquid and GovernanceGateLyquid.
+2. Step 6: E3 tamper, missing-signature and wrong-block tests.
+3. Step 7: minimal UI and user testing.
+4. Step 8: report, slides and recorded demo.

@@ -183,8 +183,22 @@ def twab_scaled(
     return total * scale // (end_block - start_block)
 
 
+EVENT_HASH_FIELDS = (
+    "chain_id",
+    "token",
+    "block_number",
+    "block_hash",
+    "tx_hash",
+    "log_index",
+    "from",
+    "to",
+    "amount",
+    "parser_version",
+)
+
+
 def canonical_event(event: Event) -> bytes:
-    return json.dumps(event, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return "|".join(str(event[field]) for field in EVENT_HASH_FIELDS).encode("utf-8")
 
 
 def event_leaf(event: Event) -> str:

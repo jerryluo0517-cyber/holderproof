@@ -1,6 +1,6 @@
 # HolderProof 协作指南
 
-当前版本：Step 3 完成（2026-11-11）
+当前版本：Step 4 完成（2026-11-11）
 
 ## 1. 当前已经完成
 
@@ -14,6 +14,8 @@
 - Rust 余额重算
 - Rust guest tests 3 个通过
 - Python ground-truth tests 6 个通过
+- 完整 QueryCertificate、block hash、event Merkle root、query hash 和 signer IDs
+- Consumer 对完整证书进行状态、字段和签名数量校验
 
 ## 2. 每台机器需要准备
 
@@ -150,7 +152,6 @@ __pycache__/
 
 ## 9. 下一步工作包
 
-- Step 4：完整查询证书
 - Step 5：AirdropGate / GovernanceGate
 - Step 6：E3 篡改和异常测试
 - Step 7：最小 UI

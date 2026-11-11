@@ -1,7 +1,7 @@
-# HolderProof Step 2/3 操作记录与后续步骤
+# HolderProof Step 2–4 操作记录与后续步骤
 
 日期：2026-11-11  
-状态：Step 1–3 已完成；Step 4 待开始
+状态：Step 1–4 已完成；Step 5 待开始
 
 ## 1. 当前成果
 
@@ -351,3 +351,37 @@ Consumer 最终结果：
 ```
 
 Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block 重放真实 fixture。
+
+## 12. Step 4 完成记录
+
+### 完成内容
+
+- Rust TransferEvent 全字段模型
+- QuerySpec、Checkpoint、QueryCertificate
+- SHA-256 事件叶子
+- 与 Python 一致的 Merkle root
+- queryHash 生成
+- blockHash 绑定
+- 证书按 queryHash 保存
+- 完整 signer ID 列表
+- Consumer 读取并校验完整证书
+- Rust TWAB 对照测试
+
+### 验证结果
+
+- Rust guest tests：5 passed
+- Python tests：6 passed
+- Fixture checks：9 passed
+- Certificate status：Finalized
+- Signer count：3
+- Consumer eligible：true
+
+### 证书关键字段
+
+- queryHash: aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed
+- blockHash: 0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e
+- eventMerkleRoot: 2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b
+- eventCount: 308
+- parserVersion: holderproof-fixture-v1
+
+完整技术记录见 `docs/step4-certificate.md`。
