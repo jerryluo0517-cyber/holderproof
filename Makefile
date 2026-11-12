@@ -19,3 +19,9 @@ demo:
 
 stop-demo:
 	./scripts/stop-step4.sh
+
+setup-env:
+	./scripts/setup-env.sh
+
+check-env:
+	./scripts/setup-env.sh --check

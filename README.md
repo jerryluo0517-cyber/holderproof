@@ -65,6 +65,23 @@ tests/                Python ground-truth tests
 docs/                 architecture, operation logs and reports
 ```
 
+## Environment setup
+
+Install and configure the local Lyquor environment:
+
+```bash
+./scripts/setup-env.sh
+```
+
+Check only, without installing or modifying the machine:
+
+```bash
+./scripts/setup-env.sh --check
+```
+
+The setup script verifies Rust, the WASM target, Lyquor LDK, Foundry and the
+project test suite.
+
 ## Requirements
 
 - Rust 1.99.0

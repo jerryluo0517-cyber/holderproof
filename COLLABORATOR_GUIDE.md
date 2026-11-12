@@ -17,7 +17,21 @@
 - 完整 QueryCertificate、block hash、event Merkle root、query hash 和 signer IDs
 - Consumer 对完整证书进行状态、字段和签名数量校验
 
-## 2. 每台机器需要准备
+## 2. 一键配置环境
+
+```bash
+./scripts/setup-env.sh
+```
+
+只检查、不安装：
+
+```bash
+./scripts/setup-env.sh --check
+```
+
+脚本会检查 Rust、WASM target、Lyquor LDK、Foundry，并运行项目测试。
+
+## 3. 每台机器需要准备
 
 1. 安装 Rust 1.99.0 和 `wasm32-unknown-unknown`
 2. 安装 Foundry
@@ -31,7 +45,7 @@ source ~/.zshenv
 
 项目依赖使用 crates.io 的 `lyquid 0.8.4`，不需要硬编码本机 LDK 路径。
 
-## 3. 本地检查
+## 4. 本地检查
 
 ```bash
 cd holderproof
@@ -53,7 +67,7 @@ shaker test lyquid-indexer/Cargo.toml
 shaker test lyquid-consumer/Cargo.toml
 ```
 
-## 4. 启动 devnet
+## 5. 启动 devnet
 
 ```bash
 ./scripts/start-devnet.sh multi
@@ -70,7 +84,7 @@ Node 4: 127.0.0.1:13087
 
 该命令会占用当前终端，按 `Ctrl-C` 停止。
 
-## 5. 一键复现
+## 6. 一键复现
 
 安装 LDK 后，在仓库根目录执行：
 
@@ -94,7 +108,7 @@ http://127.0.0.1:8080/api/result
 ./scripts/stop-step4.sh
 ```
 
-## 6. 手动部署（参考）
+## 7. 手动部署（参考）
 
 ```bash
 shaker deploy \
@@ -114,7 +128,7 @@ shaker deploy \
 docs/step2-operation-log.md
 ```
 
-## 6. 注意：本地地址不能跨机器访问
+## 8. 注意：本地地址不能跨机器访问
 
 以下 URL 只属于启动 devnet 的机器：
 
@@ -125,7 +139,7 @@ http://127.0.0.1:8081/api/certified
 
 其他成员必须在自己的机器上启动 devnet 并完成部署。
 
-## 7. 当前数据来源
+## 9. 当前数据来源
 
 当前使用：
 
@@ -136,7 +150,7 @@ fixtures/transfers.json
 这是确定性本地 fixture，不是 Sepolia 实时数据。委员会重算、认证和跨 Lyquid
 调用是真实的本地 Lyquor 执行。
 
-## 8. 推荐协作方式
+## 10. 推荐协作方式
 
 ### 一次性分享
 
@@ -174,7 +188,7 @@ __pycache__/
 
 这些已写入 `.gitignore`。
 
-## 9. 下一步工作包
+## 11. 下一步工作包
 
 - Step 5：AirdropGate / GovernanceGate
 - Step 6：E3 篡改和异常测试
