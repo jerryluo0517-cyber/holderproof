@@ -113,7 +113,15 @@ lyquid-indexer/src/tests.rs        Indexer guest tests
 lyquid-consumer/src/lib.rs         Consumer 证书校验和资格判断
 docs/CODE_WALKTHROUGH.md           代码导读
 scripts/reproduce-step4.sh         一键复现
-scripts/stop-step4.sh              停止复现环境</pre><h2>6. 本地与 GitHub 状态</h2><p>本地有未提交改动：</p><ul><li>共享类型 crate</li><li>Indexer 模块拆分</li><li>HTTP endpoints 拆分</li><li>Consumer 证书校验拆分</li><li>代码导读</li><li>新增测试</li></ul><p>这些改动尚未提交，GitHub 远程 <code>main</code> 仍是：</p><pre>b6451eb Add one-command Step 4 reproduction</pre><p>因此当前 GitHub 版本不包含最新本地可读性重构。</p><h2>7. 尚未完成</h2><ul><li>AirdropGateLyquid</li><li>GovernanceGateLyquid</li><li>Sepolia 真实数据适配器</li><li>完整 E3 篡改与异常测试</li><li>证书挑战/撤销机制</li><li>UI</li><li>用户外测</li><li>正式 6–10 页报告</li><li>预录 Demo</li><li>最终提交包</li></ul><h2>8. 下一步建议</h2><h3>Step 5A：AirdropGateLyquid</h3><p>状态：</p><pre>campaign_id
+scripts/stop-step4.sh              停止复现环境</pre><h2>6. 本地与 GitHub 状态</h2><p>本地与 GitHub 已同步：</p><pre>本地 HEAD:
+61a701d Improve code readability and add project progress copy
+
+GitHub main:
+61a701d Improve code readability and add project progress copy
+
+工作区：clean
+未提交改动：0
+未推送提交：0</pre><p>最新可读性重构已经包含在 GitHub 远程 <code>main</code>：</p><ul><li>共享类型 crate</li><li>Indexer 模块拆分</li><li>HTTP endpoints 拆分</li><li>Consumer 证书校验拆分</li><li>代码导读</li><li>新增测试</li></ul><h2>7. 尚未完成</h2><ul><li>AirdropGateLyquid</li><li>GovernanceGateLyquid</li><li>Sepolia 真实数据适配器</li><li>完整 E3 篡改与异常测试</li><li>证书挑战/撤销机制</li><li>UI</li><li>用户外测</li><li>正式 6–10 页报告</li><li>预录 Demo</li><li>最终提交包</li></ul><h2>8. 下一步建议</h2><h3>Step 5A：AirdropGateLyquid</h3><p>状态：</p><pre>campaign_id
 token
 snapshot_block
 threshold

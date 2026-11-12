@@ -17,7 +17,7 @@ consumer Lyquid can use for airdrop or governance gating.
 - [Step 2 certified-call record](docs/step2-certified-call.md)
 - [Step 3 fixture replay record](docs/step3-fixture-replay.md)
 
-## Status: Step 4 complete (2026-11-11)
+## Status: Step 4 complete (2026-11-12)
 
 Verified environment:
 

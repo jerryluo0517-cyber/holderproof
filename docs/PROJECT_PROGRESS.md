@@ -1,10 +1,10 @@
 # HolderProof 项目推进副本
 
-更新时间：2026-11-12  
-当前阶段：Step 4 完成，准备进入 Step 5  
-当前分支：main  
-本地状态：有未提交的重构改动  
-GitHub current main：b6451eb Add one-command Step 4 reproduction
+更新时间：2026-11-12
+当前阶段：Step 4 完成，准备进入 Step 5
+当前分支：main
+本地状态：工作区干净
+GitHub current main：61a701d Improve code readability and add project progress copy
 
 ## 1. 项目定位
 
@@ -86,7 +86,21 @@ scripts/stop-step4.sh              停止复现环境
 
 ## 6. 本地与 GitHub 状态
 
-本地有未提交改动：
+本地与 GitHub 已同步：
+
+```text
+本地 HEAD:
+61a701d Improve code readability and add project progress copy
+
+GitHub main:
+61a701d Improve code readability and add project progress copy
+
+工作区：clean
+未提交改动：0
+未推送提交：0
+```
+
+最新可读性重构已经包含在 GitHub 远程 `main`：
 
 - 共享类型 crate
 - Indexer 模块拆分
@@ -94,14 +108,6 @@ scripts/stop-step4.sh              停止复现环境
 - Consumer 证书校验拆分
 - 代码导读
 - 新增测试
-
-这些改动尚未提交，GitHub 远程 `main` 仍是：
-
-```text
-b6451eb Add one-command Step 4 reproduction
-```
-
-因此当前 GitHub 版本不包含最新本地可读性重构。
 
 ## 7. 尚未完成
 
