@@ -119,22 +119,22 @@ BalanceProposal { holder, block, balance }
 ## Consumer
 
 ```text
-lyquid-consumer/src/lib.rs
+lyquid-consumer/src/
+├── lib.rs             # state、configure、check_eligible
+├── certificate.rs     # 证书状态、签名数、查询和 checkpoint 校验
+├── eligibility.rs     # balance 解析与阈值判断
+├── http_endpoints.rs  # /api/result
+└── tests.rs           # Consumer guest tests
 ```
 
 推荐阅读顺序：
 
-1. `state!`
-2. `configure`
-3. `validate_certificate`
-4. `ensure_finalized`
-5. `ensure_sufficient_signers`
-6. `ensure_query_matches`
-7. `ensure_metadata`
-8. `ensure_checkpoint`
-9. `parse_balance`
-10. `check_eligible`
-11. `http_result`
+1. `lib.rs`: `state!`
+2. `lib.rs`: `configure`
+3. `certificate.rs`: `validate_certificate` 和 `ensure_*`
+4. `eligibility.rs`: `evaluate`
+5. `lib.rs`: `check_eligible`
+6. `http_endpoints.rs`: `http_result`
 
 Consumer 不直接重算余额。它只做：
 
