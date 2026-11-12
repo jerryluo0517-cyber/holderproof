@@ -1,0 +1,13 @@
+[package]
+name = "holderproof-types"
+description = "Shared wire types for the HolderProof Lyquids"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+
+[lib]
+crate-type = ["rlib"]

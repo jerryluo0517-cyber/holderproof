@@ -8,6 +8,9 @@ consumer Lyquid can use for airdrop or governance gating.
 
 ## Documentation
 
+- [Project progress copy](docs/PROJECT_PROGRESS.md)
+- [Project progress PDF](docs/HolderProof_Project_Progress_2026-11-12.pdf)
+- [Code walkthrough](docs/CODE_WALKTHROUGH.md)
 - [Scenario 1 execution plan](docs/HolderProof_Scenario1_Plan.pdf)
 - [Step 2–4 operation log](docs/HolderProof_Step2-4_Operation_Log.pdf)
 - [Collaboration guide](COLLABORATOR_GUIDE.md)

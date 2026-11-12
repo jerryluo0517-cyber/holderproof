@@ -374,7 +374,9 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 name = "holderproof-consumer"
 version = "0.1.0"
 dependencies = [
+ "holderproof-types",
  "lyquid",
+ "lyquid-test",
  "serde",
  "serde_json",
 ]
@@ -384,11 +386,19 @@ name = "holderproof-indexer"
 version = "0.1.0"
 dependencies = [
  "hex",
+ "holderproof-types",
  "lyquid",
  "lyquid-test",
  "serde",
  "serde_json",
  "sha2",
+]
+
+[[package]]
+name = "holderproof-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

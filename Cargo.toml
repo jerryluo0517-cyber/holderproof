@@ -1,15 +1,17 @@
 [workspace]
-members = ["lyquid-indexer", "lyquid-consumer"]
+members = ["holderproof-types", "lyquid-indexer", "lyquid-consumer"]
 resolver = "3"
 
 [workspace.package]
 edition = "2024"
+rust-version = "1.85"
 version = "0.1.0"
 license = "Apache-2.0"
 publish = false
 
 [workspace.dependencies]
 lyquid = { version = "0.8.4", features = ["ldk"] }
+holderproof-types = { path = "holderproof-types" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.150"
 sha2 = "0.11"
