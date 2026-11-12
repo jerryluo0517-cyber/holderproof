@@ -8,6 +8,8 @@
 再走到 Consumer 的 eligible 结果
 ```
 
+当前本地与 GitHub `main` 已同步；Git 状态以仓库页面和 `git status` 为准。
+
 ## 1. 先认识四个概念
 
 ### Lyquid
@@ -53,6 +55,7 @@ holderproof-types/src/lib.rs
 - `CertificateStatus`
 - `CHAIN_ID`
 - `PARSER_VERSION`
+- `COMMITTEE_THRESHOLD`
 
 Indexer 和 Consumer 共同使用这些类型，避免证书结构重复。
 
@@ -60,11 +63,12 @@ Indexer 和 Consumer 共同使用这些类型，避免证书结构重复。
 
 ```text
 lyquid-indexer/src/
-├── lib.rs        # state、网络方法、委员会流程、HTTP 方法
-├── fixture.rs    # fixture 解析、余额、TWAB、query hash
-├── merkle.rs     # 事件叶子、Merkle root
-├── models.rs     # BalanceProposal
-└── tests.rs      # Indexer guest tests
+├── lib.rs             # state、网络方法、委员会流程
+├── fixture.rs         # LazyLock fixture、余额、TWAB、query hash
+├── http_endpoints.rs  # HTTP 诊断端点
+├── merkle.rs          # 事件叶子、Merkle root
+├── models.rs          # BalanceProposal
+└── tests.rs           # Indexer guest tests
 ```
 
 ### `lib.rs`
@@ -78,13 +82,15 @@ lyquid-indexer/src/
 5. `update_certified_balance`
 6. `get_certificate_json`
 7. `report_balance`
-8. HTTP endpoints
+
+HTTP 方法在独立的 `http_endpoints.rs` 中。
 
 ### `fixture.rs`
 
 负责所有与本地数据有关的纯逻辑：
 
 - 读取嵌入的 `transfers.json`
+- 使用 `LazyLock` 只解析和排序一次
 - 按 holder 和 block 重算余额
 - 计算 TWAB
 - 计算 block hash
@@ -97,6 +103,7 @@ lyquid-indexer/src/
 
 - 事件规范化字符串
 - SHA-256 event leaf
+- `hash_hex` / `hash_hex_prefixed` 辅助函数
 - mirrored-pair Merkle root
 
 Rust 实现与 Python ground truth 使用完全相同的序列化规则。
@@ -120,9 +127,14 @@ lyquid-consumer/src/lib.rs
 1. `state!`
 2. `configure`
 3. `validate_certificate`
-4. `parse_balance`
-5. `check_eligible`
-6. `http_result`
+4. `ensure_finalized`
+5. `ensure_sufficient_signers`
+6. `ensure_query_matches`
+7. `ensure_metadata`
+8. `ensure_checkpoint`
+9. `parse_balance`
+10. `check_eligible`
+11. `http_result`
 
 Consumer 不直接重算余额。它只做：
 
@@ -238,7 +250,10 @@ get_twab
 propose
 aggregate
 report_balance
-HTTP endpoints
+http_balance
+http_certified
+http_certificate
+http_result
 ```
 
 ## `oracle::two_phase`
@@ -317,11 +332,20 @@ shaker test lyquid-consumer/Cargo.toml
 预期：
 
 ```text
-Indexer tests:  5 passed
-Consumer tests: 4 passed
-Python tests:   6 passed
-Fixture checks: 9 passed
+Indexer tests:      5 passed
+Consumer tests:     4 passed
+Python tests:       6 passed
+Fixture checks:     9 passed
 Certificate status: Finalized
-Signer count: 3
-eligible: true
+Signer count:       3
+eligible:           true
 ```
+
+也可以直接运行 Step 4 一键复现：
+
+```bash
+./scripts/reproduce-step4.sh
+./scripts/stop-step4.sh
+```
+
+当前工具链由 `rust-toolchain.toml` 固定为 Rust 1.99.0。`LazyLock` 的最低稳定版本要求是 Rust 1.80，因此项目环境应至少使用 Rust 1.80，推荐直接使用项目的 1.99.0。

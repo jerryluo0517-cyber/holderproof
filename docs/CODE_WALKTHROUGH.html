@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>HolderProof 代码导读</title>
+<style>
+  @page { size: A4; margin: 15mm 14mm 16mm 14mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Songti SC", "STSong", "Arial Unicode MS", serif;
+    color: #1f2937;
+    font-size: 9.8pt;
+    line-height: 1.56;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { font-family: "PingFang SC", "Heiti SC", sans-serif; margin: 0; }
+  h1 { color: #183153; font-size: 23pt; }
+  h2 { color: #183153; font-size: 15.5pt; margin: 13pt 0 6pt; padding-bottom: 4pt; border-bottom: 1.2pt solid #2563eb; break-after: avoid; }
+  h3 { color: #183153; font-size: 11.6pt; margin: 8pt 0 4pt; break-after: avoid; }
+  p { margin: 4pt 0 7pt; text-align: justify; }
+  ul, ol { margin: 4pt 0 7pt 19pt; padding: 0; }
+  li { margin: 2.5pt 0; }
+  strong { color: #111827; }
+  code { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 8.8pt; background: #f1f5f9; padding: 1px 4px; border-radius: 3px; }
+  pre { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 7.9pt; line-height: 1.43; white-space: pre-wrap; background: #f4f7fb; border: 1px solid #d8dee8; border-left: 4px solid #2563eb; border-radius: 4px; padding: 6px 8px; margin: 6px 0 8px; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 8.7pt; break-inside: avoid; }
+  th { background: #e9eff8; color: #183153; font-family: "PingFang SC", sans-serif; text-align: left; padding: 4px 5px; border: 1px solid #cbd5e1; }
+  td { padding: 4px 5px; border: 1px solid #d8dee8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfd; }
+  .page-break { break-before: auto; }
+  .avoid { break-inside: avoid; }
+  .cover { height: 260mm; break-after: page; display: flex; flex-direction: column; justify-content: center; text-align: center; position: relative; }
+  .cover:before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 7mm; background: linear-gradient(90deg,#183153,#2563eb,#0891b2); }
+  .eyebrow { font-family: "PingFang SC", sans-serif; color: #2563eb; letter-spacing: 0.08em; font-size: 11pt; margin-bottom: 18pt; }
+  .cover-title { font-family: "PingFang SC", sans-serif; font-size: 42pt; color: #183153; font-weight: 800; letter-spacing: -0.02em; }
+  .cover-subtitle { font-family: "PingFang SC", sans-serif; font-size: 20pt; font-weight: 600; color: #0f172a; margin-top: 9pt; }
+  .cover-desc { font-size: 13pt; color: #475569; margin: 13pt auto 0; max-width: 145mm; }
+  .cover-meta { margin-top: 34pt; color: #64748b; font-family: "PingFang SC", sans-serif; font-size: 10pt; }
+  .pill { display: inline-block; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; border-radius: 999px; padding: 3px 9px; margin: 2px; font-family: "PingFang SC", sans-serif; font-size: 8.8pt; }
+  .keybox { background: #f4f7fb; border: 1px solid #93b4e8; border-left: 5px solid #2563eb; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
+  .warnbox { background: #fff7ed; border: 1px solid #fdba74; border-left: 5px solid #c2410c; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
+  .greenbox { background: #f0fdf4; border: 1px solid #86efac; border-left: 5px solid #15803d; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
+  .box-title { display: block; font-family: "PingFang SC", sans-serif; font-weight: 700; color: #183153; margin-bottom: 3px; }
+  .small { font-size: 8.8pt; color: #64748b; }
+  .center { text-align: center; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .metric { border: 1px solid #d8dee8; border-radius: 5px; padding: 8px; background: #fff; text-align: center; }
+  .metric b { display: block; color: #2563eb; font-family: "PingFang SC", sans-serif; font-size: 17pt; }
+  .metric span { font-size: 8.8pt; color: #64748b; }
+  .arch { margin: 10px 0 12px; padding: 10px; border: 1px solid #d8dee8; border-radius: 7px; background: #fbfdff; break-inside: avoid; }
+  .row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 7px 0; }
+  .node { min-width: 150px; text-align: center; border: 1px solid #94a3b8; border-radius: 7px; padding: 8px 7px; background: white; font-family: "PingFang SC", sans-serif; font-size: 8.9pt; line-height: 1.35; }
+  .node.blue { border-color: #2563eb; background: #eff6ff; }
+  .node.cyan { border-color: #0891b2; background: #ecfeff; }
+  .node.green { border-color: #15803d; background: #f0fdf4; }
+  .arrow { color: #183153; font-size: 18pt; font-weight: 700; }
+  .arrow-down { color: #183153; font-size: 18pt; font-weight: 700; text-align: center; margin: -2px 0; }
+  .caption { text-align: center; color: #64748b; font-size: 8.8pt; margin-top: 2px; }
+  .toc { margin-top: 12pt; columns: 2; column-gap: 20px; }
+  .toc div { padding: 4px 0; border-bottom: 1px dotted #cbd5e1; break-inside: avoid; }
+  .toc b { color: #2563eb; margin-right: 6px; }
+  .checklist td:last-child { text-align: center; font-size: 13pt; color: #2563eb; }
+  .footer-note { margin-top: 16pt; text-align: center; color: #64748b; font-size: 8.8pt; font-family: "PingFang SC", sans-serif; }
+  .page-label { color: #2563eb; font-weight: 700; margin-right: 5px; }
+
+body { font-size: 9.35pt; line-height: 1.50; }
+table { font-size: 8.35pt; }
+pre { font-size: 7.55pt; }
+h2 { margin-top: 12pt; }
+h3 { margin-top: 8pt; }
+</style></head><body>
+<section class="cover">
+  <div class="eyebrow">CS5298 FINAL PROJECT · HOLDERPROOF</div>
+  <div class="cover-title">Code Walkthrough</div>
+  <div class="cover-subtitle">代码导读与阅读顺序</div>
+  <div class="cover-desc">模块职责 · 数据流 · 状态字段<br>委员会流程 · 证书校验 · 测试方法</div>
+  <div class="cover-meta">更新时间：2026-11-12<br>对应代码：Step 4 完成版</div>
+  <div style="margin-top:26pt">
+    <span class="pill">4 Nodes</span><span class="pill">3 Signers</span><span class="pill">Certified Balance</span><span class="pill">Consumer call!</span>
+  </div>
+</section>
+<section>
+<h2>1. 先认识四个概念</h2><h3>Lyquid</h3><p>Lyquid 是用 Rust 编写、部署到 Lyquor 上的应用。</p><h3>Network State</h3><p>多个节点共享的状态，例如：</p><pre>query_holder
+query_block
+certificates
+latest_query_hash</pre><h3>Instance State</h3><p>节点本地状态，例如 Consumer 的诊断计数。当前 Indexer 主要使用共享状态。</p><h3>Certified Call</h3><p>多个委员会节点执行 <code>propose</code>，通过 <code>aggregate</code> 达成一致，再由<br><code>submit_certified_call!</code> 提交认证后的 network call。</p><p>---</p><p># 2. 文件职责</p><h2>共享类型</h2><pre>holderproof-types/src/lib.rs</pre><p>包含：</p><ul><li><code>TransferEvent</code></li><li><code>QuerySpec</code></li><li><code>Checkpoint</code></li><li><code>QueryCertificate</code></li><li><code>CertificateStatus</code></li><li><code>CHAIN_ID</code></li><li><code>PARSER_VERSION</code></li><li><code>COMMITTEE_THRESHOLD</code></li></ul><p>Indexer 和 Consumer 共同使用这些类型，避免证书结构重复。</p><h2>Indexer</h2><pre>lyquid-indexer/src/
+├── lib.rs             # state、网络方法、委员会流程
+├── fixture.rs         # LazyLock fixture、余额、TWAB、query hash
+├── http_endpoints.rs  # HTTP 诊断端点
+├── merkle.rs          # 事件叶子、Merkle root
+├── models.rs          # BalanceProposal
+└── tests.rs           # Indexer guest tests</pre><h3><code>lib.rs</code></h3><p>推荐按以下顺序阅读：</p><ol><li><code>state!</code></li><li><code>set_query</code></li><li><code>propose</code></li><li><code>aggregate</code></li><li><code>update_certified_balance</code></li><li><code>get_certificate_json</code></li><li><code>report_balance</code></li></ol><p>HTTP 方法在独立的 <code>http_endpoints.rs</code> 中。</p><h3><code>fixture.rs</code></h3><p>负责所有与本地数据有关的纯逻辑：</p><ul><li>读取嵌入的 <code>transfers.json</code></li><li>使用 <code>LazyLock</code> 只解析和排序一次</li><li>按 holder 和 block 重算余额</li><li>计算 TWAB</li><li>计算 block hash</li><li>生成 checkpoint</li><li>生成 <code>QuerySpec</code> 和 query hash</li></ul><h3><code>merkle.rs</code></h3><p>负责：</p><ul><li>事件规范化字符串</li><li>SHA-256 event leaf</li><li><code>hash_hex</code> / <code>hash_hex_prefixed</code> 辅助函数</li><li>mirrored-pair Merkle root</li></ul><p>Rust 实现与 Python ground truth 使用完全相同的序列化规则。</p><h3><code>models.rs</code></h3><p>只包含委员会提案：</p><pre>BalanceProposal { holder, block, balance }</pre><h2>Consumer</h2><pre>lyquid-consumer/src/lib.rs</pre><p>推荐阅读顺序：</p><ol><li><code>state!</code></li><li><code>configure</code></li><li><code>validate_certificate</code></li><li><code>ensure_finalized</code></li><li><code>ensure_sufficient_signers</code></li><li><code>ensure_query_matches</code></li><li><code>ensure_metadata</code></li><li><code>ensure_checkpoint</code></li><li><code>parse_balance</code></li><li><code>check_eligible</code></li><li><code>http_result</code></li></ol><p>Consumer 不直接重算余额。它只做：</p><pre>call! Indexer
+→ 获取 QueryCertificate JSON
+→ 校验证书
+→ 读取 balance
+→ 判断 eligible</pre><p>---</p><p># 3. 一次查询的完整流程</p><pre>User / Script
+    |
+    | set_query(holder, block)
+    v
+Indexer network state: query_holder, query_block
+    |
+    | report_balance()
+    v
+propose() on each committee node
+    |
+    | fixture_balance(holder, block)
+    v
+aggregate()
+    |
+    | require 3 matching proposals
+    v
+update_certified_balance()
+    |
+    | create QueryCertificate
+    v
+network certificates[queryHash]
+    |
+    | get_certificate_json(holder, block)
+    v
+Consumer check_eligible()
+    |
+    | validate status, signers, holder, block,
+    | blockHash, eventMerkleRoot, queryHash
+    v
+eligible = balance &gt;= threshold</pre><p>---</p><p># 4. 状态说明</p><h2>Indexer</h2><pre>initializer             部署者地址
+balance_proof           oracle topic
+query_holder            当前查询的 holder
+query_block             当前查询的 block
+certified_holder        最新认证 holder
+certified_block         最新认证 block
+certified_balance       最新认证余额
+certified_signer_count  最新认证签名数
+latest_query_hash       最新证书 ID
+certificates            按 queryHash 保存的完整证书</pre><h2>Consumer</h2><pre>indexer                  Indexer Lyquid 地址
+expected_holder          预期 holder
+expected_block           预期 block
+threshold                资格阈值
+last_balance             最新认证余额
+last_eligible            最新资格结果
+last_query_hash          最新 query hash
+last_block_hash          最新 block hash
+last_event_merkle_root   最新事件 Merkle root
+last_certificate_status  最新证书状态
+last_signer_count        最新签名数量</pre><p>---</p><p># 5. Lyquid 方法类型</p><h2><code>#[method::network]</code></h2><p>在共享 network state 上执行，通常对应链上或共识路径。</p><p>当前使用：</p><pre>constructor
+set_query
+publish_balance
+get_balance
+get_certified_balance
+configure_committee
+update_certified_balance
+get_certificate_json
+get_twab</pre><h2><code>#[method::instance]</code></h2><p>在单个节点实例上执行。</p><p>当前使用：</p><pre>propose
+aggregate
+report_balance
+http_balance
+http_certified
+http_certificate
+http_result</pre><h2><code>oracle::two_phase</code></h2><p>表示委员会两阶段流程：</p><pre>propose -&gt; aggregate -&gt; certified update</pre><p>---</p><p># 6. 证书字段从哪里来</p><table>
+<tr><th>字段</th><th>来源</th></tr>
+<tr><td>certificate_id</td><td>query hash</td></tr>
+<tr><td>query_hash</td><td>chain/token/holder/block/parser version</td></tr>
+<tr><td>chain_id</td><td>固定 fixture chain ID</td></tr>
+<tr><td>token</td><td>fixture token</td></tr>
+<tr><td>holder</td><td><code>set_query</code></td></tr>
+<tr><td>block_number</td><td><code>set_query</code></td></tr>
+<tr><td>balance</td><td>fixture replay</td></tr>
+<tr><td>checkpoint.block_hash</td><td>deterministic block hash</td></tr>
+<tr><td>checkpoint.event_count</td><td>过滤后的事件数</td></tr>
+<tr><td>checkpoint.event_merkle_root</td><td><code>merkle.rs</code></td></tr>
+<tr><td>signer_ids</td><td><code>ctx.cert.signers</code></td></tr>
+<tr><td>status</td><td><code>Finalized</code></td></tr>
+<tr><td>created_at</td><td>链上位置</td></tr>
+</table><p>---</p><p># 7. 修改代码时的检查清单</p><h2>修改证书字段</h2><p>同时更新：</p><ul><li><code>holderproof-types/src/lib.rs</code></li><li>Indexer 的 <code>update_certified_balance</code></li><li>Consumer 的 <code>validate_certificate</code></li><li><code>docs/step4-certificate.md</code></li><li>Consumer 测试</li></ul><h2>修改余额算法</h2><p>同时检查：</p><ul><li><code>fixture.rs</code></li><li>Python <code>fixtures/generate_fixture.py</code></li><li>Rust tests</li><li>Python expected results</li></ul><h2>修改委员会流程</h2><p>同时检查：</p><ul><li><code>configure_committee</code></li><li><code>propose</code></li><li><code>aggregate</code></li><li><code>report_balance</code></li><li><code>scripts/reproduce-step4.sh</code></li></ul><p>---</p><p># 8. 本地验证</p><pre>make check
+shaker test lyquid-indexer/Cargo.toml
+shaker test lyquid-consumer/Cargo.toml
+./scripts/reproduce-step4.sh
+./scripts/stop-step4.sh</pre><p>预期：</p><pre>Indexer tests:      5 passed
+Consumer tests:     4 passed
+Python tests:       6 passed
+Fixture checks:     9 passed
+Certificate status: Finalized
+Signer count:       3
+eligible:           true</pre><p>也可以直接运行 Step 4 一键复现：</p><pre>./scripts/reproduce-step4.sh
+./scripts/stop-step4.sh</pre><p>当前工具链由 <code>rust-toolchain.toml</code> 固定为 Rust 1.99.0。<code>LazyLock</code> 的最低稳定版本要求是 Rust 1.80，因此项目环境应至少使用 Rust 1.80，推荐直接使用项目的 1.99.0。</p>
+</section>
+</body></html>
