@@ -14,6 +14,7 @@ consumer Lyquid can use for airdrop or governance gating.
 - [Code walkthrough PDF](docs/HolderProof_Code_Walkthrough_2026-11-12.pdf)
 - [Scenario 1 execution plan](docs/HolderProof_Scenario1_Plan.pdf)
 - [Step 2–4 operation log](docs/HolderProof_Step2-4_Operation_Log.pdf)
+- [Architecture and flow diagrams](docs/architecture.md)
 - [Collaboration guide](COLLABORATOR_GUIDE.md)
 - [Step 2 certified-call record](docs/step2-certified-call.md)
 - [Step 3 fixture replay record](docs/step3-fixture-replay.md)

@@ -183,6 +183,28 @@ Consumer check_eligible()
 eligible = balance >= threshold
 ```
 
+对应的时序图：
+
+```mermaid
+sequenceDiagram
+    participant U as User / Script
+    participant I as Indexer
+    participant N as Committee
+    participant F as Fixture
+    participant C as Consumer
+    U->>I: set_query(holder, block)
+    I->>N: report_balance / propose
+    N->>F: replay Transfer events
+    F-->>N: balance
+    N-->>I: BalanceProposal
+    I->>I: aggregate 3-of-4
+    I->>I: update_certified_balance
+    C->>I: get_certificate_json
+    I-->>C: QueryCertificate
+    C->>C: validate certificate
+    C-->>U: eligible / not eligible
+```
+
 ---
 
 # 4. 状态说明

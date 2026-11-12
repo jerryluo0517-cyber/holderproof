@@ -123,7 +123,23 @@ Consumer check_eligible()
     | validate status, signers, holder, block,
     | blockHash, eventMerkleRoot, queryHash
     v
-eligible = balance &gt;= threshold</pre><p>---</p><p># 4. 状态说明</p><h2>Indexer</h2><pre>initializer             部署者地址
+eligible = balance &gt;= threshold</pre><p>对应的时序图：</p><pre>sequenceDiagram
+    participant U as User / Script
+    participant I as Indexer
+    participant N as Committee
+    participant F as Fixture
+    participant C as Consumer
+    U-&gt;&gt;I: set_query(holder, block)
+    I-&gt;&gt;N: report_balance / propose
+    N-&gt;&gt;F: replay Transfer events
+    F--&gt;&gt;N: balance
+    N--&gt;&gt;I: BalanceProposal
+    I-&gt;&gt;I: aggregate 3-of-4
+    I-&gt;&gt;I: update_certified_balance
+    C-&gt;&gt;I: get_certificate_json
+    I--&gt;&gt;C: QueryCertificate
+    C-&gt;&gt;C: validate certificate
+    C--&gt;&gt;U: eligible / not eligible</pre><p>---</p><p># 4. 状态说明</p><h2>Indexer</h2><pre>initializer             部署者地址
 balance_proof           oracle topic
 query_holder            当前查询的 holder
 query_block             当前查询的 block

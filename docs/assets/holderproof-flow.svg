@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050" role="img" aria-labelledby="title desc">
+  <title id="title">HolderProof end-to-end flow</title>
+  <desc id="desc">User query, four-node Lyquor committee, three of four certified certificate, and consumer eligibility check.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 z" fill="#183153"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 z" fill="#15803d"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 30px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #183153; }
+      .subtitle { font: 16px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #64748b; }
+      .stage { font: 700 15px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #2563eb; letter-spacing: 1px; }
+      .box-title { font: 700 17px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #0f172a; }
+      .box-text { font: 14px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #475569; }
+      .small { font: 13px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #64748b; }
+      .node { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.4; rx: 12; }
+      .blue { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; rx: 12; }
+      .cyan { fill: #ecfeff; stroke: #0891b2; stroke-width: 1.8; rx: 12; }
+      .green { fill: #f0fdf4; stroke: #15803d; stroke-width: 1.8; rx: 12; }
+      .orange { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; rx: 12; }
+      .edge { stroke: #183153; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .edge-green { stroke: #15803d; stroke-width: 2; fill: none; marker-end: url(#arrow-green); }
+      .dash { stroke: #64748b; stroke-width: 1.8; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow); }
+      .label { font: 13px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1050"/>
+  <text class="title" x="60" y="58">HolderProof — End-to-End Flow</text>
+  <text class="subtitle" x="60" y="87">Local deterministic fixture → 4-node Lyquor committee → certified QueryCertificate → Consumer eligibility</text>
+
+  <!-- Stage 1 -->
+  <text class="stage" x="60" y="140">01 · QUERY SETUP</text>
+  <rect class="blue" x="60" y="165" width="230" height="96"/>
+  <text class="box-title" x="82" y="198">User / Script</text>
+  <text class="box-text" x="82" y="222">select holder + block</text>
+  <text class="box-text" x="82" y="244">set_query(holder, block)</text>
+
+  <path class="edge" d="M290 213 H380"/>
+  <text class="label" x="303" y="199">set_query</text>
+
+  <rect class="blue" x="380" y="165" width="260" height="96"/>
+  <text class="box-title" x="402" y="198">Indexer Lyquid</text>
+  <text class="box-text" x="402" y="222">query_holder / query_block</text>
+  <text class="box-text" x="402" y="244">report_balance()</text>
+
+  <path class="edge" d="M640 213 H740"/>
+  <rect class="green" x="740" y="165" width="280" height="96"/>
+  <text class="box-title" x="762" y="198">Lyquor Network State</text>
+  <text class="box-text" x="762" y="222">shared query + certificate state</text>
+  <text class="box-text" x="762" y="244">latest_query_hash</text>
+
+  <!-- Stage 2 -->
+  <text class="stage" x="60" y="330">02 · COMMITTEE CERTIFICATION</text>
+  <rect class="cyan" x="60" y="355" width="230" height="112"/>
+  <text class="box-title" x="82" y="388">Embedded Fixture</text>
+  <text class="box-text" x="82" y="412">transfers.json</text>
+  <text class="box-text" x="82" y="434">LazyLock sorted events</text>
+  <text class="box-text" x="82" y="454">Rust replay + Merkle</text>
+
+  <path class="edge" d="M290 411 H340"/>
+  <rect class="blue" x="340" y="355" width="210" height="112"/>
+  <text class="box-title" x="360" y="388">Node 1 propose</text>
+  <text class="box-text" x="360" y="412">balance + holder + block</text>
+  <path class="edge" d="M340 520 V488 H550 V467"/>
+  <rect class="blue" x="340" y="520" width="210" height="86"/>
+  <text class="box-title" x="360" y="552">Node 2 propose</text>
+  <text class="box-text" x="360" y="575">independent replay</text>
+  <rect class="blue" x="340" y="625" width="210" height="72"/>
+  <text class="box-title" x="360" y="655">Node 3 / 4</text>
+  <text class="box-text" x="360" y="678">3-of-4 agreement</text>
+
+  <path class="edge" d="M550 411 H630"/>
+  <rect class="orange" x="630" y="355" width="230" height="112"/>
+  <text class="box-title" x="652" y="388">Aggregate</text>
+  <text class="box-text" x="652" y="412">at least 3 matching</text>
+  <text class="box-text" x="652" y="434">BalanceProposal values</text>
+  <text class="box-text" x="652" y="454">reject otherwise</text>
+
+  <path class="edge" d="M860 411 H940"/>
+  <rect class="green" x="940" y="355" width="270" height="112"/>
+  <text class="box-title" x="962" y="388">update_certified_balance</text>
+  <text class="box-text" x="962" y="412">status = Finalized</text>
+  <text class="box-text" x="962" y="434">signer IDs + hashes</text>
+  <text class="box-text" x="962" y="454">certificates[queryHash]</text>
+
+  <!-- Stage 3 -->
+  <text class="stage" x="60" y="780">03 · CONSUMER VERIFICATION</text>
+  <rect class="blue" x="60" y="805" width="230" height="100"/>
+  <text class="box-title" x="82" y="838">Consumer Lyquid</text>
+  <text class="box-text" x="82" y="862">call! get_certificate_json</text>
+  <text class="box-text" x="82" y="884">holder + block + threshold</text>
+
+  <path class="edge" d="M290 855 H370"/>
+  <rect class="orange" x="370" y="805" width="250" height="100"/>
+  <text class="box-title" x="392" y="838">Validate Certificate</text>
+  <text class="box-text" x="392" y="862">Finalized + 3 signers</text>
+  <text class="box-text" x="392" y="884">blockHash + Merkle root</text>
+
+  <path class="edge" d="M620 855 H700"/>
+  <rect class="green" x="700" y="805" width="230" height="100"/>
+  <text class="box-title" x="722" y="838">Eligibility</text>
+  <text class="box-text" x="722" y="862">balance ≥ threshold</text>
+  <text class="box-text" x="722" y="884">eligible = true / false</text>
+
+  <path class="dash" d="M930 855 H1010"/>
+  <rect class="orange" x="1010" y="805" width="240" height="100"/>
+  <text class="box-title" x="1032" y="838">Future Consumer Actions</text>
+  <text class="box-text" x="1032" y="862">Airdrop claim()</text>
+  <text class="box-text" x="1032" y="884">Governance vote()</text>
+
+  <rect x="60" y="955" width="1190" height="55" fill="#e2e8f0" rx="8"/>
+  <text class="small" x="80" y="979">Trust boundary: 3 of 4 committee nodes must independently replay the same fixture and certificate fields are bound to queryHash, blockHash and event Merkle root.</text>
+  <text class="small" x="80" y="999">Current data source is local deterministic fixture; Sepolia live ingestion is a future extension.</text>
+</svg>
