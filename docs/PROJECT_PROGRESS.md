@@ -4,7 +4,7 @@
 当前阶段：Step 4 完成，准备进入 Step 5
 当前分支：main
 本地状态：工作区干净
-GitHub current main：61a701d Improve code readability and add project progress copy
+GitHub 状态：main 与 origin/main 同步（2026-11-12）
 
 ## 1. 项目定位
 
@@ -89,18 +89,14 @@ scripts/stop-step4.sh              停止复现环境
 本地与 GitHub 已同步：
 
 ```text
-本地 HEAD:
-61a701d Improve code readability and add project progress copy
-
-GitHub main:
-61a701d Improve code readability and add project progress copy
-
+本地 HEAD：与 GitHub main 一致
+GitHub main：与本地 HEAD 一致
 工作区：clean
 未提交改动：0
 未推送提交：0
 ```
 
-最新可读性重构已经包含在 GitHub 远程 `main`：
+具体最新 commit 以 GitHub 仓库页面为准。最新可读性重构已经包含在远程 `main`：
 
 - 共享类型 crate
 - Indexer 模块拆分
