@@ -79,7 +79,7 @@ lyquid-indexer/src/http_endpoints.rs HTTP 诊断接口
 lyquid-indexer/src/models.rs       委员会 proposal
 lyquid-indexer/src/tests.rs        Indexer guest tests
 lyquid-consumer/src/lib.rs         Consumer 证书校验和资格判断
-docs/CODE_WALKTHROUGH.md           代码导读
+docs/guides/CODE_WALKTHROUGH.md           代码导读
 scripts/reproduce-step4.sh         一键复现
 scripts/stop-step4.sh              停止复现环境
 ```

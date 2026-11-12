@@ -317,7 +317,7 @@ propose -> aggregate -> certified update
 - `holderproof-types/src/lib.rs`
 - Indexer 的 `update_certified_balance`
 - Consumer 的 `validate_certificate`
-- `docs/step4-certificate.md`
+- `docs/operations/step4-certificate.md`
 - Consumer 测试
 
 ## 修改余额算法

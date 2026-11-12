@@ -125,7 +125,7 @@ shaker deploy \
 具体委员会配置、epoch 激活、Consumer 配置和查询命令见：
 
 ```text
-docs/step2-operation-log.md
+docs/operations/step2-operation-log.md
 ```
 
 ## 8. 注意：本地地址不能跨机器访问

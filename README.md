@@ -6,18 +6,17 @@ HolderProof recomputes an address's historical ERC-20 balance from `Transfer`
 events and turns the result into a committee-certified Lyquor fact that a
 consumer Lyquid can use for airdrop or governance gating.
 
-## Documentation
-
-- [Project progress copy](docs/PROJECT_PROGRESS.md)
-- [Project progress PDF](docs/HolderProof_Project_Progress_2026-11-12.pdf)
-- [Code walkthrough](docs/CODE_WALKTHROUGH.md)
-- [Code walkthrough PDF](docs/HolderProof_Code_Walkthrough_2026-11-12.pdf)
-- [Scenario 1 execution plan](docs/HolderProof_Scenario1_Plan.pdf)
-- [Step 2–4 operation log](docs/HolderProof_Step2-4_Operation_Log.pdf)
-- [Architecture and flow diagrams](docs/architecture.md)
-- [Collaboration guide](COLLABORATOR_GUIDE.md)
-- [Step 2 certified-call record](docs/step2-certified-call.md)
-- [Step 3 fixture replay record](docs/step3-fixture-replay.md)
+- [Documentation index](docs/README.md)
+- [Project progress copy](docs/progress/PROJECT_PROGRESS.md)
+- [Project progress PDF](docs/progress/HolderProof_Project_Progress_2026-11-12.pdf)
+- [Code walkthrough](docs/guides/CODE_WALKTHROUGH.md)
+- [Code walkthrough PDF](docs/guides/HolderProof_Code_Walkthrough_2026-11-12.pdf)
+- [Scenario 1 execution plan](docs/reports/HolderProof_Scenario1_Plan.pdf)
+- [Step 2–4 operation log](docs/reports/HolderProof_Step2-4_Operation_Log.pdf)
+- [Architecture and flow diagrams](docs/architecture/architecture.md)
+- [Collaboration guide](docs/guides/COLLABORATOR_GUIDE.md)
+- [Step 2 certified-call record](docs/operations/step2-certified-call.md)
+- [Step 3 fixture replay record](docs/operations/step3-fixture-replay.md)
 
 ## Status: Step 4 complete (2026-11-12)
 

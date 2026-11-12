@@ -220,7 +220,7 @@ Consumer result: eligible=true
 - `lyquid-indexer/src/lib.rs`
 - 新增富余索引数据加载或 Rust fixture 解析
 - `fixtures/transfers.json`
-- `docs/step2-certified-call.md`
+- `docs/operations/step2-certified-call.md`
 
 完成标准：
 
@@ -245,7 +245,7 @@ Rust 重算的 62685 与 Python ground truth 一致
 - `lyquid-indexer/src/lib.rs`
 - `lyquid-consumer/src/lib.rs`
 - `tests/`
-- `docs/architecture.md`
+- `docs/architecture/architecture.md`
 
 ### Step 5：正式消费方
 
@@ -384,7 +384,7 @@ Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block �
 - eventCount: 308
 - parserVersion: holderproof-fixture-v1
 
-完整技术记录见 `docs/step4-certificate.md`。
+完整技术记录见 `docs/operations/step4-certificate.md`。
 
 ## 13. 一键复现脚本
 
