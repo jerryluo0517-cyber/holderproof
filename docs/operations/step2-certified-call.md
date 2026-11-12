@@ -17,7 +17,11 @@ Prove the P0 architectural gate:
 | File | Purpose |
 |---|---|
 | `lyquid-indexer/src/lib.rs` | Stores the historical balance fact and exposes `get_balance` |
-| `lyquid-consumer/src/lib.rs` | Reads the indexer with `call!` and applies a threshold |
+| `lyquid-consumer/src/lib.rs` | Entry points and state |
+| `lyquid-consumer/src/certificate.rs` | Certificate trust rules |
+| `lyquid-consumer/src/eligibility.rs` | Balance parsing and threshold logic |
+| `lyquid-consumer/src/http_endpoints.rs` | Result diagnostics |
+| `lyquid-consumer/src/tests.rs` | Certificate validation tests |
 | `scripts/start-devnet.sh` | Starts the official 4-node devnet |
 | `docs/operations/step2-certified-call.md` | Records the integration gate |
 

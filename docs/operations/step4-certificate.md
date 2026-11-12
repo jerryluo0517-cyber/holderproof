@@ -111,8 +111,8 @@ Observed certificate:
 
 ```json
 {
-  "certificate_id": "aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed",
-  "query_hash": "aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed",
+  "certificate_id": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+  "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
   "chain_id": 11155111,
   "token": "0x5298000000000000000000000000000000000001",
   "holder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -124,7 +124,7 @@ Observed certificate:
     "block_hash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
     "event_count": 308,
     "event_merkle_root": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b",
-    "parser_version": "holderproof-fixture-v1"
+    "parser_version": "holderproof-v1"
   },
   "signer_ids": [
     "Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia",
@@ -132,7 +132,7 @@ Observed certificate:
     "Node-oq2lcra5u4ksufzsv2ciqbl56dkp5c653ikzkx3lh62tai566d7dseia"
   ],
   "status": "Finalized",
-  "created_at": 63
+  "created_at": 10
 }
 ```
 
@@ -150,7 +150,7 @@ Observed:
   "eligible": true,
   "certificateStatus": "Finalized",
   "signerCount": 3,
-  "queryHash": "aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed",
+  "queryHash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
   "blockHash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
   "eventMerkleRoot": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b"
 }

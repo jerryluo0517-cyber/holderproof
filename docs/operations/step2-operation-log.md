@@ -244,6 +244,10 @@ Rust 重算的 62685 与 Python ground truth 一致
 
 - `lyquid-indexer/src/lib.rs`
 - `lyquid-consumer/src/lib.rs`
+- `lyquid-consumer/src/certificate.rs`
+- `lyquid-consumer/src/eligibility.rs`
+- `lyquid-consumer/src/http_endpoints.rs`
+- `lyquid-consumer/src/tests.rs`
 - `tests/`
 - `docs/architecture/architecture.md`
 
@@ -378,11 +382,11 @@ Step 3 已证明委员会不是返回固定值，而是根据 holder 和 block �
 
 ### 证书关键字段
 
-- queryHash: aebad9b697ef48fb2923895c745762167afcb88ff2c28c713a6ba358234f78ed
+- queryHash: 1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884
 - blockHash: 0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e
 - eventMerkleRoot: 2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b
 - eventCount: 308
-- parserVersion: holderproof-fixture-v1
+- parserVersion: holderproof-v1
 
 完整技术记录见 `docs/operations/step4-certificate.md`。
 

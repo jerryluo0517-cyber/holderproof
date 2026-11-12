@@ -126,7 +126,7 @@ Consumer output after restoring Alice's query:
 }
 ```
 
-## Current limitation
+## Step 4 extension
 
-The certificate still does not contain the full event Merkle root, block hash
-and query hash. Those are Step 4.
+The full event Merkle root, block hash, query hash, parser version and signer
+IDs are now included by the Step 4 certificate implementation.
