@@ -1,227 +1,85 @@
 # HolderProof 当前进度
 
-更新时间：2026-11-15。当前实现：执行方案 03/04 的本地 fixture P0，
-包含三成员 2-of-3 完整事实证书、独立空投/治理消费者，以及历史 EVM 对照。
+更新日期：2026-11-15。当前完成到执行方案 03/04 的本地 fixture P0。
+内部历史 Step 编号不是执行方案章节号。最新提交及远端同步状态以 Git 记录为准。
 
-完整验收范围、原生 LDK 适配和剩余限制见
-[03/04 验收记录](../reports/PLAN_03_04_ACCEPTANCE.md)。
+![当前系统流程](../architecture/assets/holderproof-flow.svg)
 
-本次补齐以 `12f622e` 为远端基线；最新提交与同步状态以 Git 记录为准。
+## 1. 已完成的闭环
 
-验证：`make acceptance` 已通过；Rust guest 测试 24 项、Python 测试 6 项、fixture 检查 9 项、
-308 条 EVM 日志和 18 次历史余额查询一致。
+查询一个 Token、holder 和历史区块，三个委员会成员独立重放完整事实，
+达到 2-of-3 一致后执行原生认证并持久化证书。空投、治理两个独立 Lyquid
+读取同一份当前 Finalized 证书，按各自门槛判断资格。
 
-运行：`make acceptance`。原有内部 Step 编号与执行方案章节号不同。
-下方是历史进度快照；其中的“尚未实现”、测试数量和 Git 状态按各自日期理解。
+官方 localnet 启动四个基础设施节点，只有前三个是业务委员会成员。
+第四个节点不改变应用的 2-of-3 规则。
 
----
+## 2. 当前实现与证据
 
-# HolderProof 项目推进副本
+| 内容 | 状态 |
+|---|---|
+| 308 条确定性 Transfer、Python 标准答案 | 已完成 |
+| checked U256 历史余额重放、Merkle 根 | 已完成 |
+| 完整查询、余额、checkpoint 一起达成共识并进入签名载荷 | 已完成 |
+| 原生证书、签名字节、节点映射、来源引用 | 已保存并校验一致性 |
+| 相同查询幂等、当前状态撤销检查 | 已实现 |
+| 独立空投和治理消费者 | 已实现并部署验收 |
+| 两个消费者的正反资格结果 | 已验收 |
+| 节点提案缓存、消费者实例历史 | 已实现 |
+| 查询 CLI、一键验收 | 已完成 |
+| 历史 EVM `balanceOf` 对照 | 308 条日志、18 次读取一致 |
 
-更新时间：2026-11-12
-当前阶段：Step 4 完成，准备进入 Step 5
-当前分支：main
-本地状态：工作区干净
-GitHub 状态：main 与 origin/main 同步（2026-11-12）
+## 3. 已验证的演示结果
 
-## 2026-11-15：Step 4 加固
+Alice 在 fixture 区块 1000 的余额为 **62685**。
 
-本次改动尚未提交，下面原有的 Git 同步状态仅为 2026-11-12 记录。
-
-- Consumer 配置仅部署者可修改，拒绝零地址，重新配置会清空旧结果。
-- 四节点委员会要求成员唯一；聚合支持第一份提案异常时其余三份达成一致。
-- 重复节点不参与投票；认证写入要求至少三名不同签名者。
-- 查询哈希算法移至共享类型 crate，Consumer 重算并校验证书 ID 和查询字段。
-- 限定 fixture token、chain 和 parser，校验 checkpoint 范围及哈希格式。
-- Rust guest 测试：Indexer 10 项，Consumer 10 项；Python 6 项，fixture 检查 9 项。
-- 新增 `scripts/verify_step4.py`，一键演示会自动比对在线证书与独立 fixture 答案。
-- 仍使用本地 fixture；JSON 证书的认证依赖配置的 Indexer 与 Lyquor 运行时。
-- 本次只更新 Markdown 文档，已有 PDF 是历史版本。
-
-## 1. 项目定位
-
-HolderProof 是一个基于 Lyquor 的可验证 ERC-20 历史持仓证明：
-
-```text
-ERC-20 Transfer fixture
-→ Rust 历史余额重算
-→ 4 节点委员会
-→ 3-of-4 认证
-→ QueryCertificate
-→ Consumer call!
-→ eligible / not eligible
-```
-
-当前数据源是本地确定性 fixture，不是 Sepolia 实时数据。Lyquor devnet、多节点委员会和跨 Lyquid 调用是真实本地执行。
-
-## 2. 已完成阶段
-
-| 阶段 | 内容 | 状态 |
+| 消费者 | 门槛 | 资格结果 |
 |---|---|---|
-| Step 1 | Rust/LDK/Foundry/devnet/Hello Lyquid | 完成 |
-| Step 2 | 4 节点委员会与跨 Lyquid call! | 完成 |
-| Step 3 | ERC-20 fixture 重算与 TWAB | 完成 |
-| Step 4 | 完整 QueryCertificate、Merkle root、Consumer 校验 | 完成 |
+| AirdropGateLyquid | 60000 | true |
+| AirdropGateLyquid | 70000 | false |
+| GovernanceGateLyquid | 50000 | true |
+| GovernanceGateLyquid | 70000 | false |
 
-## 3. Step 4 技术成果
+四个结果复用同一证书，门槛变化不重写余额事实。
+资格检查、重复查询和实例历史已在实际本地网络中通过。
+`claim()` 与 `vote()` 已有身份绑定及防重复记录，但完整支付或 DAO 执行不在当前验收范围。
 
-- 共享类型 crate：`holderproof-types`
-- TransferEvent 全字段模型
-- QuerySpec、Checkpoint、QueryCertificate
-- SHA-256 event leaf
-- 与 Python 一致的 Merkle root
-- queryHash
-- deterministic blockHash
-- 3 个 signer ID
-- Finalized 状态
-- certificate 按 queryHash 持久化
-- Consumer 读取并校验完整证书
-- 一键复现脚本
+## 4. 验证数量与运行入口
 
-## 4. 当前验证结果
-
-```text
-cargo check --workspace: PASS
-Indexer guest tests:     5 passed
-Consumer guest tests:    4 passed
-Python tests:            6 passed
-Fixture checks:          9 passed
-```
-
-最近一次一键复现结果：
-
-```json
-{
-  "balance": "62685",
-  "eligible": true,
-  "certificateStatus": "Finalized",
-  "signerCount": 3,
-  "eventMerkleRoot": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b"
-}
-```
-
-## 5. 当前代码结构
-
-```text
-holderproof-types/src/lib.rs       共享 wire types
-lyquid-indexer/src/lib.rs          Indexer state 和方法
-lyquid-indexer/src/fixture.rs      fixture、余额、TWAB、query hash
-lyquid-indexer/src/merkle.rs       事件哈希和 Merkle root
-lyquid-indexer/src/http_endpoints.rs HTTP 诊断接口
-lyquid-indexer/src/models.rs       委员会 proposal
-lyquid-indexer/src/tests.rs        Indexer guest tests
-lyquid-consumer/src/lib.rs         Consumer state 和入口
-lyquid-consumer/src/certificate.rs Consumer 证书校验
-lyquid-consumer/src/eligibility.rs Consumer 资格计算
-lyquid-consumer/src/http_endpoints.rs Consumer HTTP 接口
-lyquid-consumer/src/tests.rs       Consumer guest tests
-docs/guides/CODE_WALKTHROUGH.md           代码导读
-scripts/reproduce-step4.sh         一键复现
-scripts/stop-step4.sh              停止复现环境
-```
-
-## 6. 本地与 GitHub 状态
-
-本地与 GitHub 已同步：
-
-```text
-本地 HEAD：与 GitHub main 一致
-GitHub main：与本地 HEAD 一致
-工作区：clean
-未提交改动：0
-未推送提交：0
-```
-
-具体最新 commit 以 GitHub 仓库页面为准。最新可读性重构已经包含在远程 `main`：
-
-- 共享类型 crate
-- Indexer 模块拆分
-- HTTP endpoints 拆分
-- Consumer 证书校验拆分
-- 代码导读
-- 新增测试
-
-## 7. 尚未完成
-
-- AirdropGateLyquid
-- GovernanceGateLyquid
-- Sepolia 真实数据适配器
-- 完整 E3 篡改与异常测试
-- 证书挑战/撤销机制
-- UI
-- 用户外测
-- 正式 6–10 页报告
-- 预录 Demo
-- 最终提交包
-
-## 8. 下一步建议
-
-### Step 5A：AirdropGateLyquid
-
-状态：
-
-```text
-campaign_id
-token
-snapshot_block
-threshold
-claim_amount
-claimed[address]
-```
-
-流程：
-
-```text
-QueryCertificate
-→ check eligible
-→ claim()
-→ mark claimed
-→ transfer test token
-```
-
-### Step 5B：GovernanceGateLyquid
-
-状态：
-
-```text
-proposal_id
-snapshot_block
-minimum_balance
-has_voted[address]
-```
-
-流程：
-
-```text
-QueryCertificate
-→ check snapshot balance
-→ vote()
-→ prevent duplicate voting
-```
-
-### Step 6：E3
-
-至少覆盖：
-
-- 篡改 Transfer 事件
-- 错误 blockHash
-- 伪造 Merkle root
-- 少于 3 个 signer
-- 证书重放
-- holder/block 不匹配
-- stale certificate
-
-## 9. 目前最准确的状态描述
-
-> HolderProof 的 P0 可验证持仓证明闭环和完整证书已经完成；项目还没有完成空投领取、治理投票、真实 Sepolia 数据和最终交付材料。
-
-## 10. 恢复工作命令
+| 检查 | 结果 |
+|---|---|
+| Rust workspace 编译 | 五个 crate 通过 |
+| Indexer guest 测试 | 12 项通过 |
+| 共享 Gate guest 测试 | 12 项通过 |
+| Python 标准答案测试 | 6 项通过 |
+| fixture 校验 | 9 项通过 |
+| EVM Transfer 与历史余额 | 308 条日志、18 次查询通过 |
 
 ```bash
-cd holderproof
-make check
-shaker test lyquid-indexer/Cargo.toml
-shaker test lyquid-consumer/Cargo.toml
-./scripts/reproduce-step4.sh
+make acceptance
 ./scripts/stop-step4.sh
 ```
+
+证据保存于 `.run/step4/` 和 `.run/acceptance/`，运行缓存不提交。
+完整逐项验收与实现适配见 [03/04 验收记录](../reports/PLAN_03_04_ACCEPTANCE.md)。
+
+## 5. 本轮文档与可读性更新
+
+架构 Markdown、Mermaid、SVG/PNG、代码导读和协作指南统一为当前架构，
+HTML/PDF 从对应 Markdown 生成。Indexer 的证书装配拆到独立模块，
+查询 CLI 主函数只负责流程编排，聚合变量使用明确业务命名。
+
+原始执行方案、早期操作记录和 2026-11-12 PDF 是历史资料；不把它们当成当前验收说明。
+
+## 6. 实现适配及剩余工作
+
+原子跨 Lyquid `call!` 在 LDK 0.8.4 中只能从 Network 方法执行，
+因此权威策略和动作记录保留在共享状态，实例状态用于本地缓存与历史。
+
+数据源仍是本地 fixture，哈希是合成值。历史 EVM 对照使用独立测试合约，
+fixture 区块 N 对应 EVM N+2；对照验证余额，不验证 Sepolia 链头或真实最终性。
+消费者依赖配置的 Indexer 和运行时认证，不提供独立的脱机签名验证注册表。
+
+后续范围：P1 的 MIN_BALANCE、ACTIVE_RATIO、窗口证书；Sepolia 接入；
+完整 E3 故障注入和外部用户测试；UI、最终报告、幻灯片及录制演示。
+已有 TWAB 重放不代表全部 P1 已完成。

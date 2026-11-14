@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>HolderProof 协作与复现指南</title><style>
+:root { color-scheme: light; }
+body { margin: 0 auto; max-width: 1040px; padding: 48px 40px; color: #243449;
+  font: 16px/1.8 "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #fff; }
+h1 { color: #183153; font-size: 32px; line-height: 1.4; border-top: 6px solid #0f766e; padding-top: 24px; }
+h2 { color: #183153; font-size: 23px; border-bottom: 1px solid #cbd5e1; padding-bottom: 7px; margin-top: 34px; }
+a { color: #0f766e; } table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 10px 13px; text-align: left; vertical-align: top; }
+th { color: #183153; background: #eff6ff; } tr:nth-child(even) td { background: #f8fafc; }
+pre { padding: 16px; background: #f1f5f9; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; }
+code { font: .88em/1.6 Menlo, Consolas, monospace; } p, li { overflow-wrap: anywhere; }
+svg, img { display: block; width: 100%; height: auto; } .source-note { color: #52657b; font-size: 14px; }
+@media print { body { padding: 0; font-size: 10pt; } h1,h2 { break-after: avoid; } tr,pre { break-inside: avoid; } }
+</style></head><body><h1>HolderProof 协作与复现指南</h1>
+<p>更新日期：2026-11-15。当前基线为执行方案 03/04 的本地 fixture P0。
+请先阅读 README；原有 dated PDF 和早期操作日志仅反映历史版本。</p>
+<h2>1. 当前可以复现什么</h2>
+<p>三个委员会成员独立重放余额与 checkpoint，由两份一致批准完成原生认证。
+空投和治理两个独立 Lyquid 复用同一证书，支持各自门槛下的合格与不合格结果。</p>
+<table>
+<thead>
+<tr>
+<th>验收内容</th>
+<th>当前结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Rust guest 测试</td>
+<td>24 项通过</td>
+</tr>
+<tr>
+<td>Python 标准答案测试</td>
+<td>6 项通过</td>
+</tr>
+<tr>
+<td>fixture 检查</td>
+<td>9 项通过</td>
+</tr>
+<tr>
+<td>双消费者、双结果</td>
+<td>网络环境下通过</td>
+</tr>
+<tr>
+<td>重复相同查询</td>
+<td>原证书保持不变</td>
+</tr>
+<tr>
+<td>实例历史</td>
+<td>两个消费者均有本地历史记录</td>
+</tr>
+<tr>
+<td>历史 EVM 对照</td>
+<td>308 条日志、18 次历史余额读取一致</td>
+</tr>
+</tbody></table>
+<h2>2. 环境与首次启动</h2>
+<p>已验证环境为 Rust 1.99.0、Lyquor LDK 0.8.4、Foundry 1.7.1、Python 3.12。</p>
+<pre><code class="language-bash">./scripts/setup-env.sh --check
+# 缺少依赖时再运行安装模式：
+./scripts/setup-env.sh
+</code></pre>
+<p>首次编译 EVM 测试合约会下载固定版本 Solidity 0.8.28；后续对照可以使用已缓存编译器。
+guest VM 需要能够初始化内存管理器；受限沙箱可能阻止 VM 或本地监听端口启动。</p>
+<pre><code class="language-bash">make acceptance
+</code></pre>
+<p>验收启动官方四节点基础设施，但业务委员会只有前三个成员，门槛为 2-of-3。
+需要空闲端口 8545、10087、11087、12087、13087、8080、8081 和 8082。
+历史 EVM 检查另外启动隔离 Anvil，并在结束时自动停止它。</p>
+<h2>3. 查看结果与提交查询</h2>
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>http://127.0.0.1:8081/api/certificate</code></td>
+<td>当前 Indexer 证书及原生证据</td>
+</tr>
+<tr>
+<td><code>http://127.0.0.1:8080/api/result</code></td>
+<td>空投资格结果</td>
+</tr>
+<tr>
+<td><code>http://127.0.0.1:8082/api/result</code></td>
+<td>治理资格结果</td>
+</tr>
+<tr>
+<td>两个消费者的 <code>/api/history</code></td>
+<td>各自实例级查询结果历史</td>
+</tr>
+</tbody></table>
+<pre><code class="language-bash">./scripts/run-proof.sh \
+  --token 0x5298000000000000000000000000000000000001 \
+  --holder 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+  --block 1000
+</code></pre>
+<p>该命令要求已有运行中的 demo 和委员会配置。
+P0 只接受上述 fixture Token、非零 holder 和 fixture 区块 0..1000。
+默认是公开的本地 Anvil 开发密钥；<code>HOLDERPROOF_DEV_KEY</code> 可以覆盖本地开发账户。</p>
+<pre><code class="language-bash"># 只检查现有默认演示结果：
+python3 scripts/verify_step4.py
+# 修改本地 demo 门槛，验证两个 Gate 的两种结果：
+python3 scripts/verify_step4.py --exercise-gates
+# 停止这套 demo：
+./scripts/stop-step4.sh
+</code></pre>
+<h2>4. 阅读、修改和验证代码</h2>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>修改时关注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>holderproof-types</code></td>
+<td>共享 wire 类型、字段顺序、查询和事实摘要的兼容性</td>
+</tr>
+<tr>
+<td><code>lyquid-indexer</code></td>
+<td>确定性重放、完整事实一致性、原生认证和证书存储</td>
+</tr>
+<tr>
+<td><code>holderproof-gate-core</code></td>
+<td>两个消费者必须共享的信任和资格规则</td>
+</tr>
+<tr>
+<td><code>lyquid-consumer</code></td>
+<td>空投资格与领取资格记录，沿用原目录名</td>
+</tr>
+<tr>
+<td><code>lyquid-governance-gate</code></td>
+<td>独立治理策略与每个提案的动作记录</td>
+</tr>
+<tr>
+<td><code>scripts</code> / <code>evm</code></td>
+<td>可复现入口、独立 EVM 标准答案与验收证据</td>
+</tr>
+</tbody></table>
+<p>保持函数职责单一：运行时上下文和状态写入放入口模块，纯校验与数据构造放独立模块。
+变量应表达业务含义，例如 <code>agreed_fact</code>；不要把一致结果叫作“第一份结果”。
+更改事件哈希字段、事实序列化、证书结构或共识逻辑时，要同步检查 Python、Rust 和文档。</p>
+<pre><code class="language-bash">cargo fmt --all -- --check
+make check
+make guest-test
+# 改到公开接口、认证载荷或部署脚本时：
+make acceptance
+</code></pre>
+<p>不要提交 <code>.run/</code>、编译产物、测试链状态或本机日志。
+说明文档以 Markdown 为源；更新后重建 HTML、PDF 和 PNG，避免派生版本继续显示旧架构。</p>
+<h2>5. 信任边界与后续范围</h2>
+<p>消费者信任管理员配置的 Indexer 和 Lyquor 的认证写入路径。
+原生签名字节被保留，但消费者不为任意 JSON 维护一套独立委员会密钥验证服务。
+共享状态引用也不是状态包含证明。</p>
+<p>当前 fixture 和区块哈希是合成数据。独立 EVM 对照验证余额和事件内容，
+fixture N 映射到 EVM N+2；它不是实时 Sepolia 接入，也不验证真实网络重组和最终性。</p>
+<p>P1 的 MIN_BALANCE、ACTIVE_RATIO 和窗口证书、Sepolia 适配、完整 E3、外部用户测试、
+UI、最终报告和录制演示仍需另行推进。<code>claim()</code> 与 <code>vote()</code> 目前是资格动作记录，
+验收主要覆盖资格判断和证书复用，不宣称完整支付或治理系统已验收。</p>
+</body></html>

@@ -1,146 +1,244 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<title>HolderProof 项目推进副本</title>
-<style>
-  @page { size: A4; margin: 15mm 14mm 16mm 14mm; }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: "Songti SC", "STSong", "Arial Unicode MS", serif;
-    color: #1f2937;
-    font-size: 9.8pt;
-    line-height: 1.56;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  h1, h2, h3, h4 { font-family: "PingFang SC", "Heiti SC", sans-serif; margin: 0; }
-  h1 { color: #183153; font-size: 23pt; }
-  h2 { color: #183153; font-size: 15.5pt; margin: 13pt 0 6pt; padding-bottom: 4pt; border-bottom: 1.2pt solid #2563eb; break-after: avoid; }
-  h3 { color: #183153; font-size: 11.6pt; margin: 8pt 0 4pt; break-after: avoid; }
-  p { margin: 4pt 0 7pt; text-align: justify; }
-  ul, ol { margin: 4pt 0 7pt 19pt; padding: 0; }
-  li { margin: 2.5pt 0; }
-  strong { color: #111827; }
-  code { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 8.8pt; background: #f1f5f9; padding: 1px 4px; border-radius: 3px; }
-  pre { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 7.9pt; line-height: 1.43; white-space: pre-wrap; background: #f4f7fb; border: 1px solid #d8dee8; border-left: 4px solid #2563eb; border-radius: 4px; padding: 6px 8px; margin: 6px 0 8px; break-inside: avoid; }
-  table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 8.7pt; break-inside: avoid; }
-  th { background: #e9eff8; color: #183153; font-family: "PingFang SC", sans-serif; text-align: left; padding: 4px 5px; border: 1px solid #cbd5e1; }
-  td { padding: 4px 5px; border: 1px solid #d8dee8; vertical-align: top; }
-  tr:nth-child(even) td { background: #fafbfd; }
-  .page-break { break-before: auto; }
-  .avoid { break-inside: avoid; }
-  .cover { height: 260mm; break-after: page; display: flex; flex-direction: column; justify-content: center; text-align: center; position: relative; }
-  .cover:before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 7mm; background: linear-gradient(90deg,#183153,#2563eb,#0891b2); }
-  .eyebrow { font-family: "PingFang SC", sans-serif; color: #2563eb; letter-spacing: 0.08em; font-size: 11pt; margin-bottom: 18pt; }
-  .cover-title { font-family: "PingFang SC", sans-serif; font-size: 42pt; color: #183153; font-weight: 800; letter-spacing: -0.02em; }
-  .cover-subtitle { font-family: "PingFang SC", sans-serif; font-size: 20pt; font-weight: 600; color: #0f172a; margin-top: 9pt; }
-  .cover-desc { font-size: 13pt; color: #475569; margin: 13pt auto 0; max-width: 145mm; }
-  .cover-meta { margin-top: 34pt; color: #64748b; font-family: "PingFang SC", sans-serif; font-size: 10pt; }
-  .pill { display: inline-block; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; border-radius: 999px; padding: 3px 9px; margin: 2px; font-family: "PingFang SC", sans-serif; font-size: 8.8pt; }
-  .keybox { background: #f4f7fb; border: 1px solid #93b4e8; border-left: 5px solid #2563eb; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
-  .warnbox { background: #fff7ed; border: 1px solid #fdba74; border-left: 5px solid #c2410c; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
-  .greenbox { background: #f0fdf4; border: 1px solid #86efac; border-left: 5px solid #15803d; border-radius: 5px; padding: 9px 11px; margin: 9px 0 11px; break-inside: avoid; }
-  .box-title { display: block; font-family: "PingFang SC", sans-serif; font-weight: 700; color: #183153; margin-bottom: 3px; }
-  .small { font-size: 8.8pt; color: #64748b; }
-  .center { text-align: center; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-  .metric { border: 1px solid #d8dee8; border-radius: 5px; padding: 8px; background: #fff; text-align: center; }
-  .metric b { display: block; color: #2563eb; font-family: "PingFang SC", sans-serif; font-size: 17pt; }
-  .metric span { font-size: 8.8pt; color: #64748b; }
-  .arch { margin: 10px 0 12px; padding: 10px; border: 1px solid #d8dee8; border-radius: 7px; background: #fbfdff; break-inside: avoid; }
-  .row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 7px 0; }
-  .node { min-width: 150px; text-align: center; border: 1px solid #94a3b8; border-radius: 7px; padding: 8px 7px; background: white; font-family: "PingFang SC", sans-serif; font-size: 8.9pt; line-height: 1.35; }
-  .node.blue { border-color: #2563eb; background: #eff6ff; }
-  .node.cyan { border-color: #0891b2; background: #ecfeff; }
-  .node.green { border-color: #15803d; background: #f0fdf4; }
-  .arrow { color: #183153; font-size: 18pt; font-weight: 700; }
-  .arrow-down { color: #183153; font-size: 18pt; font-weight: 700; text-align: center; margin: -2px 0; }
-  .caption { text-align: center; color: #64748b; font-size: 8.8pt; margin-top: 2px; }
-  .toc { margin-top: 12pt; columns: 2; column-gap: 20px; }
-  .toc div { padding: 4px 0; border-bottom: 1px dotted #cbd5e1; break-inside: avoid; }
-  .toc b { color: #2563eb; margin-right: 6px; }
-  .checklist td:last-child { text-align: center; font-size: 13pt; color: #2563eb; }
-  .footer-note { margin-top: 16pt; text-align: center; color: #64748b; font-size: 8.8pt; font-family: "PingFang SC", sans-serif; }
-  .page-label { color: #2563eb; font-weight: 700; margin-right: 5px; }
+<html lang="zh-CN"><head><meta charset="utf-8"><title>HolderProof 当前进度</title><style>
+:root { color-scheme: light; }
+body { margin: 0 auto; max-width: 1040px; padding: 48px 40px; color: #243449;
+  font: 16px/1.8 "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #fff; }
+h1 { color: #183153; font-size: 32px; line-height: 1.4; border-top: 6px solid #0f766e; padding-top: 24px; }
+h2 { color: #183153; font-size: 23px; border-bottom: 1px solid #cbd5e1; padding-bottom: 7px; margin-top: 34px; }
+a { color: #0f766e; } table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 10px 13px; text-align: left; vertical-align: top; }
+th { color: #183153; background: #eff6ff; } tr:nth-child(even) td { background: #f8fafc; }
+pre { padding: 16px; background: #f1f5f9; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; }
+code { font: .88em/1.6 Menlo, Consolas, monospace; } p, li { overflow-wrap: anywhere; }
+svg, img { display: block; width: 100%; height: auto; } .source-note { color: #52657b; font-size: 14px; }
+@media print { body { padding: 0; font-size: 10pt; } h1,h2 { break-after: avoid; } tr,pre { break-inside: avoid; } }
+</style></head><body><h1>HolderProof 当前进度</h1>
+<p>更新日期：2026-11-15。当前完成到执行方案 03/04 的本地 fixture P0。
+内部历史 Step 编号不是执行方案章节号。最新提交及远端同步状态以 Git 记录为准。</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1220" viewBox="0 0 1600 1220" role="img" aria-labelledby="title desc">
+<title id="title">HolderProof: full-fact certification and two independent gates</title>
+<desc id="desc">Three committee members independently replay query, balance and checkpoint. Two matching approvals certify one shared fact. Airdrop and Governance gates reuse it with independent thresholds. Local EVM archival checks provide independent correctness evidence.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#334155"/></marker>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#183153}.heading{font-weight:700;font-size:34px}.sub{font-size:19px;fill:#52657b}.stage{font-size:16px;font-weight:700;letter-spacing:2px;fill:#0f766e}.box-title{font-size:23px;font-weight:700}.body{font-size:18px;fill:#334155}.small{font-size:16px;fill:#52657b}.edge{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}.thin{fill:none;stroke:#94a3b8;stroke-width:2}</style></defs>
+<rect width="1600" height="1220" fill="#f8fafc"/>
+<rect width="1600" height="10" fill="#0f766e"/>
+<text x="64" y="67" class="heading">HolderProof | Certified history, reusable policy</text>
+<text x="64" y="103" class="sub">Local fixture P0 · 2-of-3 business committee · Independent Airdrop and Governance Lyquids · 2026-11-15</text>
 
-body { font-size: 9.35pt; line-height: 1.50; }
-table { font-size: 8.35pt; }
-pre { font-size: 7.55pt; }
-h2 { margin-top: 12pt; }
-h3 { margin-top: 8pt; }
-</style></head><body>
-<section class="cover">
-  <div class="eyebrow">CS5298 FINAL PROJECT · HOLDERPROOF</div>
-  <div class="cover-title">Progress</div>
-  <div class="cover-subtitle">项目推进副本</div>
-  <div class="cover-desc">Step 1–4 完成情况 · 当前验证结果<br>遗留任务 · 下一阶段行动</div>
-  <div class="cover-meta">更新日期：2026-11-12<br>当前阶段：Step 4 完成</div>
-  <div style="margin-top:26pt">
-    <span class="pill">4 Nodes</span><span class="pill">3 Signers</span><span class="pill">Certified Balance</span><span class="pill">Consumer call!</span>
-  </div>
-</section>
-<section>
-<h2>1. 项目定位</h2><p>HolderProof 是一个基于 Lyquor 的可验证 ERC-20 历史持仓证明：</p><pre>ERC-20 Transfer fixture
-→ Rust 历史余额重算
-→ 4 节点委员会
-→ 3-of-4 认证
-→ QueryCertificate
-→ Consumer call!
-→ eligible / not eligible</pre><p>当前数据源是本地确定性 fixture，不是 Sepolia 实时数据。Lyquor devnet、多节点委员会和跨 Lyquid 调用是真实本地执行。</p><h2>2. 已完成阶段</h2><table>
-<tr><th>阶段</th><th>内容</th><th>状态</th></tr>
-<tr><td>Step 1</td><td>Rust/LDK/Foundry/devnet/Hello Lyquid</td><td>完成</td></tr>
-<tr><td>Step 2</td><td>4 节点委员会与跨 Lyquid call!</td><td>完成</td></tr>
-<tr><td>Step 3</td><td>ERC-20 fixture 重算与 TWAB</td><td>完成</td></tr>
-<tr><td>Step 4</td><td>完整 QueryCertificate、Merkle root、Consumer 校验</td><td>完成</td></tr>
-</table><h2>3. Step 4 技术成果</h2><ul><li>共享类型 crate：<code>holderproof-types</code></li><li>TransferEvent 全字段模型</li><li>QuerySpec、Checkpoint、QueryCertificate</li><li>SHA-256 event leaf</li><li>与 Python 一致的 Merkle root</li><li>queryHash</li><li>deterministic blockHash</li><li>3 个 signer ID</li><li>Finalized 状态</li><li>certificate 按 queryHash 持久化</li><li>Consumer 读取并校验完整证书</li><li>一键复现脚本</li></ul><h2>4. 当前验证结果</h2><pre>cargo check --workspace: PASS
-Indexer guest tests:     5 passed
-Consumer guest tests:    4 passed
-Python tests:            6 passed
-Fixture checks:          9 passed</pre><p>最近一次一键复现结果：</p><pre>{
-  &quot;balance&quot;: &quot;62685&quot;,
-  &quot;eligible&quot;: true,
-  &quot;certificateStatus&quot;: &quot;Finalized&quot;,
-  &quot;signerCount&quot;: 3,
-  &quot;eventMerkleRoot&quot;: &quot;2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b&quot;
-}</pre><h2>5. 当前代码结构</h2><pre>holderproof-types/src/lib.rs       共享 wire types
-lyquid-indexer/src/lib.rs          Indexer state 和方法
-lyquid-indexer/src/fixture.rs      fixture、余额、TWAB、query hash
-lyquid-indexer/src/merkle.rs       事件哈希和 Merkle root
-lyquid-indexer/src/http_endpoints.rs HTTP 诊断接口
-lyquid-indexer/src/models.rs       委员会 proposal
-lyquid-indexer/src/tests.rs        Indexer guest tests
-lyquid-consumer/src/lib.rs         Consumer state 和入口
-lyquid-consumer/src/certificate.rs Consumer 证书校验
-lyquid-consumer/src/eligibility.rs Consumer 资格计算
-lyquid-consumer/src/http_endpoints.rs Consumer HTTP 接口
-lyquid-consumer/src/tests.rs       Consumer guest tests
-docs/guides/CODE_WALKTHROUGH.md           代码导读
-scripts/reproduce-step4.sh         一键复现
-scripts/stop-step4.sh              停止复现环境</pre><h2>6. 本地与 GitHub 状态</h2><p>本地与 GitHub 已同步：</p><pre>本地 HEAD：与 GitHub main 一致
-GitHub main：与本地 HEAD 一致
-工作区：clean
-未提交改动：0
-未推送提交：0</pre><p>具体最新 commit 以 GitHub 仓库页面为准。最新可读性重构已经包含在远程 <code>main</code>：</p><ul><li>共享类型 crate</li><li>Indexer 模块拆分</li><li>HTTP endpoints 拆分</li><li>Consumer 证书校验拆分</li><li>代码导读</li><li>新增测试</li></ul><h2>7. 尚未完成</h2><ul><li>AirdropGateLyquid</li><li>GovernanceGateLyquid</li><li>Sepolia 真实数据适配器</li><li>完整 E3 篡改与异常测试</li><li>证书挑战/撤销机制</li><li>UI</li><li>用户外测</li><li>正式 6–10 页报告</li><li>预录 Demo</li><li>最终提交包</li></ul><h2>8. 下一步建议</h2><h3>Step 5A：AirdropGateLyquid</h3><p>状态：</p><pre>campaign_id
-token
-snapshot_block
-threshold
-claim_amount
-claimed[address]</pre><p>流程：</p><pre>QueryCertificate
-→ check eligible
-→ claim()
-→ mark claimed
-→ transfer test token</pre><h3>Step 5B：GovernanceGateLyquid</h3><p>状态：</p><pre>proposal_id
-snapshot_block
-minimum_balance
-has_voted[address]</pre><p>流程：</p><pre>QueryCertificate
-→ check snapshot balance
-→ vote()
-→ prevent duplicate voting</pre><h3>Step 6：E3</h3><p>至少覆盖：</p><ul><li>篡改 Transfer 事件</li><li>错误 blockHash</li><li>伪造 Merkle root</li><li>少于 3 个 signer</li><li>证书重放</li><li>holder/block 不匹配</li><li>stale certificate</li></ul><h2>9. 目前最准确的状态描述</h2><p>&gt; HolderProof 的 P0 可验证持仓证明闭环和完整证书已经完成；项目还没有完成空投领取、治理投票、真实 Sepolia 数据和最终交付材料。</p><h2>10. 恢复工作命令</h2><pre>cd holderproof
-make check
-shaker test lyquid-indexer/Cargo.toml
-shaker test lyquid-consumer/Cargo.toml
-./scripts/reproduce-step4.sh
-./scripts/stop-step4.sh</pre>
-</section>
+<text x="64" y="145" class="stage">01  SELECT A HISTORICAL QUERY</text>
+<rect x="64" y="165" width="420" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="200" class="box-title">User / CLI</text>
+<text x="86" y="231" class="body">proof(token, holder, block)</text>
+<text x="86" y="257" class="body">run-proof.sh prints the certificate</text>
+<rect x="568" y="165" width="464" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="590" y="200" class="box-title">Indexer Lyquid</text>
+<text x="590" y="231" class="body">Capture holder + block per round</text>
+<text x="590" y="257" class="body">Coordinate report_balance()</text>
+<rect x="1116" y="165" width="420" height="113" rx="14" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1138" y="200" class="box-title">Source and infrastructure</text>
+<text x="1138" y="231" class="body">308 deterministic Transfer events</text>
+<text x="1138" y="257" class="body">4 localnet nodes; only 3 committee voters</text>
+<path d="M484 222 H562" class="edge"/>
+<text x="64" y="315" class="stage">02  INDEPENDENT REPLAY + FULL-FACT AGREEMENT</text>
+<rect x="64" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="86" y="385" class="box-title">Committee member 1</text>
+<text x="86" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="86" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="86" y="468" class="body">Per-node proposal cache</text>
+<rect x="568" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="590" y="385" class="box-title">Committee member 2</text>
+<text x="590" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="590" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="590" y="468" class="body">Per-node proposal cache</text>
+<rect x="1072" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="1094" y="385" class="box-title">Committee member 3</text>
+<text x="1094" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="1094" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="1094" y="468" class="body">Per-node proposal cache</text>
+<path d="M800 278 V330 H296 M800 330 H1304" class="thin"/>
+<path d="M296 330 V344" class="edge"/>
+<path d="M800 330 V344" class="edge"/>
+<path d="M1304 330 V344" class="edge"/>
+<path d="M296 480 V517 H1304 V480" class="thin"/>
+<path d="M800 480 V547" class="edge"/>
+<rect x="536" y="553" width="528" height="112" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="558" y="588" class="box-title">Full-fact agreement</text>
+<text x="558" y="619" class="body">At least 2 identical facts from distinct nodes</text>
+<text x="558" y="645" class="body">Repeated node submissions do not count</text>
+<rect x="64" y="553" width="420" height="145" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="86" y="588" class="box-title">Independent EVM cross-check</text>
+<text x="86" y="619" class="body">Replay all 308 Transfer logs</text>
+<text x="86" y="645" class="body">18 archival balanceOf comparisons</text>
+<text x="86" y="671" class="body">Fixture N maps to EVM N+2</text>
+<rect x="1116" y="553" width="420" height="145" rx="14" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
+<text x="1138" y="588" class="box-title">Reject and preserve boundaries</text>
+<text x="1138" y="619" class="body">No quorum: no certificate</text>
+<text x="1138" y="645" class="body">Invalid / revoked proof: no eligibility</text>
+<text x="1138" y="671" class="body">Shared bugs remain a trust assumption</text>
+<path d="M800 665 V724" class="edge"/>
+<text x="64" y="751" class="stage">03  CERTIFY ONCE</text>
+<rect x="480" y="730" width="640" height="135" rx="14" fill="#ecfeff" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="502" y="765" class="box-title">Native certified write → shared QueryCertificate</text>
+<text x="502" y="796" class="body">Entire fact JSON is inside the signed call payload</text>
+<text x="502" y="822" class="body">Store native signatures, hashes and state provenance</text>
+<text x="502" y="848" class="body">Identical query keeps the original certificate</text>
+<text x="64" y="910" class="stage">04  INDEPENDENT GATES</text>
+<path d="M800 865 V885 H414 V934" class="edge"/>
+<path d="M800 885 H1186 V934" class="edge"/>
+<rect x="64" y="940" width="700" height="130" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="975" class="box-title">AirdropGateLyquid</text>
+<text x="86" y="1006" class="body">Alice balance 62685: threshold 60000 → true; 70000 → false</text>
+<text x="86" y="1032" class="body">call! → shared validation → own threshold</text>
+<text x="86" y="1058" class="body">claim(): one entitlement per holder; no token payout</text>
+<rect x="836" y="940" width="700" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="858" y="975" class="box-title">GovernanceGateLyquid</text>
+<text x="858" y="1006" class="body">Same certificate: threshold 50000 → true; 70000 → false</text>
+<text x="858" y="1032" class="body">call! → shared validation → independent threshold</text>
+<text x="858" y="1058" class="body">vote(): one record per proposal / holder</text>
+<rect x="64" y="1111" width="1472" height="77" rx="12" fill="#e2e8f0"/>
+<text x="86" y="1140" class="small">Trust anchor: configured Indexer + Lyquor native authentication. Exported signature JSON is not a detached proof service.</text>
+<text x="86" y="1167" class="small">Canonical policy is network state; replay caches and bounded result history are instance state. Fixture hashes are synthetic.</text>
+</svg>
+</p>
+<h2>1. 已完成的闭环</h2>
+<p>查询一个 Token、holder 和历史区块，三个委员会成员独立重放完整事实，
+达到 2-of-3 一致后执行原生认证并持久化证书。空投、治理两个独立 Lyquid
+读取同一份当前 Finalized 证书，按各自门槛判断资格。</p>
+<p>官方 localnet 启动四个基础设施节点，只有前三个是业务委员会成员。
+第四个节点不改变应用的 2-of-3 规则。</p>
+<h2>2. 当前实现与证据</h2>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>308 条确定性 Transfer、Python 标准答案</td>
+<td>已完成</td>
+</tr>
+<tr>
+<td>checked U256 历史余额重放、Merkle 根</td>
+<td>已完成</td>
+</tr>
+<tr>
+<td>完整查询、余额、checkpoint 一起达成共识并进入签名载荷</td>
+<td>已完成</td>
+</tr>
+<tr>
+<td>原生证书、签名字节、节点映射、来源引用</td>
+<td>已保存并校验一致性</td>
+</tr>
+<tr>
+<td>相同查询幂等、当前状态撤销检查</td>
+<td>已实现</td>
+</tr>
+<tr>
+<td>独立空投和治理消费者</td>
+<td>已实现并部署验收</td>
+</tr>
+<tr>
+<td>两个消费者的正反资格结果</td>
+<td>已验收</td>
+</tr>
+<tr>
+<td>节点提案缓存、消费者实例历史</td>
+<td>已实现</td>
+</tr>
+<tr>
+<td>查询 CLI、一键验收</td>
+<td>已完成</td>
+</tr>
+<tr>
+<td>历史 EVM <code>balanceOf</code> 对照</td>
+<td>308 条日志、18 次读取一致</td>
+</tr>
+</tbody></table>
+<h2>3. 已验证的演示结果</h2>
+<p>Alice 在 fixture 区块 1000 的余额为 <strong>62685</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>消费者</th>
+<th>门槛</th>
+<th>资格结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AirdropGateLyquid</td>
+<td>60000</td>
+<td>true</td>
+</tr>
+<tr>
+<td>AirdropGateLyquid</td>
+<td>70000</td>
+<td>false</td>
+</tr>
+<tr>
+<td>GovernanceGateLyquid</td>
+<td>50000</td>
+<td>true</td>
+</tr>
+<tr>
+<td>GovernanceGateLyquid</td>
+<td>70000</td>
+<td>false</td>
+</tr>
+</tbody></table>
+<p>四个结果复用同一证书，门槛变化不重写余额事实。
+资格检查、重复查询和实例历史已在实际本地网络中通过。
+<code>claim()</code> 与 <code>vote()</code> 已有身份绑定及防重复记录，但完整支付或 DAO 执行不在当前验收范围。</p>
+<h2>4. 验证数量与运行入口</h2>
+<table>
+<thead>
+<tr>
+<th>检查</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Rust workspace 编译</td>
+<td>五个 crate 通过</td>
+</tr>
+<tr>
+<td>Indexer guest 测试</td>
+<td>12 项通过</td>
+</tr>
+<tr>
+<td>共享 Gate guest 测试</td>
+<td>12 项通过</td>
+</tr>
+<tr>
+<td>Python 标准答案测试</td>
+<td>6 项通过</td>
+</tr>
+<tr>
+<td>fixture 校验</td>
+<td>9 项通过</td>
+</tr>
+<tr>
+<td>EVM Transfer 与历史余额</td>
+<td>308 条日志、18 次查询通过</td>
+</tr>
+</tbody></table>
+<pre><code class="language-bash">make acceptance
+./scripts/stop-step4.sh
+</code></pre>
+<p>证据保存于 <code>.run/step4/</code> 和 <code>.run/acceptance/</code>，运行缓存不提交。
+完整逐项验收与实现适配见 <a href="../reports/PLAN_03_04_ACCEPTANCE.md">03/04 验收记录</a>。</p>
+<h2>5. 本轮文档与可读性更新</h2>
+<p>架构 Markdown、Mermaid、SVG/PNG、代码导读和协作指南统一为当前架构，
+HTML/PDF 从对应 Markdown 生成。Indexer 的证书装配拆到独立模块，
+查询 CLI 主函数只负责流程编排，聚合变量使用明确业务命名。</p>
+<p>原始执行方案、早期操作记录和 2026-11-12 PDF 是历史资料；不把它们当成当前验收说明。</p>
+<h2>6. 实现适配及剩余工作</h2>
+<p>原子跨 Lyquid <code>call!</code> 在 LDK 0.8.4 中只能从 Network 方法执行，
+因此权威策略和动作记录保留在共享状态，实例状态用于本地缓存与历史。</p>
+<p>数据源仍是本地 fixture，哈希是合成值。历史 EVM 对照使用独立测试合约，
+fixture 区块 N 对应 EVM N+2；对照验证余额，不验证 Sepolia 链头或真实最终性。
+消费者依赖配置的 Indexer 和运行时认证，不提供独立的脱机签名验证注册表。</p>
+<p>后续范围：P1 的 MIN_BALANCE、ACTIVE_RATIO、窗口证书；Sepolia 接入；
+完整 E3 故障注入和外部用户测试；UI、最终报告、幻灯片及录制演示。
+已有 TWAB 重放不代表全部 P1 已完成。</p>
 </body></html>

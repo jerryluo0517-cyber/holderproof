@@ -7,6 +7,16 @@ committee members. Two matching approvals certify the complete balance fact,
 including its checkpoint. Two separately deployed Lyquids consume the same
 certificate with independent eligibility thresholds.
 
+## Architecture and reading guide
+
+![HolderProof current end-to-end architecture](docs/architecture/assets/holderproof-flow.svg)
+
+[Architecture](docs/architecture/architecture.md) ·
+[Code walkthrough](docs/guides/CODE_WALKTHROUGH.md) ·
+[Collaboration guide](docs/guides/COLLABORATOR_GUIDE.md) ·
+[Current HTML/PDF exports](docs/README.md) ·
+[Rebuild documentation](docs/MAINTAINING_DOCS.md)
+
 ## Current scope
 
 Execution-plan sections **03 and 04, P0** are implemented for the local fixture.

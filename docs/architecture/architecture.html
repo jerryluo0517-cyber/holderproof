@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>HolderProof 架构与端到端流程</title><style>
+:root { color-scheme: light; }
+body { margin: 0 auto; max-width: 1040px; padding: 48px 40px; color: #243449;
+  font: 16px/1.8 "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #fff; }
+h1 { color: #183153; font-size: 32px; line-height: 1.4; border-top: 6px solid #0f766e; padding-top: 24px; }
+h2 { color: #183153; font-size: 23px; border-bottom: 1px solid #cbd5e1; padding-bottom: 7px; margin-top: 34px; }
+a { color: #0f766e; } table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 10px 13px; text-align: left; vertical-align: top; }
+th { color: #183153; background: #eff6ff; } tr:nth-child(even) td { background: #f8fafc; }
+pre { padding: 16px; background: #f1f5f9; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; }
+code { font: .88em/1.6 Menlo, Consolas, monospace; } p, li { overflow-wrap: anywhere; }
+svg, img { display: block; width: 100%; height: auto; } .source-note { color: #52657b; font-size: 14px; }
+@media print { body { padding: 0; font-size: 10pt; } h1,h2 { break-after: avoid; } tr,pre { break-inside: avoid; } }
+</style></head><body><h1>HolderProof 架构与端到端流程</h1>
+<p>更新日期：2026-11-15。对应执行方案 03/04 的本地 fixture P0。</p>
+<p>系统将历史余额事实交给三个委员会成员独立重算，由两份一致的批准完成原生认证。
+同一份证书由空投和治理两个独立 Lyquid 消费；门槛属于各自策略，不写入持仓事实。</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1220" viewBox="0 0 1600 1220" role="img" aria-labelledby="title desc">
+<title id="title">HolderProof: full-fact certification and two independent gates</title>
+<desc id="desc">Three committee members independently replay query, balance and checkpoint. Two matching approvals certify one shared fact. Airdrop and Governance gates reuse it with independent thresholds. Local EVM archival checks provide independent correctness evidence.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#334155"/></marker>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#183153}.heading{font-weight:700;font-size:34px}.sub{font-size:19px;fill:#52657b}.stage{font-size:16px;font-weight:700;letter-spacing:2px;fill:#0f766e}.box-title{font-size:23px;font-weight:700}.body{font-size:18px;fill:#334155}.small{font-size:16px;fill:#52657b}.edge{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}.thin{fill:none;stroke:#94a3b8;stroke-width:2}</style></defs>
+<rect width="1600" height="1220" fill="#f8fafc"/>
+<rect width="1600" height="10" fill="#0f766e"/>
+<text x="64" y="67" class="heading">HolderProof | Certified history, reusable policy</text>
+<text x="64" y="103" class="sub">Local fixture P0 · 2-of-3 business committee · Independent Airdrop and Governance Lyquids · 2026-11-15</text>
+
+<text x="64" y="145" class="stage">01  SELECT A HISTORICAL QUERY</text>
+<rect x="64" y="165" width="420" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="200" class="box-title">User / CLI</text>
+<text x="86" y="231" class="body">proof(token, holder, block)</text>
+<text x="86" y="257" class="body">run-proof.sh prints the certificate</text>
+<rect x="568" y="165" width="464" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="590" y="200" class="box-title">Indexer Lyquid</text>
+<text x="590" y="231" class="body">Capture holder + block per round</text>
+<text x="590" y="257" class="body">Coordinate report_balance()</text>
+<rect x="1116" y="165" width="420" height="113" rx="14" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1138" y="200" class="box-title">Source and infrastructure</text>
+<text x="1138" y="231" class="body">308 deterministic Transfer events</text>
+<text x="1138" y="257" class="body">4 localnet nodes; only 3 committee voters</text>
+<path d="M484 222 H562" class="edge"/>
+<text x="64" y="315" class="stage">02  INDEPENDENT REPLAY + FULL-FACT AGREEMENT</text>
+<rect x="64" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="86" y="385" class="box-title">Committee member 1</text>
+<text x="86" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="86" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="86" y="468" class="body">Per-node proposal cache</text>
+<rect x="568" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="590" y="385" class="box-title">Committee member 2</text>
+<text x="590" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="590" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="590" y="468" class="body">Per-node proposal cache</text>
+<rect x="1072" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="1094" y="385" class="box-title">Committee member 3</text>
+<text x="1094" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="1094" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="1094" y="468" class="body">Per-node proposal cache</text>
+<path d="M800 278 V330 H296 M800 330 H1304" class="thin"/>
+<path d="M296 330 V344" class="edge"/>
+<path d="M800 330 V344" class="edge"/>
+<path d="M1304 330 V344" class="edge"/>
+<path d="M296 480 V517 H1304 V480" class="thin"/>
+<path d="M800 480 V547" class="edge"/>
+<rect x="536" y="553" width="528" height="112" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="558" y="588" class="box-title">Full-fact agreement</text>
+<text x="558" y="619" class="body">At least 2 identical facts from distinct nodes</text>
+<text x="558" y="645" class="body">Repeated node submissions do not count</text>
+<rect x="64" y="553" width="420" height="145" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="86" y="588" class="box-title">Independent EVM cross-check</text>
+<text x="86" y="619" class="body">Replay all 308 Transfer logs</text>
+<text x="86" y="645" class="body">18 archival balanceOf comparisons</text>
+<text x="86" y="671" class="body">Fixture N maps to EVM N+2</text>
+<rect x="1116" y="553" width="420" height="145" rx="14" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
+<text x="1138" y="588" class="box-title">Reject and preserve boundaries</text>
+<text x="1138" y="619" class="body">No quorum: no certificate</text>
+<text x="1138" y="645" class="body">Invalid / revoked proof: no eligibility</text>
+<text x="1138" y="671" class="body">Shared bugs remain a trust assumption</text>
+<path d="M800 665 V724" class="edge"/>
+<text x="64" y="751" class="stage">03  CERTIFY ONCE</text>
+<rect x="480" y="730" width="640" height="135" rx="14" fill="#ecfeff" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="502" y="765" class="box-title">Native certified write → shared QueryCertificate</text>
+<text x="502" y="796" class="body">Entire fact JSON is inside the signed call payload</text>
+<text x="502" y="822" class="body">Store native signatures, hashes and state provenance</text>
+<text x="502" y="848" class="body">Identical query keeps the original certificate</text>
+<text x="64" y="910" class="stage">04  INDEPENDENT GATES</text>
+<path d="M800 865 V885 H414 V934" class="edge"/>
+<path d="M800 885 H1186 V934" class="edge"/>
+<rect x="64" y="940" width="700" height="130" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="975" class="box-title">AirdropGateLyquid</text>
+<text x="86" y="1006" class="body">Alice balance 62685: threshold 60000 → true; 70000 → false</text>
+<text x="86" y="1032" class="body">call! → shared validation → own threshold</text>
+<text x="86" y="1058" class="body">claim(): one entitlement per holder; no token payout</text>
+<rect x="836" y="940" width="700" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="858" y="975" class="box-title">GovernanceGateLyquid</text>
+<text x="858" y="1006" class="body">Same certificate: threshold 50000 → true; 70000 → false</text>
+<text x="858" y="1032" class="body">call! → shared validation → independent threshold</text>
+<text x="858" y="1058" class="body">vote(): one record per proposal / holder</text>
+<rect x="64" y="1111" width="1472" height="77" rx="12" fill="#e2e8f0"/>
+<text x="86" y="1140" class="small">Trust anchor: configured Indexer + Lyquor native authentication. Exported signature JSON is not a detached proof service.</text>
+<text x="86" y="1167" class="small">Canonical policy is network state; replay caches and bounded result history are instance state. Fixture hashes are synthetic.</text>
+</svg>
+</p>
+<h2>1. 组件及职责</h2>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>当前职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查询 CLI</td>
+<td><code>run-proof.sh --token --holder --block</code> 选择查询、等待生效、请求认证并返回证书</td>
+</tr>
+<tr>
+<td>Indexer Lyquid</td>
+<td>固定轮次查询参数，协调委员会，存储和读取当前证书状态</td>
+</tr>
+<tr>
+<td>三成员委员会</td>
+<td>各自重放 Transfer、生成完整 BalanceFact，要求两份事实完全一致</td>
+</tr>
+<tr>
+<td>Lyquor 原生认证</td>
+<td>对完整事实所在的认证调用载荷签名，并验证认证写入</td>
+</tr>
+<tr>
+<td>共享校验库</td>
+<td>校验来源、状态、查询身份、事实哈希、checkpoint 与签名证据一致性</td>
+</tr>
+<tr>
+<td>AirdropGateLyquid</td>
+<td>独立资格门槛；<code>claim()</code> 记录一次领取资格，不执行代币支付</td>
+</tr>
+<tr>
+<td>GovernanceGateLyquid</td>
+<td>独立治理门槛；<code>vote()</code> 记录每个提案和持有者的一次投票</td>
+</tr>
+<tr>
+<td>历史 EVM 对照</td>
+<td>在隔离 Anvil 重放同批事件，再读取历史 <code>balanceOf</code> 验证余额</td>
+</tr>
+</tbody></table>
+<p>官方 localnet 启动四个基础设施节点，HolderProof 只选前三个组成业务委员会。
+第四个基础设施节点不参与该委员会投票。应用规则是 <strong>2-of-3</strong>。</p>
+<h2>2. 查询与认证时序</h2>
+<p>时序图的可编辑 Mermaid 源码见本页对应的 Markdown；上方架构图可离线查看。</p>
+<p>签名轮次捕获查询参数，轮次开始后修改所选查询不会改变其含义。
+聚合比较完整事实：余额相同但区块哈希、事件根、数据集或查询对象不同，不能合并为一致结果。
+重复节点不计入投票；重复相同查询保留原证书及其创建位置。</p>
+<h2>3. 状态分层</h2>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>实际保存的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Network State</td>
+<td>委员会策略、所选查询、证书、当前状态、两个 Gate 的权威策略与动作记录</td>
+</tr>
+<tr>
+<td>Indexer Instance State</td>
+<td>各节点的完整提案缓存 <code>proposal_cache</code></td>
+</tr>
+<tr>
+<td>Gate Instance State</td>
+<td>各自最多 32 条查询与结果历史，通过 <code>/api/history</code> 查看</td>
+</tr>
+<tr>
+<td>节点本地数据</td>
+<td>内嵌 fixture、排序后的事件缓存；密钥由 Lyquor 运行时管理</td>
+</tr>
+<tr>
+<td>离线审计材料</td>
+<td>Python 标准答案、EVM 对照、验收日志及 JSON 结果</td>
+</tr>
+</tbody></table>
+<p>LDK 0.8.4 的原子跨 Lyquid <code>call!</code> 只能在 network 方法内执行。
+因此权威策略和动作结果保留在 Network State，Instance State 用于本地缓存和诊断历史。
+这是对执行方案状态表的明确适配，不宣称已实现不存在的运行时接口。</p>
+<h2>4. 证书及信任边界</h2>
+<p><code>QueryCertificate</code> 包含查询身份、完整事实哈希、checkpoint、余额、原生签名证据、
+<code>network_state_id</code>、状态和创建位置。<code>checkpoint.block_hash</code> 表示查询结束区块，
+<code>block_hash_start</code> 表示起始区块；当前起点是 fixture 的区块 0。</p>
+<table>
+<thead>
+<tr>
+<th>标识或字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>query_hash</code> / <code>certificate_id</code></td>
+<td>查询身份，用于查找；P0 查询类型固定为 Balance</td>
+</tr>
+<tr>
+<td><code>fact_hash</code></td>
+<td>完整查询、查询类型、余额和 checkpoint 的一致性摘要</td>
+</tr>
+<tr>
+<td><code>runtime_certificate</code></td>
+<td>原始原生 OracleCert，包括 header、签名者索引及签名字节</td>
+</tr>
+<tr>
+<td><code>node_signatures</code></td>
+<td>原生签名者索引到节点 ID、签名字节的可读映射</td>
+</tr>
+<tr>
+<td><code>network_state_id</code></td>
+<td><code>LyquidID@creation_block</code> 来源引用，不是状态包含证明</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>当前是否 Finalized；管理员可将已存证书置为 Invalidated</td>
+</tr>
+</tbody></table>
+<p>可信来源是管理员配置的 Indexer 和 Lyquor 原生认证路径。
+消费者核对导出的证据一致性与来源，但不维护独立密钥注册表来验证任意脱离运行时的签名 JSON。
+委员会重算不是数学证明；所有成员共用实现仍有共同缺陷风险。</p>
+<h2>5. 当前演示与独立对照</h2>
+<p>Alice 在 fixture 区块 1000 的余额为 <strong>62685</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>消费者</th>
+<th>策略门槛</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>空投</td>
+<td>60000</td>
+<td>合格</td>
+</tr>
+<tr>
+<td>空投</td>
+<td>70000</td>
+<td>不合格</td>
+</tr>
+<tr>
+<td>治理</td>
+<td>50000</td>
+<td>合格</td>
+</tr>
+<tr>
+<td>治理</td>
+<td>70000</td>
+<td>不合格</td>
+</tr>
+</tbody></table>
+<p>四个结果复用同一证书。验收同时检查证书未被消费者修改、重复查询幂等，以及实例历史有记录。
+资格正反结果已完成网络演示；完整支付或 DAO 执行系统不在本次验收范围。</p>
+<p>历史对照重放 308 条真实 EVM Transfer 日志，验证 18 次历史 <code>balanceOf</code> 查询。
+测试合约部署占用区块 1，因此 fixture 区块 N 映射到 EVM 区块 N+2。
+EVM 地址、链 ID 和哈希与合成 fixture 元数据不同；此对照验证余额正确性，不验证 Sepolia 链头。</p>
+<h2>6. 验收和后续范围</h2>
+<pre><code class="language-bash">make acceptance
+./scripts/stop-step4.sh
+</code></pre>
+<p>P0 限定一个 fixture Token、一个持有者、区块 0..1000 的单点余额。
+已有 TWAB 重放属于 P1；MIN_BALANCE、ACTIVE_RATIO、窗口证书、Sepolia 接入、
+完整 E3 故障注入、外部用户测试、UI 和最终演示交付仍是后续工作。</p>
+<p>详细结果见 <a href="../reports/PLAN_03_04_ACCEPTANCE.md">03/04 验收记录</a>。</p>
+</body></html>

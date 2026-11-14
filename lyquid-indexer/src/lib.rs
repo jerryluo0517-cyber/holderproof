@@ -26,6 +26,7 @@ pub(crate) fn invalid(reason: impl Into<String>) -> LyquidError {
     LyquidError::LyquorRuntime(reason.into())
 }
 
+mod certificate_builder;
 mod fixture;
 mod http_endpoints;
 mod merkle;
@@ -93,7 +94,7 @@ fn publish_balance(ctx: &mut _, holder: Address, block: u64, balance: U256) -> L
     Ok(true)
 }
 
-// Read the balance fact consumed by the consumer Lyquid.
+// Legacy smoke-test balance. Production gate paths read certificates instead.
 #[method::network(export = eth)]
 fn get_balance(ctx: &_, holder: Address, block: u64) -> LyquidResult<U256> {
     if holder == *ctx.network.snapshot_holder && block == *ctx.network.snapshot_block {
@@ -197,18 +198,18 @@ fn aggregate(ctx: &_) -> LyquidResult<Option<CertifiedCallParams>> {
     if init.avg_num as usize != COMMITTEE_THRESHOLD {
         return Err(invalid("unexpected proposal threshold"));
     }
-    let Some(first) = agreeing_proposal(&proposals, COMMITTEE_THRESHOLD) else {
+    let Some(agreed_fact) = agreeing_proposal(&proposals, COMMITTEE_THRESHOLD) else {
         return Ok(None);
     };
 
-    if first.query.holder != init.holder.to_string().to_ascii_lowercase()
-        || first.query.block != init.block
+    if agreed_fact.query.holder != init.holder.to_string().to_ascii_lowercase()
+        || agreed_fact.query.block != init.block
     {
         return Err(invalid("committee fact does not match the requested query"));
     }
     // Commit the complete voted fact, not only its balance. Native signatures
     // now cover the checkpoint and query fields in this exact JSON payload.
-    let fact_json = serde_json::to_string(first).map_err(|err| invalid(err.to_string()))?;
+    let fact_json = serde_json::to_string(agreed_fact).map_err(|err| invalid(err.to_string()))?;
     let input = encode_by_fields!(fact_json: String = fact_json).into();
     Ok(Some(CertifiedCallParams {
         origin: Address::ZERO,
@@ -247,21 +248,6 @@ fn update_certified_balance(ctx: &mut _, fact_json: String) -> LyquidResult<bool
             signature: hex::encode(signature),
         });
     }
-    let signer_ids: Vec<String> = node_signatures
-        .iter()
-        .map(|sig| sig.node_id.clone())
-        .collect();
-    if signer_ids.len() < COMMITTEE_THRESHOLD
-        || signer_ids
-            .iter()
-            .enumerate()
-            .any(|(index, id)| signer_ids[..index].contains(id))
-    {
-        return Err(invalid(
-            "certificate requires two distinct committee signers",
-        ));
-    }
-    let signer_count = signer_ids.len() as u64;
     let balance = fact
         .balance
         .parse::<U256>()
@@ -277,25 +263,14 @@ fn update_certified_balance(ctx: &mut _, fact_json: String) -> LyquidResult<bool
         return Ok(true);
     }
     let created_at = lyquor_api::chain_pos()?.block();
-    let certificate = QueryCertificate {
-        query_type: fact.query_type,
-        fact_hash: fact.hash(),
+    let certificate = certificate_builder::build(
+        &fact,
         node_signatures,
-        runtime_certificate: serde_json::to_string(&ctx.cert)
-            .map_err(|err| invalid(err.to_string()))?,
-        network_state_id: format!("{}@{}", ctx.lyquid_id, created_at),
-        certificate_id: certificate_hash.clone(),
-        query_hash: certificate_hash.clone(),
-        chain_id: fact.query.chain_id,
-        token: fact.query.token.clone(),
-        holder: fact.query.holder.clone(),
-        block_number: block,
-        balance: fact.balance.clone(),
-        checkpoint: fact.checkpoint.clone(),
-        signer_ids,
-        status: CertificateStatus::Finalized,
+        &runtime_cert,
+        ctx.lyquid_id,
         created_at,
-    };
+    )?;
+    let signer_count = certificate.signer_ids.len() as u64;
 
     *ctx.network.certified_holder = holder;
     *ctx.network.certified_block = block;

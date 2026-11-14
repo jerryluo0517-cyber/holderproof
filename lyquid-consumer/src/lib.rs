@@ -125,10 +125,14 @@ fn claim(ctx: &mut _) -> LyquidResult<bool> {
 #[method::instance]
 fn record_result(ctx: &mut _) -> LyquidResult<()> {
     let item = serde_json::json!({
-        "holder": ctx.network.expected_holder.to_string(), "block": *ctx.network.expected_block,
-        "threshold": ctx.network.threshold.to_string(), "balance": ctx.network.last_balance.to_string(),
-        "eligible": *ctx.network.last_eligible, "queryHash": ctx.network.last_query_hash.to_string(),
-    }).to_string();
+        "holder": ctx.network.expected_holder.to_string(),
+        "block": *ctx.network.expected_block,
+        "threshold": ctx.network.threshold.to_string(),
+        "balance": ctx.network.last_balance.to_string(),
+        "eligible": *ctx.network.last_eligible,
+        "queryHash": ctx.network.last_query_hash.to_string(),
+    })
+    .to_string();
     let mut history = ctx.instance.result_history.write();
     if history.len() == 32 {
         history.remove(0);

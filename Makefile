@@ -1,4 +1,4 @@
-.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance
+.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs
 
 fixture:
 	python3 fixtures/generate_fixture.py
@@ -41,3 +41,11 @@ historical-check:
 acceptance: check guest-test
 	./scripts/reproduce-step4.sh
 	$(MAKE) historical-check
+
+# Optional documentation exporters; see docs/MAINTAINING_DOCS.md.
+DOCS_NODE ?= node
+DOCS_PYTHON ?= python3
+
+docs:
+	$(DOCS_NODE) scripts/build_docs.mjs
+	$(DOCS_PYTHON) scripts/build_docs.py

@@ -1,118 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050" role="img" aria-labelledby="title desc">
-  <title id="title">HolderProof end-to-end flow</title>
-  <desc id="desc">User query, four-node Lyquor committee, three of four certified certificate, and consumer eligibility check.</desc>
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L8,3 L0,6 z" fill="#183153"/>
-    </marker>
-    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L8,3 L0,6 z" fill="#15803d"/>
-    </marker>
-    <style>
-      .bg { fill: #f8fafc; }
-      .title { font: 700 30px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #183153; }
-      .subtitle { font: 16px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #64748b; }
-      .stage { font: 700 15px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #2563eb; letter-spacing: 1px; }
-      .box-title { font: 700 17px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #0f172a; }
-      .box-text { font: 14px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #475569; }
-      .small { font: 13px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #64748b; }
-      .node { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.4; rx: 12; }
-      .blue { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; rx: 12; }
-      .cyan { fill: #ecfeff; stroke: #0891b2; stroke-width: 1.8; rx: 12; }
-      .green { fill: #f0fdf4; stroke: #15803d; stroke-width: 1.8; rx: 12; }
-      .orange { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; rx: 12; }
-      .edge { stroke: #183153; stroke-width: 2; fill: none; marker-end: url(#arrow); }
-      .edge-green { stroke: #15803d; stroke-width: 2; fill: none; marker-end: url(#arrow-green); }
-      .dash { stroke: #64748b; stroke-width: 1.8; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow); }
-      .label { font: 13px "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #475569; }
-    </style>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1220" viewBox="0 0 1600 1220" role="img" aria-labelledby="title desc">
+<title id="title">HolderProof: full-fact certification and two independent gates</title>
+<desc id="desc">Three committee members independently replay query, balance and checkpoint. Two matching approvals certify one shared fact. Airdrop and Governance gates reuse it with independent thresholds. Local EVM archival checks provide independent correctness evidence.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#334155"/></marker>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#183153}.heading{font-weight:700;font-size:34px}.sub{font-size:19px;fill:#52657b}.stage{font-size:16px;font-weight:700;letter-spacing:2px;fill:#0f766e}.box-title{font-size:23px;font-weight:700}.body{font-size:18px;fill:#334155}.small{font-size:16px;fill:#52657b}.edge{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}.thin{fill:none;stroke:#94a3b8;stroke-width:2}</style></defs>
+<rect width="1600" height="1220" fill="#f8fafc"/>
+<rect width="1600" height="10" fill="#0f766e"/>
+<text x="64" y="67" class="heading">HolderProof | Certified history, reusable policy</text>
+<text x="64" y="103" class="sub">Local fixture P0 · 2-of-3 business committee · Independent Airdrop and Governance Lyquids · 2026-11-15</text>
 
-  <rect class="bg" x="0" y="0" width="1600" height="1050"/>
-  <text class="title" x="60" y="58">HolderProof — End-to-End Flow</text>
-  <text class="subtitle" x="60" y="87">Local deterministic fixture → 4-node Lyquor committee → certified QueryCertificate → Consumer eligibility</text>
-
-  <!-- Stage 1 -->
-  <text class="stage" x="60" y="140">01 · QUERY SETUP</text>
-  <rect class="blue" x="60" y="165" width="230" height="96"/>
-  <text class="box-title" x="82" y="198">User / Script</text>
-  <text class="box-text" x="82" y="222">select holder + block</text>
-  <text class="box-text" x="82" y="244">set_query(holder, block)</text>
-
-  <path class="edge" d="M290 213 H380"/>
-  <text class="label" x="303" y="199">set_query</text>
-
-  <rect class="blue" x="380" y="165" width="260" height="96"/>
-  <text class="box-title" x="402" y="198">Indexer Lyquid</text>
-  <text class="box-text" x="402" y="222">query_holder / query_block</text>
-  <text class="box-text" x="402" y="244">report_balance()</text>
-
-  <path class="edge" d="M640 213 H740"/>
-  <rect class="green" x="740" y="165" width="280" height="96"/>
-  <text class="box-title" x="762" y="198">Lyquor Network State</text>
-  <text class="box-text" x="762" y="222">shared query + certificate state</text>
-  <text class="box-text" x="762" y="244">latest_query_hash</text>
-
-  <!-- Stage 2 -->
-  <text class="stage" x="60" y="330">02 · COMMITTEE CERTIFICATION</text>
-  <rect class="cyan" x="60" y="355" width="230" height="112"/>
-  <text class="box-title" x="82" y="388">Embedded Fixture</text>
-  <text class="box-text" x="82" y="412">transfers.json</text>
-  <text class="box-text" x="82" y="434">LazyLock sorted events</text>
-  <text class="box-text" x="82" y="454">Rust replay + Merkle</text>
-
-  <path class="edge" d="M290 411 H340"/>
-  <rect class="blue" x="340" y="355" width="210" height="112"/>
-  <text class="box-title" x="360" y="388">Node 1 propose</text>
-  <text class="box-text" x="360" y="412">balance + holder + block</text>
-  <path class="edge" d="M340 520 V488 H550 V467"/>
-  <rect class="blue" x="340" y="520" width="210" height="86"/>
-  <text class="box-title" x="360" y="552">Node 2 propose</text>
-  <text class="box-text" x="360" y="575">independent replay</text>
-  <rect class="blue" x="340" y="625" width="210" height="72"/>
-  <text class="box-title" x="360" y="655">Node 3 / 4</text>
-  <text class="box-text" x="360" y="678">3-of-4 agreement</text>
-
-  <path class="edge" d="M550 411 H630"/>
-  <rect class="orange" x="630" y="355" width="230" height="112"/>
-  <text class="box-title" x="652" y="388">Aggregate</text>
-  <text class="box-text" x="652" y="412">at least 3 matching</text>
-  <text class="box-text" x="652" y="434">BalanceProposal values</text>
-  <text class="box-text" x="652" y="454">reject otherwise</text>
-
-  <path class="edge" d="M860 411 H940"/>
-  <rect class="green" x="940" y="355" width="270" height="112"/>
-  <text class="box-title" x="962" y="388">update_certified_balance</text>
-  <text class="box-text" x="962" y="412">status = Finalized</text>
-  <text class="box-text" x="962" y="434">signer IDs + hashes</text>
-  <text class="box-text" x="962" y="454">certificates[queryHash]</text>
-
-  <!-- Stage 3 -->
-  <text class="stage" x="60" y="780">03 · CONSUMER VERIFICATION</text>
-  <rect class="blue" x="60" y="805" width="230" height="100"/>
-  <text class="box-title" x="82" y="838">Consumer Lyquid</text>
-  <text class="box-text" x="82" y="862">call! get_certificate_json</text>
-  <text class="box-text" x="82" y="884">holder + block + threshold</text>
-
-  <path class="edge" d="M290 855 H370"/>
-  <rect class="orange" x="370" y="805" width="250" height="100"/>
-  <text class="box-title" x="392" y="838">Validate Certificate</text>
-  <text class="box-text" x="392" y="862">Finalized + 3 signers</text>
-  <text class="box-text" x="392" y="884">blockHash + Merkle root</text>
-
-  <path class="edge" d="M620 855 H700"/>
-  <rect class="green" x="700" y="805" width="230" height="100"/>
-  <text class="box-title" x="722" y="838">Eligibility</text>
-  <text class="box-text" x="722" y="862">balance ≥ threshold</text>
-  <text class="box-text" x="722" y="884">eligible = true / false</text>
-
-  <path class="dash" d="M930 855 H1010"/>
-  <rect class="orange" x="1010" y="805" width="240" height="100"/>
-  <text class="box-title" x="1032" y="838">Future Consumer Actions</text>
-  <text class="box-text" x="1032" y="862">Airdrop claim()</text>
-  <text class="box-text" x="1032" y="884">Governance vote()</text>
-
-  <rect x="60" y="955" width="1190" height="55" fill="#e2e8f0" rx="8"/>
-  <text class="small" x="80" y="979">Trust boundary: 3 of 4 committee nodes must independently replay the same fixture and certificate fields are bound to queryHash, blockHash and event Merkle root.</text>
-  <text class="small" x="80" y="999">Current data source is local deterministic fixture; Sepolia live ingestion is a future extension.</text>
+<text x="64" y="145" class="stage">01  SELECT A HISTORICAL QUERY</text>
+<rect x="64" y="165" width="420" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="200" class="box-title">User / CLI</text>
+<text x="86" y="231" class="body">proof(token, holder, block)</text>
+<text x="86" y="257" class="body">run-proof.sh prints the certificate</text>
+<rect x="568" y="165" width="464" height="113" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="590" y="200" class="box-title">Indexer Lyquid</text>
+<text x="590" y="231" class="body">Capture holder + block per round</text>
+<text x="590" y="257" class="body">Coordinate report_balance()</text>
+<rect x="1116" y="165" width="420" height="113" rx="14" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1138" y="200" class="box-title">Source and infrastructure</text>
+<text x="1138" y="231" class="body">308 deterministic Transfer events</text>
+<text x="1138" y="257" class="body">4 localnet nodes; only 3 committee voters</text>
+<path d="M484 222 H562" class="edge"/>
+<text x="64" y="315" class="stage">02  INDEPENDENT REPLAY + FULL-FACT AGREEMENT</text>
+<rect x="64" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="86" y="385" class="box-title">Committee member 1</text>
+<text x="86" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="86" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="86" y="468" class="body">Per-node proposal cache</text>
+<rect x="568" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="590" y="385" class="box-title">Committee member 2</text>
+<text x="590" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="590" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="590" y="468" class="body">Per-node proposal cache</text>
+<rect x="1072" y="350" width="464" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="1094" y="385" class="box-title">Committee member 3</text>
+<text x="1094" y="416" class="body">Local fixture replay + Merkle checkpoint</text>
+<text x="1094" y="442" class="body">BalanceFact = query + balance + checkpoint</text>
+<text x="1094" y="468" class="body">Per-node proposal cache</text>
+<path d="M800 278 V330 H296 M800 330 H1304" class="thin"/>
+<path d="M296 330 V344" class="edge"/>
+<path d="M800 330 V344" class="edge"/>
+<path d="M1304 330 V344" class="edge"/>
+<path d="M296 480 V517 H1304 V480" class="thin"/>
+<path d="M800 480 V547" class="edge"/>
+<rect x="536" y="553" width="528" height="112" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="558" y="588" class="box-title">Full-fact agreement</text>
+<text x="558" y="619" class="body">At least 2 identical facts from distinct nodes</text>
+<text x="558" y="645" class="body">Repeated node submissions do not count</text>
+<rect x="64" y="553" width="420" height="145" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="86" y="588" class="box-title">Independent EVM cross-check</text>
+<text x="86" y="619" class="body">Replay all 308 Transfer logs</text>
+<text x="86" y="645" class="body">18 archival balanceOf comparisons</text>
+<text x="86" y="671" class="body">Fixture N maps to EVM N+2</text>
+<rect x="1116" y="553" width="420" height="145" rx="14" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
+<text x="1138" y="588" class="box-title">Reject and preserve boundaries</text>
+<text x="1138" y="619" class="body">No quorum: no certificate</text>
+<text x="1138" y="645" class="body">Invalid / revoked proof: no eligibility</text>
+<text x="1138" y="671" class="body">Shared bugs remain a trust assumption</text>
+<path d="M800 665 V724" class="edge"/>
+<text x="64" y="751" class="stage">03  CERTIFY ONCE</text>
+<rect x="480" y="730" width="640" height="135" rx="14" fill="#ecfeff" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="502" y="765" class="box-title">Native certified write → shared QueryCertificate</text>
+<text x="502" y="796" class="body">Entire fact JSON is inside the signed call payload</text>
+<text x="502" y="822" class="body">Store native signatures, hashes and state provenance</text>
+<text x="502" y="848" class="body">Identical query keeps the original certificate</text>
+<text x="64" y="910" class="stage">04  INDEPENDENT GATES</text>
+<path d="M800 865 V885 H414 V934" class="edge"/>
+<path d="M800 885 H1186 V934" class="edge"/>
+<rect x="64" y="940" width="700" height="130" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+<text x="86" y="975" class="box-title">AirdropGateLyquid</text>
+<text x="86" y="1006" class="body">Alice balance 62685: threshold 60000 → true; 70000 → false</text>
+<text x="86" y="1032" class="body">call! → shared validation → own threshold</text>
+<text x="86" y="1058" class="body">claim(): one entitlement per holder; no token payout</text>
+<rect x="836" y="940" width="700" height="130" rx="14" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+<text x="858" y="975" class="box-title">GovernanceGateLyquid</text>
+<text x="858" y="1006" class="body">Same certificate: threshold 50000 → true; 70000 → false</text>
+<text x="858" y="1032" class="body">call! → shared validation → independent threshold</text>
+<text x="858" y="1058" class="body">vote(): one record per proposal / holder</text>
+<rect x="64" y="1111" width="1472" height="77" rx="12" fill="#e2e8f0"/>
+<text x="86" y="1140" class="small">Trust anchor: configured Indexer + Lyquor native authentication. Exported signature JSON is not a detached proof service.</text>
+<text x="86" y="1167" class="small">Canonical policy is network state; replay caches and bounded result history are instance state. Fixture hashes are synthetic.</text>
 </svg>

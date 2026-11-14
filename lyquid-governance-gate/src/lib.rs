@@ -88,11 +88,16 @@ fn vote(ctx: &mut _) -> LyquidResult<bool> {
 fn http_result(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
     let body = serde_json::to_vec(&serde_json::json!({
         "voteCount": *ctx.network.vote_count,
-        "role": "GovernanceGateLyquid", "proposalId": *ctx.network.proposal_id,
-        "holder": ctx.network.holder.to_string(), "block": *ctx.network.block,
-        "threshold": ctx.network.threshold.to_string(), "balance": ctx.network.balance.to_string(),
-        "eligible": *ctx.network.eligible, "queryHash": ctx.network.query_hash.to_string(),
-        "factHash": ctx.network.fact_hash.to_string(), "checkCount": *ctx.network.check_count,
+        "role": "GovernanceGateLyquid",
+        "proposalId": *ctx.network.proposal_id,
+        "holder": ctx.network.holder.to_string(),
+        "block": *ctx.network.block,
+        "threshold": ctx.network.threshold.to_string(),
+        "balance": ctx.network.balance.to_string(),
+        "eligible": *ctx.network.eligible,
+        "queryHash": ctx.network.query_hash.to_string(),
+        "factHash": ctx.network.fact_hash.to_string(),
+        "checkCount": *ctx.network.check_count,
     }))
     .map_err(|err| invalid(err.to_string()))?;
     Ok(http::Response {
@@ -108,9 +113,12 @@ fn http_result(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
 #[method::instance]
 fn record_result(ctx: &mut _) -> LyquidResult<()> {
     let item = serde_json::json!({
-        "holder": ctx.network.holder.to_string(), "block": *ctx.network.block,
-        "threshold": ctx.network.threshold.to_string(), "balance": ctx.network.balance.to_string(),
-        "eligible": *ctx.network.eligible, "queryHash": ctx.network.query_hash.to_string(),
+        "holder": ctx.network.holder.to_string(),
+        "block": *ctx.network.block,
+        "threshold": ctx.network.threshold.to_string(),
+        "balance": ctx.network.balance.to_string(),
+        "eligible": *ctx.network.eligible,
+        "queryHash": ctx.network.query_hash.to_string(),
     })
     .to_string();
     let mut history = ctx.instance.result_history.write();

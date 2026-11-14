@@ -117,3 +117,16 @@ P0 is restricted to the fixture's one standard token and finalized block range
 Sepolia ingestion, independent RPC diversity, an external signature-verifier
 registry, full E3 fault-injection/user testing, a UI, report and recorded demo
 are not claimed by this acceptance record. Existing dated PDFs remain historical.
+
+## Documentation and readability follow-up (2026-11-15)
+
+The current architecture, Mermaid sequence, SVG/PNG, walkthrough, collaboration
+guide and progress documents now describe the same 2-of-3 / dual-gate design.
+Four HTML/PDF exports are regenerated from Markdown; older dated PDFs remain
+historical records, explicitly separated in the documentation index.
+
+The Indexer certificate builder is extracted from runtime/state orchestration,
+the aggregate result is named `agreed_fact`, and CLI parsing/submission/waiting
+are separate functions. Public methods and certificate fields are unchanged.
+`make acceptance` passed after the refactor; the log is at
+`.run/acceptance/docs-refactor-check.log`.

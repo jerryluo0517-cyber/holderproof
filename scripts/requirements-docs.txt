@@ -1,0 +1,2 @@
+# Optional documentation tooling; not needed to run the HolderProof application.
+reportlab>=4.4,<5
