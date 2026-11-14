@@ -1,3 +1,21 @@
+# HolderProof 当前进度
+
+更新时间：2026-11-15。当前实现：执行方案 03/04 的本地 fixture P0，
+包含三成员 2-of-3 完整事实证书、独立空投/治理消费者，以及历史 EVM 对照。
+
+完整验收范围、原生 LDK 适配和剩余限制见
+[03/04 验收记录](../reports/PLAN_03_04_ACCEPTANCE.md)。
+
+本次补齐以 `12f622e` 为远端基线；最新提交与同步状态以 Git 记录为准。
+
+验证：`make acceptance` 已通过；Rust guest 测试 24 项、Python 测试 6 项、fixture 检查 9 项、
+308 条 EVM 日志和 18 次历史余额查询一致。
+
+运行：`make acceptance`。原有内部 Step 编号与执行方案章节号不同。
+下方是历史进度快照；其中的“尚未实现”、测试数量和 Git 状态按各自日期理解。
+
+---
+
 # HolderProof 项目推进副本
 
 更新时间：2026-11-12
@@ -5,6 +23,20 @@
 当前分支：main
 本地状态：工作区干净
 GitHub 状态：main 与 origin/main 同步（2026-11-12）
+
+## 2026-11-15：Step 4 加固
+
+本次改动尚未提交，下面原有的 Git 同步状态仅为 2026-11-12 记录。
+
+- Consumer 配置仅部署者可修改，拒绝零地址，重新配置会清空旧结果。
+- 四节点委员会要求成员唯一；聚合支持第一份提案异常时其余三份达成一致。
+- 重复节点不参与投票；认证写入要求至少三名不同签名者。
+- 查询哈希算法移至共享类型 crate，Consumer 重算并校验证书 ID 和查询字段。
+- 限定 fixture token、chain 和 parser，校验 checkpoint 范围及哈希格式。
+- Rust guest 测试：Indexer 10 项，Consumer 10 项；Python 6 项，fixture 检查 9 项。
+- 新增 `scripts/verify_step4.py`，一键演示会自动比对在线证书与独立 fixture 答案。
+- 仍使用本地 fixture；JSON 证书的认证依赖配置的 Indexer 与 Lyquor 运行时。
+- 本次只更新 Markdown 文档，已有 PDF 是历史版本。
 
 ## 1. 项目定位
 

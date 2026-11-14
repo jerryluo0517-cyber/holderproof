@@ -105,7 +105,7 @@ run_project_checks() {
     cd "$ROOT"
     make check
     shaker test lyquid-indexer/Cargo.toml
-    shaker test lyquid-consumer/Cargo.toml
+    shaker test holderproof-gate-core/Cargo.toml
     pass "all project checks passed"
 }
 

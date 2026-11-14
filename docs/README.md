@@ -31,3 +31,10 @@
 - [Scenario 1 execution plan](reports/HolderProof_Scenario1_Plan.pdf)
 - [Step 2–4 operation log PDF](reports/HolderProof_Step2-4_Operation_Log.pdf)
 - [Archived Step 2–3 operation log](archive/HolderProof_Step2-3_Operation_Log.pdf)
+
+## Current P0 acceptance
+
+- [Execution plan sections 03/04](reports/PLAN_03_04_ACCEPTANCE.md)
+- [Current certificate rules](operations/step4-certificate.md)
+
+Earlier dated PDFs and operation logs are historical records.

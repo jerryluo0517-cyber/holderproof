@@ -8,14 +8,17 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 pub const CHAIN_ID: u64 = 11_155_111;
+/// The only token supported by the Step 4 deterministic fixture.
+pub const FIXTURE_TOKEN: &str = "0x5298000000000000000000000000000000000001";
+pub const FIXTURE_END_BLOCK: u64 = 1000;
+pub const DATASET_ID: &str = "holderproof-fixture-5298-v1";
+pub const COMMITTEE_SIZE: usize = 3;
 pub const PARSER_VERSION: &str = "holderproof-v1";
 
-/// Committee agreement threshold: the devnet committee is 4 nodes, so
-/// `n / 2 + 1 == 3`. Keep this in one place because the Indexer proposes with
-/// it and the Consumer enforces it when validating a certificate.
-pub const COMMITTEE_THRESHOLD: usize = 3;
+/// P0 policy: two distinct approvals from the three-member committee.
+pub const COMMITTEE_THRESHOLD: usize = 2;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TransferEvent {
     pub chain_id: u64,
     pub token: String,
@@ -29,7 +32,7 @@ pub struct TransferEvent {
     pub parser_version: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct QuerySpec {
     pub chain_id: u64,
     pub token: String,
@@ -38,8 +41,10 @@ pub struct QuerySpec {
     pub parser_version: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Checkpoint {
+    pub dataset_id: String,
+    pub block_hash_start: String,
     pub from_block: u64,
     pub to_block: u64,
     pub block_hash: String,
@@ -69,8 +74,14 @@ impl fmt::Display for CertificateStatus {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct QueryCertificate {
+    pub query_type: QueryType,
+    pub fact_hash: String,
+    pub node_signatures: Vec<NodeSignature>,
+    /// Full native OracleCert; authenticity is enforced by the Lyquor runtime.
+    pub runtime_certificate: String,
+    pub network_state_id: String,
     pub certificate_id: String,
     pub query_hash: String,
     pub chain_id: u64,
@@ -83,4 +94,77 @@ pub struct QueryCertificate {
     pub signer_ids: Vec<String>,
     pub status: CertificateStatus,
     pub created_at: u64,
+}
+
+impl QuerySpec {
+    /// Canonical query identity shared by producer and consumer. Keep the field
+    /// order stable: persisted certificates are keyed by this digest.
+    pub fn hash(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let canonical = format!(
+            "query|{}|{}|{}|{}|{}",
+            self.chain_id, self.token, self.holder, self.block, self.parser_version
+        );
+        hex::encode(Sha256::digest(canonical.as_bytes()))
+    }
+}
+
+/// P0 certifies a single historical balance. Thresholds belong to gate policy,
+/// so one certificate can be reused by gates with different thresholds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QueryType {
+    Balance,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct NodeSignature {
+    pub node_id: String,
+    pub signer_id: u32,
+    pub signature: String,
+}
+
+/// Every field in this value travels inside the runtime-signed call payload.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BalanceFact {
+    pub query: QuerySpec,
+    pub query_type: QueryType,
+    pub balance: String,
+    pub checkpoint: Checkpoint,
+}
+
+impl BalanceFact {
+    pub fn hash(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let bytes =
+            serde_json::to_vec(self).expect("BalanceFact contains only serializable fields");
+        hex::encode(Sha256::digest(bytes))
+    }
+}
+
+impl QueryCertificate {
+    pub fn fact(&self) -> BalanceFact {
+        BalanceFact {
+            query: QuerySpec {
+                chain_id: self.chain_id,
+                token: self.token.clone(),
+                holder: self.holder.to_ascii_lowercase(),
+                block: self.block_number,
+                parser_version: self.checkpoint.parser_version.clone(),
+            },
+            query_type: self.query_type,
+            balance: self.balance.clone(),
+            checkpoint: self.checkpoint.clone(),
+        }
+    }
+}
+
+/// Identifies the immutable fixture source, not a live chain header.
+pub fn fixture_block_hash(block: u64) -> String {
+    use sha2::{Digest, Sha256};
+    format!(
+        "0x{}",
+        hex::encode(Sha256::digest(
+            format!("block|{CHAIN_ID}|{block}").as_bytes()
+        ))
+    )
 }

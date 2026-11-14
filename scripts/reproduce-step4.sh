@@ -115,6 +115,9 @@ state_write() {
         printf 'LOCALNET_PID=%q\n' "$LOCALNET_PID"
         printf 'SERVE_INDEXER_PID=%q\n' "$SERVE_INDEXER_PID"
         printf 'SERVE_CONSUMER_PID=%q\n' "$SERVE_CONSUMER_PID"
+        printf 'SERVE_GOVERNANCE_PID=%q\n' "$SERVE_GOVERNANCE_PID"
+        printf 'GOVERNANCE_CONTRACT=%q\n' "$GOVERNANCE_CONTRACT"
+        printf 'GOVERNANCE_LYQUID=%q\n' "$GOVERNANCE_LYQUID"
         printf 'INDEXER_LYQUID=%q\n' "$INDEXER_LYQUID"
         printf 'INDEXER_CONTRACT=%q\n' "$INDEXER_CONTRACT"
         printf 'CONSUMER_LYQUID=%q\n' "$CONSUMER_LYQUID"
@@ -125,7 +128,7 @@ state_write() {
 for tool in shaker cast curl lsof python3; do
     require_tool "$tool"
 done
-for port in 10087 11087 12087 13087 8080 8081; do
+for port in 8545 10087 11087 12087 13087 8080 8081 8082; do
     require_port_free "$port"
 done
 
@@ -145,6 +148,9 @@ PY
 LOCALNET_PID=$!
 SERVE_INDEXER_PID=""
 SERVE_CONSUMER_PID=""
+SERVE_GOVERNANCE_PID=""
+GOVERNANCE_CONTRACT=""
+GOVERNANCE_LYQUID=""
 INDEXER_LYQUID=""
 INDEXER_CONTRACT=""
 CONSUMER_LYQUID=""
@@ -175,15 +181,21 @@ CONSUMER_CONTRACT="$(printf '%s' "$CONSUMER_OUTPUT" | json_field contract)"
 }
 echo "      $CONSUMER_LYQUID -> $CONSUMER_CONTRACT"
 
-echo "[4/9] Reading four node IDs..."
+echo "      Deploying independent GovernanceGateLyquid..."
+GOVERNANCE_OUTPUT="$(deploy_json "$ROOT/lyquid-governance-gate/Cargo.toml" "http://127.0.0.1:10087/lyquids:holderproof-governance-local")"
+GOVERNANCE_LYQUID="$(printf '%s' "$GOVERNANCE_OUTPUT" | json_field lyquid_id)"
+GOVERNANCE_CONTRACT="$(printf '%s' "$GOVERNANCE_OUTPUT" | json_field contract)"
+[[ "$GOVERNANCE_LYQUID" == Lyquid-* && "$GOVERNANCE_CONTRACT" == 0x* ]] || exit 1
+state_write
+
+echo "[4/9] Reading three committee node IDs..."
 NODE1="$(node_id_hex 10087)"
 NODE2="$(node_id_hex 11087)"
 NODE3="$(node_id_hex 12087)"
-NODE4="$(node_id_hex 13087)"
 
-echo "[5/9] Configuring 3-of-4 committee and query..."
+echo "[5/9] Configuring 2-of-3 committee and query..."
 cast send "$INDEXER_CONTRACT" 'configure_committee(bytes32[])' \
-    "[$NODE1,$NODE2,$NODE3,$NODE4]" \
+    "[$NODE1,$NODE2,$NODE3]" \
     --private-key "$ANVIL_KEY" --rpc-url "$RPC" --quiet
 cast send "$INDEXER_CONTRACT" 'set_query(address,uint64)' "$ALICE" "$BLOCK" \
     --private-key "$ANVIL_KEY" --rpc-url "$RPC" --quiet
@@ -226,6 +238,13 @@ sleep 2
 cast send "$CONSUMER_CONTRACT" 'check_eligible()' \
     --private-key "$ANVIL_KEY" --rpc-url "$ANVIL" --quiet
 
+cast send "$GOVERNANCE_CONTRACT" 'configure(address,address,uint64,uint256,uint64)' \
+    "$INDEXER_TARGET" "$ALICE" "$BLOCK" 70000 1 \
+    --private-key "$ANVIL_KEY" --rpc-url "$ANVIL" --quiet
+sleep 2
+cast send "$GOVERNANCE_CONTRACT" 'check_eligible()' \
+    --private-key "$ANVIL_KEY" --rpc-url "$ANVIL" --quiet
+
 echo "[8/9] Starting HTTP diagnostics..."
 shaker serve --endpoint "$RPC" --listen 127.0.0.1:8081 "$INDEXER_LYQUID" \
     > "$RUN_DIR/serve-indexer.log" 2>&1 &
@@ -233,8 +252,14 @@ SERVE_INDEXER_PID=$!
 shaker serve --endpoint "$RPC" --listen 127.0.0.1:8080 "$CONSUMER_LYQUID" \
     > "$RUN_DIR/serve-consumer.log" 2>&1 &
 SERVE_CONSUMER_PID=$!
+shaker serve --endpoint "$RPC" --listen 127.0.0.1:8082 "$GOVERNANCE_LYQUID" \
+    > "$RUN_DIR/serve-governance.log" 2>&1 &
+SERVE_GOVERNANCE_PID=$!
+state_write
 wait_for_url "http://127.0.0.1:8081/lyquid/info" "Indexer proxy"
 wait_for_url "http://127.0.0.1:8080/lyquid/info" "Consumer proxy"
+
+wait_for_url "http://127.0.0.1:8082/lyquid/info" "Governance proxy"
 
 echo "[9/9] Result"
 echo "Certificate:"
@@ -245,7 +270,9 @@ curl -fsS http://127.0.0.1:8080/api/result
 echo
 
 state_write
+python3 "$ROOT/scripts/verify_step4.py" --exercise-gates
 printf '\nReproduction complete.\n'
 printf '  Certificate: http://127.0.0.1:8081/api/certificate\n'
 printf '  Result:      http://127.0.0.1:8080/api/result\n'
+printf '  Governance:  http://127.0.0.1:8082/api/result\n'
 printf '  Stop with:   ./scripts/stop-step4.sh\n'

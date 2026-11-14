@@ -5,6 +5,8 @@ use super::*;
 #[method::instance(export = http, method = "GET", path_prefix = "/api/result")]
 fn http_result(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
     let body = serde_json::to_vec(&serde_json::json!({
+        "claimCount": *ctx.network.claim_count,
+        "role": "AirdropGateLyquid",
         "indexer": ctx.network.indexer.to_string(),
         "holder": ctx.network.expected_holder.to_string(),
         "block": *ctx.network.expected_block,
@@ -25,6 +27,17 @@ fn http_result(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
             name: "content-type".into(),
             value: b"application/json; charset=utf-8".to_vec(),
         }],
+        body,
+    })
+}
+
+#[method::instance(export = http, method = "GET", path_prefix = "/api/history")]
+fn http_history(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
+    let history = ctx.instance.result_history.read();
+    let body = serde_json::to_vec(&*history).map_err(|err| invalid(err.to_string()))?;
+    Ok(http::Response {
+        status: 200,
+        headers: vec![],
         body,
     })
 }

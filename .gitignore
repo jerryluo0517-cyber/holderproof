@@ -6,3 +6,6 @@ node_modules/
 *.log
 lyquid_tools_target/
 .run/
+
+evm/out/
+evm/cache/

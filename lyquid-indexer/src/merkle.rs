@@ -6,8 +6,8 @@ use sha2::{Digest, Sha256};
 /// SHA-256 → 64 lowercase hex, **no `0x` prefix**.
 ///
 /// Prefix convention: application-level hashes (event leaves, Merkle root,
-/// query hash) stay unprefixed to match the Python ground truth; only the
-/// on-chain-style `block_hash` adds a `0x` prefix, via [`hash_hex_prefixed`].
+/// query hash) stay unprefixed to match the Python ground truth; fixture
+/// block hashes add a `0x` prefix in holderproof-types.
 pub(crate) fn hash_hex(data: &[u8]) -> String {
     use std::fmt::Write as _;
     let digest = Sha256::digest(data);
@@ -16,11 +16,6 @@ pub(crate) fn hash_hex(data: &[u8]) -> String {
         write!(&mut out, "{byte:02x}").expect("writing to String cannot fail");
     }
     out
-}
-
-/// Same as [`hash_hex`], with a leading `0x` (on-chain style).
-pub(crate) fn hash_hex_prefixed(data: &[u8]) -> String {
-    format!("0x{}", hash_hex(data))
 }
 
 /// Serialize an event for hashing. The `|`-joined field order MUST match

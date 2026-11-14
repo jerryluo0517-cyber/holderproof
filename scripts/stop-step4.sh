@@ -40,9 +40,10 @@ kill_port() {
 }
 
 echo "Stopping HTTP proxies..."
+kill_pid "${SERVE_GOVERNANCE_PID:-}"
 kill_pid "${SERVE_CONSUMER_PID:-}"
 kill_pid "${SERVE_INDEXER_PID:-}"
-for port in 8080 8081; do kill_port "$port"; done
+for port in 8080 8081 8082; do kill_port "$port"; done
 echo "Stopping devnet..."
 kill_group "${LOCALNET_PID:-}"
 for port in 10087 11087 12087 13087; do kill_port "$port"; done

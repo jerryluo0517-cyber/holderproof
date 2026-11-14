@@ -11,6 +11,7 @@ lyquid.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 holderproof-types.workspace = true
+holderproof-gate-core.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]

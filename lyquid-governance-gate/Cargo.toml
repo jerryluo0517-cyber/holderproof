@@ -1,0 +1,15 @@
+[package]
+name = "holderproof-governance-gate"
+description = "Independent governance consumer of HolderProof balance certificates"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+lyquid.workspace = true
+holderproof-gate-core.workspace = true
+serde_json.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
