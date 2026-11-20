@@ -86,6 +86,12 @@ HTTP diagnostics while the demo is running:
 - Governance: `http://127.0.0.1:8082/api/result`
 - Per-instance result history: `/api/history` on either gate
 
+## E3 自审计
+
+`make e3` 在空闲端口启动全新的本地 demo，运行 P0 验收，再验证资格动作、权限、证书撤销和委员会暂停恢复。
+该目标会改变 demo 的 Gate 配置及证书状态。结束后可用 `./scripts/stop-step4.sh` 停止。
+测试覆盖和证据见 [方案 05 自审计记录](docs/reports/PLAN_05_E3_AUDIT.md)。
+
 ## Individual commands
 
 ```bash
@@ -142,7 +148,7 @@ consumer result histories use instance state. Raw fixture data is embedded
 locally. This is an explicit implementation adaptation of the plan's state table.
 
 P1 already has TWAB replay, but MIN_BALANCE, ACTIVE_RATIO and historical-window
-certificates are outside P0. Sepolia ingestion, full E3/user testing, UI, final
+certificates are outside P0. Sepolia ingestion, external user testing, UI, final
 report and recorded demo remain separate work.
 
 [Documentation index](docs/README.md) ·

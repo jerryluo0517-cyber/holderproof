@@ -65,7 +65,8 @@ fn duplicate_nodes_and_split_votes_cannot_form_quorum() {
     let duplicates = vec![(0, proposal(1)), (0, proposal(1)), (1, proposal(1))];
     assert!(crate::models::agreeing_proposal(&duplicates, 2).is_none());
     let split = vec![(0, proposal(1)), (1, proposal(2)), (2, proposal(3))];
-    assert!(crate::models::agreeing_proposal(&split, 3).is_none());
+    let threshold = holderproof_types::COMMITTEE_THRESHOLD;
+    assert!(crate::models::agreeing_proposal(&split, threshold).is_none());
 }
 
 #[test]
@@ -130,4 +131,31 @@ fn twab_respects_half_open_window_and_large_gaps() {
         fixture_twab(alice, 1000, 1_000_000_000, 1).unwrap(),
         U256::from(62685u64)
     );
+}
+
+#[test]
+fn same_block_replay_uses_log_order_and_includes_the_boundary() {
+    use crate::fixture::{parse_events, replay_balance};
+
+    let holder = Address::new([0xaa; 20]);
+    let recipient = Address::new([0xbb; 20]);
+    let mut credit = fixture_events().unwrap()[0].clone();
+    credit.block_number = 10;
+    credit.block_hash = holderproof_types::fixture_block_hash(10);
+    credit.log_index = 0;
+    credit.from = Address::ZERO.to_string();
+    credit.to = holder.to_string();
+    credit.amount = "10".into();
+
+    let mut debit = credit.clone();
+    debit.log_index = 1;
+    debit.from = holder.to_string();
+    debit.to = recipient.to_string();
+    debit.amount = "4".into();
+
+    // Reverse the input so parsing must restore log order before the debit.
+    let json = serde_json::to_string(&[debit, credit]).unwrap();
+    let events = parse_events(&json).unwrap();
+    assert_eq!(replay_balance(&events, holder, 9).unwrap(), U256::ZERO);
+    assert_eq!(replay_balance(&events, holder, 10).unwrap(), U256::from(6));
 }

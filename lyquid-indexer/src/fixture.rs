@@ -8,9 +8,12 @@ const FIXTURE_JSON: &str = include_str!("../../fixtures/transfers.json");
 
 /// Parse and sort the embedded fixture once, then reuse it for every query.
 /// Errors are cached as a `String` so the `LazyLock` stays `Sync`.
-static FIXTURE_EVENTS: LazyLock<Result<Vec<TransferEvent>, String>> = LazyLock::new(|| {
+static FIXTURE_EVENTS: LazyLock<Result<Vec<TransferEvent>, String>> =
+    LazyLock::new(|| parse_events(FIXTURE_JSON));
+
+pub(crate) fn parse_events(json: &str) -> Result<Vec<TransferEvent>, String> {
     let mut events: Vec<TransferEvent> =
-        serde_json::from_str(FIXTURE_JSON).map_err(|err| format!("fixture JSON error: {err}"))?;
+        serde_json::from_str(json).map_err(|err| format!("fixture JSON error: {err}"))?;
     events.sort_by_key(|event| (event.block_number, event.log_index));
     for (index, event) in events.iter().enumerate() {
         if event.chain_id != CHAIN_ID
@@ -35,7 +38,7 @@ static FIXTURE_EVENTS: LazyLock<Result<Vec<TransferEvent>, String>> = LazyLock::
         }
     }
     Ok(events)
-});
+}
 
 /// Normalize an `Address` to its lowercase `0x…` hex string. Fixture event
 /// `from`/`to` fields are already lowercase, so string comparison is safe as
@@ -65,8 +68,17 @@ pub(crate) fn fixture_token() -> LyquidResult<String> {
 }
 
 pub(crate) fn fixture_balance(holder: Address, block: u64) -> LyquidResult<U256> {
+    replay_balance(fixture_events()?, holder, block)
+}
+
+/// Replay validated events in ascending block and log index order.
+pub(crate) fn replay_balance(
+    events: &[TransferEvent],
+    holder: Address,
+    block: u64,
+) -> LyquidResult<U256> {
     let mut balance = U256::ZERO;
-    for event in fixture_events()? {
+    for event in events {
         if event.block_number > block {
             break;
         }
