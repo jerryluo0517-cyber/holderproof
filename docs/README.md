@@ -1,12 +1,16 @@
 # HolderProof 文档索引
 
-更新日期为 2026-11-20。本地 fixture P0 的架构和导读见 03/04 快照，最新自动验收见 05 自审计记录。
+更新日期为 2026-11-21。本地 fixture P0 的架构和导读见 03/04 快照，最新自动验收见 05 自审计记录。
 
 ## 方案 05 验收
 
 - [测试操作指引](guides/TESTING.md)
 - [05 E3 自审计和本地回归](reports/PLAN_05_E3_AUDIT.md)
 - [外部用户试用任务单](guides/EXTERNAL_USER_TEST.md)
+
+## 方案 06 评测
+
+- [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（Codex 代跑，团队内部复现）
 
 ## 03/04 文档快照
 
