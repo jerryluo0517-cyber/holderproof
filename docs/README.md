@@ -4,6 +4,7 @@
 
 ## 方案 05 验收
 
+- [测试操作指引](guides/TESTING.md)
 - [05 E3 自审计和本地回归](reports/PLAN_05_E3_AUDIT.md)
 - [外部用户试用任务单](guides/EXTERNAL_USER_TEST.md)
 

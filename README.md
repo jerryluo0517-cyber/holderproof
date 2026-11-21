@@ -56,6 +56,11 @@ The first `forge build --root evm` downloads the pinned official Solidity 0.8.28
 compiler. Later historical checks can run offline. The LDK guest-test VM needs
 permission to initialize its memory manager.
 
+## Testing guide
+
+Follow the [测试操作指引](docs/guides/TESTING.md) for a first manual run, expected
+certificate and gate results, automated acceptance, and troubleshooting.
+
 ## Full P0 acceptance
 
 From this repository's root:
