@@ -10,7 +10,7 @@
 
 ## 方案 06 评测
 
-- [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（Codex 代跑，团队内部复现）
+- [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（团队内部自动复现）
 
 ## 03/04 文档快照
 
