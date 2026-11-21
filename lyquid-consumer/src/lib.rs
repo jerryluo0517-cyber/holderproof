@@ -67,6 +67,67 @@ fn configure(
     Ok(true)
 }
 
+/// Multi-user mode: configure policy without locking a single holder.
+#[method::network(export = eth)]
+fn configure_policy(
+    ctx: &mut _,
+    indexer: Address,
+    expected_block: u64,
+    threshold: U256,
+) -> LyquidResult<bool> {
+    if ctx.caller != *ctx.network.initializer {
+        return Err(invalid("only initializer can configure consumer"));
+    }
+    if indexer == Address::ZERO {
+        return Err(invalid("indexer must be nonzero address"));
+    }
+    *ctx.network.last_balance = U256::ZERO;
+    *ctx.network.last_eligible = false;
+    *ctx.network.check_count = 0;
+    *ctx.network.last_query_hash = String::new();
+    *ctx.network.last_block_hash = String::new();
+    *ctx.network.last_event_merkle_root = String::new();
+    *ctx.network.last_certificate_status = String::new();
+    *ctx.network.last_signer_count = 0;
+    *ctx.network.indexer = indexer;
+    *ctx.network.expected_holder = Address::ZERO; // 0 表示开放多用户模式
+    *ctx.network.expected_block = expected_block;
+    *ctx.network.threshold = threshold;
+    Ok(true)
+}
+
+#[method::network(export = eth)]
+fn check_eligible_for(ctx: &mut _, holder: Address) -> LyquidResult<bool> {
+    let indexer_address = *ctx.network.indexer;
+    let block = *ctx.network.expected_block;
+    let threshold = *ctx.network.threshold;
+    if indexer_address == Address::ZERO {
+        return Err(invalid("HolderProof consumer indexer is not configured"));
+    }
+    if holder == Address::ZERO {
+        return Err(invalid("holder must be nonzero address"));
+    }
+
+    let certificate = certified_balance(indexer_address, holder, block)?;
+    let (balance, eligible) = evaluate(&certificate, threshold)?;
+
+    *ctx.network.expected_holder = if *ctx.network.expected_holder == Address::ZERO {
+        Address::ZERO
+    } else {
+        holder
+    };
+    *ctx.network.last_balance = balance;
+    *ctx.network.last_eligible = eligible;
+    *ctx.network.check_count += 1;
+    *ctx.network.last_query_hash = certificate.query_hash;
+    *ctx.network.last_block_hash = certificate.checkpoint.block_hash;
+    *ctx.network.last_event_merkle_root = certificate.checkpoint.event_merkle_root;
+    *ctx.network.last_certificate_status = certificate.status.to_string();
+    *ctx.network.last_signer_count = certificate.signer_ids.len() as u64;
+    trigger!(record_result(), TriggerMode::Commit);
+    Ok(eligible)
+}
+
 #[method::network(export = eth)]
 fn check_eligible(ctx: &mut _) -> LyquidResult<bool> {
     let indexer_address = *ctx.network.indexer;
@@ -96,7 +157,8 @@ fn check_eligible(ctx: &mut _) -> LyquidResult<bool> {
 // the sequenced caller; an operator cannot claim using someone else's proof.
 #[method::network(export = eth)]
 fn claim(ctx: &mut _) -> LyquidResult<bool> {
-    if ctx.caller != *ctx.network.expected_holder {
+    let locked = *ctx.network.expected_holder;
+    if locked != Address::ZERO && ctx.caller != locked {
         return Err(invalid("claim caller must match configured holder"));
     }
     if ctx

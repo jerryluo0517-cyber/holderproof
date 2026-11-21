@@ -1,0 +1,16 @@
+[package]
+name = "holderproof-credit-gate"
+description = "VeriCredit dynamic fee and differentiated lending LTV gate"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+lyquid.workspace = true
+holderproof-types.workspace = true
+holderproof-gate-core.workspace = true
+serde_json.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]

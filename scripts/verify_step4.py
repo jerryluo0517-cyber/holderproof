@@ -92,7 +92,7 @@ def main():
     require(certificate["checkpoint"]["event_merkle_root"] == expected["merkle_root"], "Wrong Merkle root")
     require(certificate["checkpoint"]["event_count"] == expected["event_count"], "Wrong event count")
     require(certificate["status"] == "Finalized", "Certificate not finalized")
-    require(2 <= len(set(certificate["signer_ids"])) == len(certificate["signer_ids"]) <= 3, "Invalid 2-of-3 signer set")
+    require(3 <= len(set(certificate["signer_ids"])) == len(certificate["signer_ids"]) <= 4, "Invalid 3-of-4 signer set")
     native = json.loads(certificate["runtime_certificate"])
     require(len(native["signatures"]) == len(certificate["node_signatures"]) == len(certificate["signer_ids"]),
             "Missing native signatures")

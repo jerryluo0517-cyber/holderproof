@@ -5,6 +5,7 @@ use lyquid::prelude::*;
 pub mod certificate;
 pub mod configuration;
 pub mod eligibility;
+pub mod credit;
 #[cfg(test)]
 mod tests;
 

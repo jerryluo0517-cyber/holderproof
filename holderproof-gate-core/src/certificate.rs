@@ -77,17 +77,22 @@ fn ensure_metadata(certificate: &QueryCertificate) -> LyquidResult<()> {
             certificate.chain_id
         )));
     }
-    if certificate.token != FIXTURE_TOKEN {
-        return Err(invalid(
-            "certificate token does not match the Step 4 fixture",
-        ));
+    let is_sepolia = certificate.checkpoint.dataset_id == holderproof_types::SEPOLIA_DATASET_ID;
+    if is_sepolia {
+        if certificate.token.parse::<Address>().is_err()
+            || certificate.token.parse::<Address>().unwrap() == Address::ZERO
+        {
+            return Err(invalid("sepolia certificate token must be a valid nonzero address"));
+        }
+    } else if certificate.token != FIXTURE_TOKEN {
+        return Err(invalid("certificate token does not match the Step 4 fixture"));
     }
     if certificate.checkpoint.parser_version != PARSER_VERSION {
         return Err(invalid("unsupported certificate parser version"));
     }
     let query = QuerySpec {
         chain_id: CHAIN_ID,
-        token: FIXTURE_TOKEN.to_string(),
+        token: certificate.token.to_ascii_lowercase(),
         holder: certificate.holder.to_ascii_lowercase(),
         block: certificate.block_number,
         parser_version: PARSER_VERSION.to_string(),
@@ -105,6 +110,20 @@ fn ensure_metadata(certificate: &QueryCertificate) -> LyquidResult<()> {
 }
 
 fn ensure_checkpoint(certificate: &QueryCertificate, block: u64) -> LyquidResult<()> {
+    let checkpoint = &certificate.checkpoint;
+    if checkpoint.dataset_id == holderproof_types::SEPOLIA_DATASET_ID {
+        if checkpoint.from_block > checkpoint.to_block || checkpoint.to_block != block {
+            return Err(invalid("sepolia checkpoint block range mismatch"));
+        }
+        if !checkpoint.block_hash_start.strip_prefix("0x").is_some_and(is_digest)
+            || !checkpoint.block_hash.strip_prefix("0x").is_some_and(is_digest)
+            || checkpoint.event_count == 0
+            || !is_digest(&checkpoint.event_merkle_root)
+        {
+            return Err(invalid("invalid sepolia checkpoint hashes or root"));
+        }
+        return Ok(());
+    }
     let checkpoint = &certificate.checkpoint;
     if checkpoint.dataset_id != holderproof_types::DATASET_ID {
         return Err(invalid("unexpected fixture dataset"));

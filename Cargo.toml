@@ -1,5 +1,5 @@
 [workspace]
-members = ["holderproof-types", "lyquid-indexer", "lyquid-consumer", "holderproof-gate-core", "lyquid-governance-gate"]
+members = ["holderproof-types", "lyquid-indexer", "lyquid-consumer", "holderproof-gate-core", "lyquid-governance-gate", "lyquid-credit-gate",]
 resolver = "3"
 
 [workspace.package]

@@ -49,6 +49,50 @@ fn configure(
     Ok(true)
 }
 
+/// Multi-user mode: configure governance proposal policy without locking a single voter.
+#[method::network(export = eth)]
+fn configure_policy(
+    ctx: &mut _,
+    indexer: Address,
+    block: u64,
+    threshold: U256,
+    proposal_id: u64,
+) -> LyquidResult<bool> {
+    if ctx.caller != *ctx.network.initializer {
+        return Err(invalid("only initializer can configure consumer"));
+    }
+    if indexer == Address::ZERO {
+        return Err(invalid("indexer must be nonzero address"));
+    }
+    *ctx.network.indexer = indexer;
+    *ctx.network.holder = Address::ZERO; // 0 表示开放多用户模式
+    *ctx.network.block = block;
+    *ctx.network.threshold = threshold;
+    *ctx.network.proposal_id = proposal_id;
+    *ctx.network.eligible = false;
+    *ctx.network.balance = U256::ZERO;
+    *ctx.network.query_hash = String::new();
+    *ctx.network.fact_hash = String::new();
+    *ctx.network.check_count = 0;
+    Ok(true)
+}
+
+#[method::network(export = eth)]
+fn check_eligible_for(ctx: &mut _, holder: Address) -> LyquidResult<bool> {
+    if holder == Address::ZERO {
+        return Err(invalid("holder must be nonzero address"));
+    }
+    let certificate = certified_balance(*ctx.network.indexer, holder, *ctx.network.block)?;
+    let (balance, eligible) = evaluate(&certificate, *ctx.network.threshold)?;
+    *ctx.network.balance = balance;
+    *ctx.network.eligible = eligible;
+    *ctx.network.query_hash = certificate.query_hash;
+    *ctx.network.fact_hash = certificate.fact_hash;
+    *ctx.network.check_count += 1;
+    trigger!(record_result(), TriggerMode::Commit);
+    Ok(eligible)
+}
+
 #[method::network(export = eth)]
 fn check_eligible(ctx: &mut _) -> LyquidResult<bool> {
     let certificate = certified_balance(
@@ -68,7 +112,8 @@ fn check_eligible(ctx: &mut _) -> LyquidResult<bool> {
 
 #[method::network(export = eth)]
 fn vote(ctx: &mut _) -> LyquidResult<bool> {
-    if ctx.caller != *ctx.network.holder {
+    let locked = *ctx.network.holder;
+    if locked != Address::ZERO && ctx.caller != locked {
         return Err(invalid("voter must match configured holder"));
     }
     let key = format!("{}|{}", *ctx.network.proposal_id, ctx.caller);
@@ -82,6 +127,23 @@ fn vote(ctx: &mut _) -> LyquidResult<bool> {
     ctx.network.voted.insert(key, true);
     *ctx.network.vote_count += 1;
     Ok(true)
+}
+
+fn json_response(body: Vec<u8>) -> http::Response {
+    http::Response {
+        status: 200,
+        headers: vec![
+            http::Header {
+                name: "content-type".into(),
+                value: b"application/json; charset=utf-8".to_vec(),
+            },
+            http::Header {
+                name: "access-control-allow-origin".into(),
+                value: b"*".to_vec(),
+            },
+        ],
+        body,
+    }
 }
 
 #[method::instance(export = http, method = "GET", path_prefix = "/api/result")]
@@ -100,14 +162,7 @@ fn http_result(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
         "checkCount": *ctx.network.check_count,
     }))
     .map_err(|err| invalid(err.to_string()))?;
-    Ok(http::Response {
-        status: 200,
-        headers: vec![http::Header {
-            name: "content-type".into(),
-            value: b"application/json".to_vec(),
-        }],
-        body,
-    })
+    Ok(json_response(body))
 }
 
 #[method::instance]
@@ -133,9 +188,5 @@ fn record_result(ctx: &mut _) -> LyquidResult<()> {
 fn http_history(ctx: &_, _req: http::Request) -> LyquidResult<http::Response> {
     let history = ctx.instance.result_history.read();
     let body = serde_json::to_vec(&*history).map_err(|err| invalid(err.to_string()))?;
-    Ok(http::Response {
-        status: 200,
-        headers: vec![],
-        body,
-    })
+    Ok(json_response(body))
 }

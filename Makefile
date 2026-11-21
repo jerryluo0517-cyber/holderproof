@@ -1,4 +1,4 @@
-.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs e3
+.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs e3 credit-check sepolia-check
 
 fixture:
 	python3 fixtures/generate_fixture.py
@@ -47,6 +47,10 @@ e3: acceptance
 	python3 scripts/verify_e3.py
 	python3 scripts/verify_committee_availability.py
 
+credit-check:
+	python3 fixtures/generate_credit_fixture.py
+	python3 scripts/verify_credit.py
+
 # Optional documentation exporters; see docs/MAINTAINING_DOCS.md.
 DOCS_NODE ?= node
 DOCS_PYTHON ?= python3
@@ -54,3 +58,6 @@ DOCS_PYTHON ?= python3
 docs:
 	$(DOCS_NODE) scripts/build_docs.mjs
 	$(DOCS_PYTHON) scripts/build_docs.py
+
+sepolia-check:
+	python3 scripts/verify_sepolia.py

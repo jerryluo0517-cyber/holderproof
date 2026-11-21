@@ -80,10 +80,10 @@ fn proposals_must_agree_on_holder_and_block_too() {
 }
 
 #[test]
-fn committee_requires_three_distinct_members() {
-    assert!(crate::models::valid_committee(&[0, 1, 2]));
-    assert!(!crate::models::valid_committee(&[0, 1]));
-    assert!(!crate::models::valid_committee(&[0, 1, 1]));
+fn committee_requires_four_distinct_members() {
+    assert!(crate::models::valid_committee(&[0, 1, 2, 3]));
+    assert!(!crate::models::valid_committee(&[0, 1, 2]));
+    assert!(!crate::models::valid_committee(&[0, 1, 2, 2]));
     assert!(!crate::models::valid_committee(&[0, 1, 2, 3, 4]));
 }
 
@@ -158,4 +158,84 @@ fn same_block_replay_uses_log_order_and_includes_the_boundary() {
     let events = parse_events(&json).unwrap();
     assert_eq!(replay_balance(&events, holder, 9).unwrap(), U256::ZERO);
     assert_eq!(replay_balance(&events, holder, 10).unwrap(), U256::from(6));
+}
+
+#[test]
+fn vericredit_scores_match_python_ground_truth() {
+    use crate::credit::{credit_events, evaluate_credit};
+    use holderproof_types::CreditParams;
+
+    let events = credit_events().unwrap();
+    let params = CreditParams::default();
+
+    let alice = evaluate_credit(events, Address::new([0xaa; 20]), 0, 1000, params).unwrap();
+    assert_eq!(alice.clean_volume, "1200000");
+    assert_eq!(alice.wash_volume_removed, "0");
+    assert_eq!(alice.score, 940);
+
+    let bob = evaluate_credit(events, Address::new([0xbb; 20]), 0, 1000, params).unwrap();
+    assert_eq!(bob.clean_volume, "15000");
+    assert_eq!(bob.wash_volume_removed, "2000000");
+    assert_eq!(bob.score, 495);
+
+    let carol = evaluate_credit(events, Address::new([0xcc; 20]), 0, 1000, params).unwrap();
+    assert_eq!(carol.liquidation_count, 1);
+    assert_eq!(carol.score, 250);
+
+    let dave = evaluate_credit(events, Address::new([0xdd; 20]), 0, 1000, params).unwrap();
+    assert_eq!(dave.score, 675);
+}
+
+#[test]
+fn vericredit_custom_params_change_score_and_query_hash() {
+    use crate::credit::credit_fact;
+    use holderproof_types::CreditParams;
+
+    let bob = Address::new([0xbb; 20]);
+    let default_fact = credit_fact(bob, 0, 1000, CreditParams::default()).unwrap();
+    // 把洗盘窗口设为 0（仅剔除同块洗盘），Bob 的跨块对敲不再被剔除，分数升高且 query_hash 不同
+    let lax = CreditParams { wash_window: 0, ..CreditParams::default() };
+    let lax_fact = credit_fact(bob, 0, 1000, lax).unwrap();
+    assert!(lax_fact.metrics.score > default_fact.metrics.score);
+    assert_ne!(lax_fact.query.hash(), default_fact.query.hash());
+}
+
+#[test]
+fn vericredit_quorum_works_with_one_dissenter() {
+    use crate::credit::credit_fact;
+    use holderproof_types::CreditParams;
+
+    let good = credit_fact(Address::new([0xaa; 20]), 0, 1000, CreditParams::default()).unwrap();
+    let mut bad = good.clone();
+    bad.metrics.score = 100;
+    let votes = vec![(0, bad), (1, good.clone()), (2, good.clone())];
+    assert_eq!(crate::models::agreeing_proposal(&votes, 2), Some(&good));
+}
+
+#[test]
+fn periodic_epoch_checkpoints_advance_monotonically() {
+    use crate::fixture::fixture_epoch_fact;
+
+    let ep1 = fixture_epoch_fact(250, 250).unwrap();
+    let ep2 = fixture_epoch_fact(500, 250).unwrap();
+    let ep4 = fixture_epoch_fact(1000, 250).unwrap();
+    assert_eq!(ep1.epoch_id, 1);
+    assert_eq!(ep2.epoch_id, 2);
+    assert_eq!(ep4.epoch_id, 4);
+    assert!(ep1.checkpoint.event_count < ep2.checkpoint.event_count);
+    assert_eq!(ep4.checkpoint.event_count, 308);
+    assert_eq!(ep4.unique_holders, 5);
+    assert!(fixture_epoch_fact(300, 250).is_err()); // 非 250 整数倍必须拒绝
+}
+
+#[test]
+fn sepolia_replay_matches_fetched_ground_truth() {
+    let expected: serde_json::Value =
+        serde_json::from_str(include_str!("../../fixtures/sepolia_expected.json")).unwrap();
+    let holder: Address = expected["sample_holder"].as_str().unwrap().parse().unwrap();
+    let fact = crate::sepolia::sepolia_fact(holder).unwrap();
+    assert_eq!(fact.balance, expected["sample_window_balance"].as_str().unwrap());
+    assert_eq!(fact.checkpoint.event_count, expected["event_count"].as_u64().unwrap());
+    assert_eq!(fact.checkpoint.event_merkle_root, expected["merkle_root"].as_str().unwrap());
+    assert_eq!(fact.checkpoint.dataset_id, holderproof_types::SEPOLIA_DATASET_ID);
 }

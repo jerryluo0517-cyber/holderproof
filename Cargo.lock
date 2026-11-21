@@ -383,6 +383,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "holderproof-credit-gate"
+version = "0.1.0"
+dependencies = [
+ "holderproof-gate-core",
+ "holderproof-types",
+ "lyquid",
+ "serde_json",
+]
+
+[[package]]
 name = "holderproof-gate-core"
 version = "0.1.0"
 dependencies = [

@@ -194,3 +194,35 @@ pub(crate) fn fixture_fact(
         checkpoint: fixture_checkpoint(block)?,
     })
 }
+
+pub(crate) fn fixture_epoch_fact(to_block: u64, interval: u64) -> LyquidResult<holderproof_types::EpochFact> {
+    if interval == 0 || to_block == 0 || to_block % interval != 0 || to_block > holderproof_types::FIXTURE_END_BLOCK {
+        return Err(invalid("to_block must be a nonzero multiple of epoch interval within fixture range"));
+    }
+    let mut total_volume = U256::ZERO;
+    let mut holders = std::collections::BTreeSet::new();
+    for event in fixture_events()? {
+        if event.block_number > to_block {
+            break;
+        }
+        let amt = event.amount.parse::<U256>().map_err(|_| invalid("invalid amount"))?;
+        total_volume = total_volume
+            .checked_add(amt)
+            .ok_or_else(|| invalid("epoch volume overflow"))?;
+        let from_addr = event.from.parse::<Address>().map_err(|_| invalid("invalid from"))?;
+        let to_addr = event.to.parse::<Address>().map_err(|_| invalid("invalid to"))?;
+        if from_addr != Address::ZERO {
+            holders.insert(from_addr);
+        }
+        if to_addr != Address::ZERO {
+            holders.insert(to_addr);
+        }
+    }
+    Ok(holderproof_types::EpochFact {
+        epoch_id: to_block / interval,
+        interval,
+        checkpoint: fixture_checkpoint(to_block)?,
+        total_transfer_volume: total_volume.to_string(),
+        unique_holders: holders.len() as u64,
+    })
+}

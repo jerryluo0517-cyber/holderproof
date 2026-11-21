@@ -188,14 +188,15 @@ GOVERNANCE_CONTRACT="$(printf '%s' "$GOVERNANCE_OUTPUT" | json_field contract)"
 [[ "$GOVERNANCE_LYQUID" == Lyquid-* && "$GOVERNANCE_CONTRACT" == 0x* ]] || exit 1
 state_write
 
-echo "[4/9] Reading three committee node IDs..."
+echo "[4/9] Reading four committee node IDs..."
 NODE1="$(node_id_hex 10087)"
 NODE2="$(node_id_hex 11087)"
 NODE3="$(node_id_hex 12087)"
+NODE4="$(node_id_hex 13087)"
 
-echo "[5/9] Configuring 2-of-3 committee and query..."
+echo "[5/9] Configuring 3-of-4 committee and query..."
 cast send "$INDEXER_CONTRACT" 'configure_committee(bytes32[])' \
-    "[$NODE1,$NODE2,$NODE3]" \
+    "[$NODE1,$NODE2,$NODE3,$NODE4]" \
     --private-key "$ANVIL_KEY" --rpc-url "$RPC" --quiet
 cast send "$INDEXER_CONTRACT" 'set_query(address,uint64)' "$ALICE" "$BLOCK" \
     --private-key "$ANVIL_KEY" --rpc-url "$RPC" --quiet

@@ -3,10 +3,10 @@ pub(crate) type BalanceProposal = holderproof_types::BalanceFact;
 
 /// Select any quorum, regardless of arrival order. A node that submits more
 /// than once is excluded entirely so conflicting votes cannot count twice.
-pub(crate) fn agreeing_proposal<Signer: PartialEq>(
-    proposals: &[(Signer, BalanceProposal)],
+pub(crate) fn agreeing_proposal<Signer: PartialEq, T: PartialEq>(
+    proposals: &[(Signer, T)],
     threshold: usize,
-) -> Option<&BalanceProposal> {
+) -> Option<&T> {
     if threshold == 0 {
         return None;
     }

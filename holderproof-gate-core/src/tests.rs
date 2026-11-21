@@ -42,7 +42,7 @@ fn valid_certificate() -> QueryCertificate {
             event_merkle_root: "cd".repeat(32),
             parser_version: PARSER_VERSION.into(),
         },
-        signer_ids: vec!["node-1".into(), "node-2".into()],
+        signer_ids: vec!["node-1".into(), "node-2".into(), "node-3".into()],
         status: CertificateStatus::Finalized,
         created_at: 10,
     };
@@ -191,12 +191,12 @@ fn eligibility_handles_boundary_and_invalid_balance() {
 }
 
 #[test]
-fn third_distinct_signer_is_accepted_but_fourth_is_rejected() {
+fn fourth_distinct_signer_is_accepted_but_fifth_is_rejected() {
     let mut certificate = valid_certificate();
-    certificate.signer_ids.push("node-3".into());
+    certificate.signer_ids.push("node-4".into());
     set_signatures(&mut certificate);
     assert!(validate_certificate(&certificate, holder(), 1000).is_ok());
-    certificate.signer_ids.push("node-4".into());
+    certificate.signer_ids.push("node-5".into());
     set_signatures(&mut certificate);
     assert!(validate_certificate(&certificate, holder(), 1000).is_err());
 }
@@ -237,4 +237,100 @@ fn tampered_balance_root_or_runtime_evidence_is_rejected() {
             "{field}"
         );
     }
+}
+
+#[test]
+fn credit_tier_boundaries_map_fee_and_ltv() {
+    use crate::credit::evaluate_tier;
+    assert_eq!(evaluate_tier(800).label, "VIP");
+    assert_eq!(evaluate_tier(800).fee_bps, 5);
+    assert_eq!(evaluate_tier(800).ltv_bps, 8500);
+    assert_eq!(evaluate_tier(799).label, "Standard");
+    assert_eq!(evaluate_tier(500).fee_bps, 15);
+    assert_eq!(evaluate_tier(499).label, "Base");
+    assert_eq!(evaluate_tier(499).fee_bps, 30);
+    assert_eq!(evaluate_tier(499).ltv_bps, 6000);
+}
+
+#[test]
+fn credit_certificate_valid_and_tampered_rejection() {
+    use crate::credit::validate_credit_certificate;
+    use holderproof_types::{
+        CREDIT_DATASET_ID, CREDIT_PROTOCOL, CreditCertificate, CreditMetrics, CreditParams,
+        CreditQuerySpec, NodeSignature, QueryType, fixture_block_hash,
+    };
+    use lyquor_primitives::oracle::{OracleCert, OracleHeader};
+
+    let user = holder();
+    let query = CreditQuerySpec {
+        chain_id: CHAIN_ID,
+        protocol: CREDIT_PROTOCOL.into(),
+        user: user.to_string().to_ascii_lowercase(),
+        start_block: 0,
+        end_block: 1000,
+        params: CreditParams::default(),
+        parser_version: PARSER_VERSION.into(),
+    };
+    let native = OracleCert {
+        header: OracleHeader {
+            proposer: NodeID::new([0; 32]),
+            target: OracleTarget {
+                target: OracleServiceTarget::LVM(LyquidID::default()),
+                seq_id: [0u8; 32].into(),
+            },
+            config_hash: [0u8; 32].into(),
+            epoch: 1,
+            nonce: [0u8; 32].into(),
+        },
+        signers: vec![0, 1, 2],
+        signatures: vec![vec![1u8; 64].into(), vec![2u8; 64].into(), vec![3u8; 64].into()],
+    };
+    let mut cert = CreditCertificate {
+        query_type: QueryType::CreditScore,
+        fact_hash: String::new(),
+        node_signatures: vec![
+            NodeSignature { node_id: "node-1".into(), signer_id: 0, signature: hex::encode(&native.signatures[0]) },
+            NodeSignature { node_id: "node-2".into(), signer_id: 1, signature: hex::encode(&native.signatures[1]) },
+            NodeSignature { node_id: "node-3".into(), signer_id: 2, signature: hex::encode(&native.signatures[2]) },
+        ],
+        runtime_certificate: serde_json::to_string(&native).unwrap(),
+        network_state_id: "test-indexer@10".into(),
+        certificate_id: query.hash(),
+        query_hash: query.hash(),
+        query,
+        metrics: CreditMetrics {
+            raw_volume: "1200000".into(),
+            clean_volume: "1200000".into(),
+            wash_volume_removed: "0".into(),
+            repay_count: 12,
+            liquidation_count: 0,
+            score: 940,
+        },
+        checkpoint: Checkpoint {
+            dataset_id: CREDIT_DATASET_ID.into(),
+            block_hash_start: fixture_block_hash(0),
+            from_block: 0,
+            to_block: 1000,
+            block_hash: fixture_block_hash(1000),
+            event_count: 35,
+            event_merkle_root: "ab".repeat(32),
+            parser_version: PARSER_VERSION.into(),
+        },
+        signer_ids: vec!["node-1".into(), "node-2".into(), "node-3".into()],
+        status: CertificateStatus::Finalized,
+        created_at: 10,
+    };
+    cert.fact_hash = cert.fact().hash();
+
+    assert!(validate_credit_certificate(&cert, user, 0, 1000).is_ok());
+
+    let mut bad_score = cert.clone();
+    bad_score.metrics.score = 1000;
+    assert!(validate_credit_certificate(&bad_score, user, 0, 1000).is_err());
+
+    let mut revoked = cert.clone();
+    revoked.status = CertificateStatus::Invalidated;
+    assert!(validate_credit_certificate(&revoked, user, 0, 1000).is_err());
+
+    assert!(validate_credit_certificate(&cert, user, 0, 999).is_err());
 }

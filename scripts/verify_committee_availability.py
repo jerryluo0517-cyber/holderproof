@@ -85,7 +85,7 @@ def check_query(indexer, holder, token, ports, pids):
         if len(pids) == 1:
             require(certificate is not None, f"Two active members did not certify: {outcome}")
             require(certificate["status"] == "Finalized", "Expected a finalized certificate")
-            require(len(certificate["signer_ids"]) == 2, "Expected two signers with one paused member")
+            require(len(certificate["signer_ids"]) == 3, "Expected three signers with one paused member")
         else:
             require(certificate is None, "A certificate appeared with fewer than two active members")
 

@@ -1,0 +1,51 @@
+{
+  "dataset_id": "vericredit-fixture-5298-v1",
+  "chain_id": 11155111,
+  "protocol": "0x5298000000000000000000000000000000000002",
+  "event_count": 40,
+  "merkle_root": "8861ce000a468f9c9bd15649a78225e3b3a54ee645f4ec7845e62cc0df7d1434",
+  "default_params": {
+    "w1": 35,
+    "w2": 20,
+    "alpha": 2,
+    "wash_window": 3
+  },
+  "window": [
+    0,
+    1000
+  ],
+  "users": {
+    "alice": {
+      "raw_volume": 1200000,
+      "clean_volume": 1200000,
+      "wash_volume_removed": 0,
+      "repay_count": 12,
+      "liquidation_count": 0,
+      "score": 940
+    },
+    "bob": {
+      "raw_volume": 2015000,
+      "clean_volume": 15000,
+      "wash_volume_removed": 2000000,
+      "repay_count": 2,
+      "liquidation_count": 0,
+      "score": 495
+    },
+    "carol": {
+      "raw_volume": 500000,
+      "clean_volume": 500000,
+      "wash_volume_removed": 0,
+      "repay_count": 6,
+      "liquidation_count": 1,
+      "score": 250
+    },
+    "dave": {
+      "raw_volume": 200000,
+      "clean_volume": 200000,
+      "wash_volume_removed": 0,
+      "repay_count": 4,
+      "liquidation_count": 0,
+      "score": 675
+    }
+  }
+}
