@@ -1,7 +1,4 @@
-//! Certificate trust rules for the HolderProof Consumer.
-//!
-//! Each rule is a small function so a rejected certificate reports the exact
-//! field that failed.
+//! Validate the balance fact, checkpoint, and signature evidence.
 
 use crate::invalid;
 use holderproof_types::{
@@ -9,19 +6,27 @@ use holderproof_types::{
     PARSER_VERSION, QueryCertificate, QuerySpec,
 };
 use lyquid::prelude::*;
+use lyquor_primitives::oracle::OracleCert;
 
 pub fn validate_certificate(
     certificate: &QueryCertificate,
     holder: Address,
     block: u64,
 ) -> LyquidResult<()> {
+    validated_runtime_certificate(certificate, holder, block).map(|_| ())
+}
+
+pub(crate) fn validated_runtime_certificate(
+    certificate: &QueryCertificate,
+    holder: Address,
+    block: u64,
+) -> LyquidResult<OracleCert> {
     ensure_finalized(certificate)?;
     ensure_sufficient_signers(certificate)?;
     ensure_query_matches(certificate, holder, block)?;
     ensure_metadata(certificate)?;
     ensure_checkpoint(certificate, block)?;
-    ensure_evidence(certificate)?;
-    Ok(())
+    validate_runtime_evidence(certificate)
 }
 
 fn ensure_finalized(certificate: &QueryCertificate) -> LyquidResult<()> {
@@ -38,7 +43,7 @@ fn ensure_sufficient_signers(certificate: &QueryCertificate) -> LyquidResult<()>
     let count = certificate.signer_ids.len();
     if !(COMMITTEE_THRESHOLD..=COMMITTEE_SIZE).contains(&count) {
         return Err(invalid(format!(
-            "certificate has {count} signer(s), need at least {COMMITTEE_THRESHOLD}"
+            "certificate has {count} signer(s), expected {COMMITTEE_THRESHOLD}–{COMMITTEE_SIZE}"
         )));
     }
     for (index, signer) in certificate.signer_ids.iter().enumerate() {
@@ -79,13 +84,16 @@ fn ensure_metadata(certificate: &QueryCertificate) -> LyquidResult<()> {
     }
     let is_sepolia = certificate.checkpoint.dataset_id == holderproof_types::SEPOLIA_DATASET_ID;
     if is_sepolia {
-        if certificate.token.parse::<Address>().is_err()
-            || certificate.token.parse::<Address>().unwrap() == Address::ZERO
-        {
-            return Err(invalid("sepolia certificate token must be a valid nonzero address"));
+        match certificate.token.parse::<Address>() {
+            Ok(address) if address != Address::ZERO => {}
+            _ => {
+                return Err(invalid(
+                    "sepolia certificate token must be a valid nonzero address",
+                ));
+            }
         }
     } else if certificate.token != FIXTURE_TOKEN {
-        return Err(invalid("certificate token does not match the Step 4 fixture"));
+        return Err(invalid("certificate token does not match the fixture"));
     }
     if certificate.checkpoint.parser_version != PARSER_VERSION {
         return Err(invalid("unsupported certificate parser version"));
@@ -115,8 +123,14 @@ fn ensure_checkpoint(certificate: &QueryCertificate, block: u64) -> LyquidResult
         if checkpoint.from_block > checkpoint.to_block || checkpoint.to_block != block {
             return Err(invalid("sepolia checkpoint block range mismatch"));
         }
-        if !checkpoint.block_hash_start.strip_prefix("0x").is_some_and(is_digest)
-            || !checkpoint.block_hash.strip_prefix("0x").is_some_and(is_digest)
+        if !checkpoint
+            .block_hash_start
+            .strip_prefix("0x")
+            .is_some_and(is_digest)
+            || !checkpoint
+                .block_hash
+                .strip_prefix("0x")
+                .is_some_and(is_digest)
             || checkpoint.event_count == 0
             || !is_digest(&checkpoint.event_merkle_root)
         {
@@ -124,7 +138,6 @@ fn ensure_checkpoint(certificate: &QueryCertificate, block: u64) -> LyquidResult
         }
         return Ok(());
     }
-    let checkpoint = &certificate.checkpoint;
     if checkpoint.dataset_id != holderproof_types::DATASET_ID {
         return Err(invalid("unexpected fixture dataset"));
     }
@@ -150,15 +163,6 @@ fn ensure_checkpoint(certificate: &QueryCertificate, block: u64) -> LyquidResult
             checkpoint.to_block
         )));
     }
-    if !checkpoint
-        .block_hash
-        .strip_prefix("0x")
-        .is_some_and(is_digest)
-    {
-        return Err(invalid(
-            "checkpoint block_hash must be a 0x-prefixed SHA-256 digest",
-        ));
-    }
     if checkpoint.event_count == 0 {
         return Err(invalid("checkpoint event_count is 0"));
     }
@@ -178,10 +182,9 @@ fn is_digest(value: &str) -> bool {
             .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
 }
 
-/// Runtime signatures attest to the certified call carrying the entire fact.
-/// This checks evidence consistency; the authenticated Indexer/runtime is the
-/// trust anchor, not the mere existence of strings in a JSON document.
-fn ensure_evidence(certificate: &QueryCertificate) -> LyquidResult<()> {
+// Lyquor authenticates the certified write. The gate compares the exported
+// fact and signers with the runtime evidence.
+fn validate_runtime_evidence(certificate: &QueryCertificate) -> LyquidResult<OracleCert> {
     if certificate.query_type != holderproof_types::QueryType::Balance
         || certificate.fact_hash != certificate.fact().hash()
     {
@@ -192,9 +195,8 @@ fn ensure_evidence(certificate: &QueryCertificate) -> LyquidResult<()> {
     if certificate.network_state_id.is_empty() {
         return Err(invalid("network state provenance is missing"));
     }
-    let native: lyquor_primitives::oracle::OracleCert =
-        serde_json::from_str(&certificate.runtime_certificate)
-            .map_err(|_| invalid("invalid native runtime certificate"))?;
+    let native: OracleCert = serde_json::from_str(&certificate.runtime_certificate)
+        .map_err(|_| invalid("invalid native runtime certificate"))?;
     let count = certificate.signer_ids.len();
     if native.signers.len() != count
         || native.signatures.len() != count
@@ -202,15 +204,17 @@ fn ensure_evidence(certificate: &QueryCertificate) -> LyquidResult<()> {
     {
         return Err(invalid("runtime signature count mismatch"));
     }
-    for (index, signature) in certificate.node_signatures.iter().enumerate() {
-        if signature.node_id != certificate.signer_ids[index]
-            || signature.signer_id != native.signers[index]
-            || signature.signature != hex::encode(&native.signatures[index])
-            || native.signatures[index].len() != 64
-            || native.signers[..index].contains(&signature.signer_id)
-        {
+    for (index, exported_signature) in certificate.node_signatures.iter().enumerate() {
+        let runtime_signer = native.signers[index];
+        let runtime_signature = &native.signatures[index];
+        let signer_matches = exported_signature.node_id == certificate.signer_ids[index]
+            && exported_signature.signer_id == runtime_signer;
+        let signature_matches = runtime_signature.len() == 64
+            && exported_signature.signature == hex::encode(runtime_signature);
+        let first_occurrence = !native.signers[..index].contains(&runtime_signer);
+        if !(signer_matches && signature_matches && first_occurrence) {
             return Err(invalid("inconsistent runtime signature evidence"));
         }
     }
-    Ok(())
+    Ok(native)
 }

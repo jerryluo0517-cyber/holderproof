@@ -4,7 +4,9 @@
 
 基于 **Lyquor Network（LDK 0.8.4）** 与 **Rust（Edition 2024）** 构建的 **3-of-4 拜占庭容错（BFT）可验证历史链上索引器与多场景门控系统**。
 
-系统通过 4 个独立委员会节点确定性重放历史链上事件，采用 $N = 3f + 1 = 4$、法定人数 $2f + 1 = 3$ 的原生两阶段预言机（Two-Phase Oracle）协议对完整事实与 Merkle Root 检查点达成背书并持久化到全网状态；下游多个独立部署的消费端 Lyquid（空投门控、治理门控、动态费率与借贷 LTV 门控）在同一次原子调用（`call!`）中直接读取并校验同一份证书，实现**无需链下 ZK 证明延迟的链上历史可验证计算与跨应用复用**。
+四个本地委员会节点重放同一份有序事件。至少三个节点就完整事实达成一致后，Lyquor 原生两阶段预言机对该事实出证，Indexer 将结果写入网络状态。空投和治理 Gate 共用余额证书，各自判断资格。信用 Gate 读取信用证书，并给出费率和借贷 LTV。
+
+[课程报告初稿（英文）](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [测试指引](docs/guides/TESTING.md) · [独立证据演示控制台](ui/holderproof_vericredit_idx_console.html)
 
 ---
 
@@ -50,7 +52,7 @@ flowchart TB
         C3["lyquid-credit-gate 端口 8083<br/>VeriCreditGateLyquid<br/>费率 5/15/30 bps · LTV 85/75/60%<br/>quote_or_fallback 自动回退"]
     end
 
-    UI["交互式 Web 演示控制台<br/>ui/holderproof_demo.html"]
+    UI["交互式 Web 演示控制台<br/>ui/holderproof_vericredit_idx_console.html"]
 
     DS1 --> Committee
     DS2 --> Committee
@@ -60,10 +62,7 @@ flowchart TB
     Core --> C1
     Core --> C2
     Core --> C3
-    Indexer -.->|"HTTP JSON + CORS"| UI
-    C1 -.->|"HTTP JSON + CORS"| UI
-    C2 -.->|"HTTP JSON + CORS"| UI
-    C3 -.->|"HTTP JSON + CORS"| UI
+    NS -.->|"手动导入证据"| UI
 ```
 
 ---
@@ -78,7 +77,7 @@ flowchart TB
 | **VeriCredit-Idx 信用评分与动态费率** | 自动剔除短窗口同对手方反向对敲洗盘量；用纯整数 `u128::ilog2` 计算 $S(u) \in [0, 1000]$；支持默认权重（`35/20/2/3`）与 `initializer` 自定义配置；下游 `lyquid-credit-gate` 同步返回动态费率（`5/15/30 bps`）与借贷 LTV（`85%/75%/60%`），并提供 `quote_or_fallback()` 在证书缺失/吊销/超期（Audit-05 TTL）时自动回退保守档 | `lyquid-indexer/src/credit.rs`, `holderproof-gate-core/src/credit.rs`, `lyquid-credit-gate/`, `scripts/verify_credit.py`                  |
 | **真实 Sepolia 链双轨接入**           | `fetch_sepolia_logs.py` 从公共 Sepolia RPC 分页拉取官方 WETH 合约 169 条真实 `Transfer` 日志与真实区块头哈希（块 `12184050..12184649`）；`sepolia_proof` 通道走 3-of-4 签发真实链证书（余额 `0.002 WETH`），消费端按 `dataset_id` 双轨分流校验                                                                            | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
 | **双重安全防线（NDSS 2026 防御）**    | 确定性历史查询采用 `ChainPos` 区块锚定 + 字节级全等；时间差观测查询在 Network State 实现诚实核心区间离散度校验 $(v_{m-f} - v_{f+1}) \times 10000 \le M \times \epsilon_{\max}$（默认 `100 bps` = 1%），抵御单节点极端值与 Leader 挑拣攻击                                                                                 | `lyquid-indexer/src/dispersion.rs`                                                                                                        |
-| **独立 EVM 归档对账与 Web 控制台**    | `FixtureToken.sol` 在独立 Anvil（Chain ID `31338`）重放 308 笔转账并核对 18 组归档 `eth_call balanceOf`；全部 HTTP 诊断接口均带 `content-type` 与 CORS 头，配套全英文 4 标签页交互演示台 `holderproof_demo.html`                                                                                                          | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_demo.html`                                                                |
+| **独立 EVM 归档对账与 Web 控制台**    | `FixtureToken.sol` 在独立 Anvil（Chain ID `31338`）重放 308 笔转账并核对 18 组归档 `eth_call balanceOf`；全部 HTTP 诊断接口均带 `content-type` 与 CORS 头，配套全英文 4 标签页交互演示台 `holderproof_vericredit_idx_console.html`                                                                                                          | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                                                |
 
 ---
 
@@ -96,7 +95,7 @@ flowchart TB
 | `evm/`                    | Foundry (Solidity 0.8.28) | `FixtureToken.sol`，用于独立 Anvil 归档 `balanceOf` 正确性交叉验证                                                                                                                              |
 | `scripts/`                | Shell + Python + JS       | 环境安装、4 节点 Devnet 起停、P0/E3/周期检查点/VeriCredit/Sepolia 自动化验收脚本、Sepolia RPC 抓取工具与文档导出工具                                                                            |
 | `tests/`                  | Python `unittest`         | `test_ground_truth.py`（**6 项**基准单测：确定性生成、边界包含、Merkle 证明与篡改检测）                                                                                                         |
-| `ui/`                     | HTML + JS                 | 零依赖单文件全英文交互控制台 `holderproof_demo.html`（4 个标签页 + 本地证据 JSON 导入）                                                                                                         |
+| `ui/`                     | HTML + JS                 | 零依赖单文件全英文交互控制台 `holderproof_vericredit_idx_console.html`（4 个标签页 + 本地证据 JSON 导入）                                                                                                         |
 
 ---
 
@@ -190,7 +189,7 @@ flowchart LR
 | `./scripts/setup-env.sh --check`                              | 检查本地 Rust / LDK / Foundry / Python 环境                                          |
 | `make check && make guest-test`                               | 秒级本地自检：Python 基准（6 项）+ 全量编译 + Rust Guest 单测（**21 + 15 = 36 项**） |
 | `./scripts/stop-step4.sh && make e3`                          | 完整 P0 3-of-4 验收 + 独立 EVM 归档对账 + E3 动作/吊销/节点宕机自审计                |
-| `python3 scripts/verify_epoch_checkpoints.py`                 | 激活 `checkpoint_proof` 并提交验证 `250 / 500 / 750 / 1000` 四个周期检查点           |
+| `make epoch-check`                                           | 激活 `checkpoint_proof` 并提交验证 `250 / 500 / 750 / 1000` 四个周期检查点           |
 | `make credit-check`                                           | 部署 `lyquid-credit-gate`（`8083`）并验证 4 个画像、反洗盘与自定义权重权限           |
 | `python3 scripts/fetch_sepolia_logs.py && make sepolia-check` | 从真实 Sepolia RPC 拉取 WETH 日志并通过 3-of-4 委员会签发真实链证书                  |
 | `./scripts/run-proof.sh --holder 0x... --block 1000`          | 对运行中的本地 Indexer 发起任意合规地址/区块的按需出证                               |
@@ -226,4 +225,4 @@ flowchart LR
 2. **完整 P1 持仓窗口证书族**：`lyquid-indexer` 已完成 `TWAB` 只读算法与单测，但 `MIN_BALANCE` 与 `ACTIVE_RATIO` 尚未接入委员会出证；后续可沿用 `VeriCredit` 的窗口证书模式无缝并入 `QueryType`。
 3. **跨链 L1 独立验签合约**：当前消费端依托 Lyquor 同一网络内的 `call!` 信任锚点；若未来需将 `QueryCertificate` 交付给以太坊主网 Solidity 合约消费，可在 L1 部署维护委员会公钥集合的独立密码学验签器。
 4. **实时多源价格风控场景（VeriRisk-Idx）**：目前 `dispersion.rs` 已完成核心离散度校验器与单测，未来可接入多 DEX/CEX 实时行情源实现截尾 TWAP 与实现波动率 $\sigma_{\text{realized}}^2$ 清算熔断。
-5. **外部用户测试与自动化 CI**：结合 `ui/holderproof_demo.html` 开展外部用户复现测试，并将 `make check && make guest-test` 接入 GitHub Actions 持续集成。
+5. **外部用户测试与自动化 CI**：结合 `ui/holderproof_vericredit_idx_console.html` 开展外部用户复现测试，并将 `make check && make guest-test` 接入 GitHub Actions 持续集成。

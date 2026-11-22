@@ -1,11 +1,11 @@
-//! Shared trust and threshold rules for independent Airdrop and Governance Lyquids.
+//! Shared certificate and policy rules for the Airdrop, Governance, and Credit gates.
 
 use holderproof_types::QueryCertificate;
 use lyquid::prelude::*;
 pub mod certificate;
 pub mod configuration;
-pub mod eligibility;
 pub mod credit;
+pub mod eligibility;
 #[cfg(test)]
 mod tests;
 
@@ -13,27 +13,24 @@ pub fn invalid(reason: impl Into<String>) -> LyquidError {
     LyquidError::LyquorRuntime(reason.into())
 }
 
-/// Network-only: call! has atomic inter-Lyquid semantics in LDK 0.8.4.
-/// Keep canonical policy in network state so every node evaluates the same rule.
+/// Fetch and validate the Indexer's balance certificate from a network method.
 pub fn certified_balance(
     indexer: Address,
     holder: Address,
     block: u64,
 ) -> LyquidResult<QueryCertificate> {
+    let source = LyquidID::from(indexer);
     let response = call!(
-        (LyquidID::from(indexer)).get_certificate_json(holder: Address = holder, block: u64 = block)
+        (source).get_certificate_json(holder: Address = holder, block: u64 = block)
         -> (certificate: LyquidResult<String>)
     );
     let certificate: QueryCertificate = serde_json::from_str(&response.certificate?)
         .map_err(|err| invalid(format!("certificate decode error: {err}")))?;
-    certificate::validate_certificate(&certificate, holder, block)?;
-    let native: lyquor_primitives::oracle::OracleCert =
-        serde_json::from_str(&certificate.runtime_certificate)
-            .map_err(|_| invalid("invalid native certificate"))?;
-    let source = LyquidID::from(indexer);
+    let native = certificate::validated_runtime_certificate(&certificate, holder, block)?;
+    let expected_state = format!("{source}@{}", certificate.created_at);
     if native.header.target.target != OracleServiceTarget::LVM(source)
         || native.header.target.seq_id != lyquor_api::sequence_backend_id()?
-        || certificate.network_state_id != format!("{}@{}", source, certificate.created_at)
+        || certificate.network_state_id != expected_state
     {
         return Err(invalid(
             "certificate provenance does not match configured Indexer",

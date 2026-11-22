@@ -1,64 +1,50 @@
-# Full-fact certificate and consumer validation
+# Certificate issuance and validation
 
-Updated: 2026-11-15. For execution-plan section mapping and acceptance evidence,
-see [03/04 acceptance](../reports/PLAN_03_04_ACCEPTANCE.md).
+Four committee members replay the input history. Certification requires at
+least three members to agree on the full fact. This page describes balance
+certificates. The [course report draft](../reports/CS5298_FINAL_REPORT_DRAFT.md)
+covers the credit, epoch, and Sepolia paths alongside fixture balances.
 
-## Certification path
+## From query to certificate
 
-1. Each of three committee nodes replays the fixture and builds `BalanceFact`.
-2. A fact contains the complete query, query type, balance and checkpoint.
-3. Aggregation requires two identical facts from distinct nodes; a node that
-   submits repeatedly is excluded from the candidate vote count.
-4. The returned certified-call input contains the entire serialized fact.
-5. Lyquor's native certification signs that payload and authenticates submission.
-6. The Indexer defensively replays the fact, resolves signer IDs, retains actual
-   signature bytes and the native OracleCert, and stores a QueryCertificate.
-7. Identical queries preserve the original certificate, signatures and creation
-   position. An initializer-only method can invalidate its current status.
+1. Each member replays the requested history and builds a `BalanceFact`.
+2. The Indexer groups identical facts and counts each participating member once.
+   It excludes members that submit duplicate proposals.
+3. Lyquor signs and authenticates the call that carries the agreed fact.
+4. The Indexer replays the fact, resolves the signers, and stores a
+   `QueryCertificate` with the original `OracleCert` and signature bytes.
+5. Repeating a query returns its original certificate. The deploying
+   initializer can mark the certificate invalid.
 
-The Indexer also keeps a per-node instance cache of replayed proposals.
+## What each gate checks
 
-## Shared consumer rules
+| Check | Rule |
+|---|---|
+| Status and query | The balance certificate is `Finalized`. The holder and block match the request, and the chain, token and parser pass the dataset rules. The query hash and certificate ID match the recomputed ID. |
+| Fixture checkpoint | The range starts at block 0 and ends at the requested block. The endpoint hashes match the fixture, and the checkpoint carries an event count and a Merkle root. |
+| Sepolia checkpoint | The snapshot range ends at the requested block. The boundary hashes and Merkle root have the expected encoding, and the event count is positive. The replay uses the embedded WETH snapshot. |
+| Fact digest | The digest covers the query type, balance, and all checkpoint fields. |
+| Signer evidence | Three or four distinct node IDs are paired with distinct native signers and their 64-byte approval signatures. |
+| Source | The target Lyquid, sequence backend, and state reference match the configured Indexer. |
+| Eligibility | The gate parses the balance as `U256` and compares it with its own threshold. |
 
-`holderproof-gate-core` checks:
+The deploying initializer configures each gate with nonzero addresses. When the
+policy changes, the gate clears its last decision. It loads the current
+certificate on every eligibility check and before recording an action.
+`claim()` records one entitlement per holder. `vote()` records one vote per
+proposal and holder. Both match the holder to the caller.
 
-- current certificate status is Finalized;
-- two or three distinct, nonempty node IDs;
-- native signer/signature counts, IDs and byte values match exported evidence;
-- Ed25519 approval signatures have 64 bytes;
-- source Lyquid, sequence backend and state reference match the configured Indexer;
-- chain, token, holder, block and parser match the supported query;
-- query hash and certificate ID match recomputed query identity;
-- full fact hash matches query, type, balance and every checkpoint field;
-- fixture dataset ID and both endpoint block hashes match the deterministic source;
-- checkpoint starts at genesis, ends at the requested finalized fixture block,
-  and contains a nonzero event count and correctly encoded Merkle digest;
-- balance parses as U256 before comparison with each gate's own threshold.
+## State and trust
 
-Both gates restrict configuration to the deploying initializer, reject zero
-addresses and clear the last decision when policy changes. They fetch and
-validate the current certificate on each eligibility/action request.
-`claim()` binds a one-time entitlement to the caller; `vote()` binds one vote
-per proposal/holder to the caller. They are qualification records, not payouts
-or a complete DAO execution system.
+The configured Indexer supplies the certificate and Lyquor authenticates the
+certified write. Gates check the attached runtime evidence for consistency and
+verify its source. The committee assumes access to complete Transfer history.
 
-## State split
+Shared facts and gate policy use network state, where LDK 0.8.4 supports atomic
+`call!`. Instance state stores each node's replay cache and recent gate
+decisions. Read the latter at `/api/history`.
 
-Canonical facts and gate policy use network state. The native LDK `call!` API
-requires network execution, so moving authoritative gate policy/results solely
-to instance state would not preserve deterministic composition. Bounded local
-query/result histories use instance state and are available at `/api/history`.
-The local fixture and replay caches are per-node data.
-
-## Trust boundary
-
-Native certified-write authentication and the initializer-configured Indexer
-are the trust anchors. The exported native signature evidence is auditable;
-consumers do not independently verify detached signatures against a separate
-committee-key registry. A self-consistent fabricated JSON object is not a valid
-substitute for an authenticated Indexer call. Fact digests detect inconsistent
-payloads, but do not provide mathematical proof that a data source is truthful.
-
-Fixture hashes are synthetic, not Sepolia headers. The independent archival
-EVM check verifies replay arithmetic against actual token state with a documented
-block offset; it does not validate Sepolia availability, reorgs or live finality.
+Fixture block hashes are deterministic synthetic values. The archival EVM check
+compares replay balances with historical `balanceOf` on a separate local test
+token, using the documented block offset.
+[03/04 acceptance and historical comparison](../reports/PLAN_03_04_ACCEPTANCE.md)

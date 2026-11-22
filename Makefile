@@ -1,4 +1,4 @@
-.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs e3 credit-check sepolia-check
+.PHONY: fixture verify test rust-check check demo stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs e3 credit-check sepolia-check epoch-check
 
 fixture:
 	python3 fixtures/generate_fixture.py
@@ -63,4 +63,4 @@ sepolia-check:
 	python3 scripts/verify_sepolia.py
 
 epoch-check:
-	verify_epoch_checkpoints.py
+	python3 scripts/verify_epoch_checkpoints.py

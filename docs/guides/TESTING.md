@@ -45,7 +45,7 @@ make demo
 ```
 
 预期证书的 `balance` 为 `"62685"`，`status` 为 `Finalized`，
-`signer_ids` 至少有两个不同的成员。再次执行同一查询，结果中的
+`signer_ids` 应包含三或四名不同的成员。再次执行同一查询，结果中的
 `certificate_id`、`query_hash` 和 `network_state_id` 应一致。
 
 ```bash
@@ -81,6 +81,9 @@ make stop-demo
 | `make guest-test` | Indexer 与 Gate Core 的 Rust guest 单测 | 两套测试均无失败 |
 | `make acceptance` | 基础检查、guest 测试、完整 demo、历史 EVM 余额对照 | 双 Gate 的正反结果通过，308 条 Transfer 日志和 18 次历史余额查询一致 |
 | `make e3` | 完整 P0 验收，加上权限、撤销、重复动作、委员会暂停和恢复 | 合格动作各记录一次，拒绝用例不增加计数。一名成员暂停时仍能出证，两名暂停时观察窗口内无证书，恢复后可出证 |
+| `make epoch-check` | 在运行中的 demo 上提交并检查周期检查点 | 区块 250、500、750 和 1000 的检查点与 fixture 一致 |
+| `make credit-check` | 在运行中的 demo 上部署信用 Gate 并检查分档策略，需空闲的 8083 端口 | 四个样例的评分、费率和 LTV 与断言一致 |
+| `make sepolia-check` | 在运行中的 demo 上验证仓库内置的 Sepolia WETH 快照 | 样例查询对应 169 条 Transfer 记录，窗口重放余额为 0.002 WETH |
 
 `make e3` 会在隔离的本地 demo 中改变 Gate 配置及证书状态。
 要再次观察第 2 节的初始结果，先关闭 E3 启动的 demo，再运行 `make demo`。
@@ -95,8 +98,9 @@ tail -n 20 .run/acceptance/e3-operator.log
 printf 'exit=%s\n' "$result"
 ```
 
-通过后使用 `make stop-demo` 停止测试服务。详细覆盖范围与已验证的结果见
-[方案 05 自审计记录](../reports/PLAN_05_E3_AUDIT.md)。
+通过后使用 `make stop-demo` 停止测试服务。2-of-3 版本的结果见
+[方案 05 自审计记录](../reports/PLAN_05_E3_AUDIT.md)。当前版本的验证进度见
+[课程报告初稿](../reports/CS5298_FINAL_REPORT_DRAFT.md)。
 
 ## 4. 保存证据与排查失败
 
