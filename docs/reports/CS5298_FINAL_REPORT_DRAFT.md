@@ -6,7 +6,7 @@ This report describes the three-of-four committee design introduced in commit `c
 
 ## Abstract
 
-HolderProof certifies historical token balances so applications can use the same result to make different decisions. Four committee members replay the same ordered events. Lyquor certifies the result once at least three members agree on the complete fact. The Airdrop and Governance gates use one balance certificate to apply their own eligibility thresholds. VeriCredit-Idx uses the same certification process to turn activity within a block window into fee and loan-to-value quotes. The prototype also certifies checkpoint summaries and supports replay of a captured Sepolia WETH event window. In the earlier two-of-three prototype, replay matched all 18 historical balance reads from a local EVM ledger. The three-of-four implementation passed 36 Rust guest tests.
+HolderProof certifies historical token balances so applications can use the same result to make different decisions. Four committee members replay the same ordered events. Lyquor certifies the result once at least three members agree on the complete fact. The Airdrop and Governance gates use one balance certificate to apply their own eligibility thresholds. VeriCredit-Idx uses the same certification process to turn activity within a block window into fee and loan-to-value quotes. In the three-of-four evaluation, 308 Transfer logs and 18 historical EVM balance reads matched the fixture. The run also verified both gates, four epoch checkpoints, four credit quotes and a certificate for a captured Sepolia WETH event window.
 
 ## 1. Problem Analysis
 
@@ -83,22 +83,38 @@ The Rust workspace uses Lyquor LDK 0.8.4. The `holderproof-types` crate defines 
 
 ## 5. Evaluation and Results
 
-Evaluation covered replay correctness, certificate reuse, quorum availability and query latency. The table identifies the version or committee configuration for each result. The testing guide lists the commands and expected outputs for reproduction. [Testing guide](../guides/TESTING.md)
+### 5.1 User 1’s 3-of-4 acceptance test
 
-| Check | Version | Result |
-|---|---|---|
-| Fixture, Python and build checks | 3-of-4 integration based on `c11e69c` | Nine fixture checks and six Python tests passed. The Rust workspace compiled with the lockfile. |
-| Rust guest tests | 3-of-4 integration based on `c11e69c` | 21 Indexer tests and 15 Gate Core tests passed. They cover replay, quorum, certificate validation, scoring and tier rules. |
-| Local EVM comparison | `be9560d`, 2-of-3 | All 308 Transfer logs and 18 historical balance reads matched. |
-| Gate policy and committee availability | `be9560d`, 2-of-3 | Both gates used the same query hash. Alice qualified for the airdrop and fell short of the governance threshold. Each gate recorded one qualifying action and rejected repeats. With one member paused, certification continued. With two paused, it stalled until a member recovered. |
-| User 1 terminal query | 2-of-3 | Alice’s balance at fixture block 1,000 was 62,685. The `Finalized` certificate contained two signers and a checkpoint covering 308 events. |
-| Query latency | `db1532f`, 2-of-3 | Five sequential first-time queries on one running local network had a median of 58.10 ms from submission to readable certificate. The median for the certification step was 34.22 ms. |
+On 22 November 2026, User 1 ran `make e3`, `make epoch-check`, `make credit-check` and `make sepolia-check` in that order on a fresh four-node local devnet at commit `77d5d66`. The steps checked replay correctness, certificate reuse, quorum availability and the three additional oracle paths. The report draws on the run’s terminal logs and JSON outputs. [User 1’s operation record](PLAN_06_MEMBER_EVALUATION.md) · [Testing guide](../guides/TESTING.md) · [Acceptance script](../../scripts/run-3of4-acceptance.sh)
 
-The EVM comparison checks replay arithmetic and block boundaries by comparing balances from event replay with historical contract state. User 1’s terminal output matched the expected balance, event count and Merkle root. The two gate decisions and latency measurements came from the team’s automated runs. [Plan 05 audit](PLAN_05_E3_AUDIT.md) · [User 1 record and timing results](PLAN_06_MEMBER_EVALUATION.md)
+| Check | Observed result |
+|---|---|
+| Fixture, Python and Rust tests | Nine fixture checks, six Python tests and 36 Rust guest tests passed, and the workspace compiled. |
+| Balance certificate and gate reuse | Alice’s balance at block 1,000 was 62,685. The `Finalized` certificate had three distinct signers. Alice qualified for the airdrop at 60,000 and fell short of the governance threshold of 70,000. Both gates used the same query hash, and repeating the query returned the original certificate. |
+| Archival EVM comparison | All 308 Transfer logs and 18 historical `balanceOf` reads matched the Python reference. |
+| Gate actions and revocation | Each gate recorded one qualifying action and rejected repeats. The initializer could revoke a certificate, after which both gates rejected actions based on it. |
+| Committee availability | With one member paused, the other three certified the query. With two paused, the query remained uncertified during the observation window and finalized after recovery. |
+| Epoch checkpoints | All four checkpoints had three signers. Event counts rose from 89 at block 250 to 172 at 500, 255 at 750 and 308 at 1,000. |
+| Sepolia snapshot | Three members signed the certificate for block 12,184,649. Replaying the 169 Transfer events gave 0.002 WETH for the sample holder. |
 
-The credit fixture expects scores of 940 for Alice, 495 for Bob, 250 for Carol and 675 for Dave. In Bob’s case, the matching rule removes 2,000,000 units of short-window reversals from a raw volume of 2,015,000. The remaining 15,000 units contribute to a score of 495 and a Base quote. The guest tests check scoring and tier policy against fixture expectations. [Credit fixture answers](../../fixtures/credit_expected.json)
+The EVM comparison checks the transfer history and historical balance reads against the same Python reference used for the fixture. The gate tests then showed how two applications used one certified balance to reach different eligibility decisions. The pause test exercised the three-member quorum on the running devnet.
 
-The planned 3-of-4 evaluation covers end-to-end acceptance, live credit quotes, epoch checkpoints and Sepolia certification. Timing will use the same definition as the earlier benchmark. The usability evaluation calls for at least three participants outside the team to record setup effort, certificate results, gate decisions and any assistance they receive. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
+### 5.2 Credit quotes
+
+The Credit Gate returned the expected score, fee and loan-to-value quote for each sample. The matching rule removed 2,000,000 units of short-window reversals from Bob’s raw volume, leaving 15,000 units of clean volume. After the operator set the wash window to zero, Bob’s score rose from 495 to 740 and the quoted fee dropped from 30 to 15 basis points. [Credit fixture answers](../../fixtures/credit_expected.json) · [User 1’s quote results](PLAN_06_MEMBER_EVALUATION.md)
+
+| Sample | Score | Tier | Fee | LTV |
+|---|---:|---|---:|---:|
+| Alice | 940 | VIP | 5 basis points | 85% |
+| Dave | 675 | Standard | 15 basis points | 75% |
+| Bob | 495 | Base | 30 basis points | 60% |
+| Carol | 250 | Base | 30 basis points | 60% |
+
+### 5.3 Query latency and usability
+
+The latency benchmark used the earlier 2-of-3 implementation at `db1532f`. Five sequential first-time queries on one running local network had a median of 58.10 ms from submission to readable certificate. The median for the certification step was 34.22 ms. A comparable 3-of-4 latency measurement is pending. [Benchmark method and results](PLAN_06_MEMBER_EVALUATION.md)
+
+User 1’s run is part of the team’s internal evaluation. The separate usability study calls for at least three participants outside the team to record setup effort, certificate results, gate decisions and any assistance they receive. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
 
 ## 6. Limitations and Reflection
 

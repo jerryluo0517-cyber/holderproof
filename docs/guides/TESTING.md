@@ -72,8 +72,19 @@ make stop-demo
 
 ## 3. 自动验收
 
-按目标选一条命令。运行 `make acceptance` 或 `make e3` 前，请先停止自己此前启动的 demo，
-因为这两条命令都会重新启动本地测试网络。
+运行完整 3-of-4 验收前，先停止自己此前启动的 demo，确认本地测试端口和 `8083` 空闲。
+从仓库根目录执行以下命令。
+
+```bash
+./scripts/run-3of4-acceptance.sh
+```
+
+脚本记录工具版本和提交号，依次运行 E3、周期检查点、信用与 Sepolia 验收。
+每项成功后，它会把结果 JSON 和日志保存在本轮的 `.run/acceptance/3of4-*` 目录。
+遇到失败时，脚本以非零状态退出，当前日志和此前通过的结果仍可查看。
+运行结束后，demo 保持启动，便于检查接口结果。
+
+也可以按目标单独运行以下命令。运行 `make acceptance` 或 `make e3` 前需先释放本地测试端口。
 
 | 命令 | 覆盖范围 | 通过标准 |
 |---|---|---|
@@ -88,19 +99,9 @@ make stop-demo
 `make e3` 会在隔离的本地 demo 中改变 Gate 配置及证书状态。
 要再次观察第 2 节的初始结果，先关闭 E3 启动的 demo，再运行 `make demo`。
 
-如需保留完整日志，可用下面的方式运行 E3。先创建日志目录，再查看最后的通过标记和退出码。
-
-```bash
-mkdir -p .run/acceptance
-make e3 > .run/acceptance/e3-operator.log 2>&1
-result=$?
-tail -n 20 .run/acceptance/e3-operator.log
-printf 'exit=%s\n' "$result"
-```
-
-通过后使用 `make stop-demo` 停止测试服务。2-of-3 版本的结果见
-[方案 05 自审计记录](../reports/PLAN_05_E3_AUDIT.md)。当前版本的验证进度见
-[课程报告初稿](../reports/CS5298_FINAL_REPORT_DRAFT.md)。
+通过后使用 `make stop-demo` 停止本轮测试服务。参见
+[用户 1 的 3-of-4 实测结果](../reports/PLAN_06_MEMBER_EVALUATION.md#用户-1-操作记录3-of-4)
+和[早期 2-of-3 自审计记录](../reports/PLAN_05_E3_AUDIT.md)。
 
 ## 4. 保存证据与排查失败
 

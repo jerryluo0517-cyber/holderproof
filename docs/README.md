@@ -9,12 +9,13 @@
 ## 方案 05 验收
 
 - [测试操作指引](guides/TESTING.md)
+- [3-of-4 完整验收脚本](../scripts/run-3of4-acceptance.sh)
 - [05 E3 自审计和本地回归](reports/PLAN_05_E3_AUDIT.md)
 - [外部用户试用任务单](guides/EXTERNAL_USER_TEST.md)
 
 ## 方案 06 评测
 
-- [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（2-of-3 版本的本人操作与团队性能基准）
+- [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（3-of-4 本人验收及 2-of-3 早期基准）
 
 ## 03/04 文档快照
 
