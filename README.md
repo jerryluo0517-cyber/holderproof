@@ -6,7 +6,7 @@ A **3-of-4 Byzantine Fault Tolerant (BFT) Verifiable Historical On-Chain Indexer
 
 Four local committee nodes replay the same ordered events. When at least three agree on a full fact, Lyquor's two-phase oracle certifies it and the Indexer writes it to network state. The Airdrop and Governance gates read the same balance certificate and apply their own policies. The Credit Gate reads a credit certificate and returns a fee and loan-to-value quote.
 
-[Course report draft](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [Testing guide](docs/guides/TESTING.md) · [Standalone evidence console](ui/holderproof_vericredit_idx_console.html)
+[Course report draft](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md)
 
 ---
 
@@ -181,6 +181,12 @@ flowchart LR
 ## 7. Quickstart, Verification Commands & HTTP APIs
 
 ### 7.1 Prerequisites & Commands
+
+Run `make web` to start a fresh local devnet and open the live console at
+`http://127.0.0.1:8765`. Choose a fixture holder and a block from 0 to 1000
+to inspect a historical certificate. Both gate decisions are available at
+their policy snapshot, block 1000. The Web guide explains the controls and
+how to import saved evidence. [Web user guide](docs/guides/WEB_GUIDE.md)
 
 Verified with Rust `1.99.0` (`wasm32-unknown-unknown`), Lyquor LDK `0.8.4`, Foundry `1.7.1`, and Python `3.10+`.
 

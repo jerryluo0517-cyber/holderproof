@@ -14,6 +14,7 @@
     .tab-active { background: #0f766e; color: #ffffff; border-color: #0f766e; }
     .tab-idle { background: #ffffff; color: #334155; border-color: #cbd5e1; }
     .tab-idle:hover { background: #f8fafc; border-color: #94a3b8; }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen antialiased">
@@ -26,7 +27,7 @@
         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-700 text-white font-bold text-sm shadow-sm">HP</div>
         <div>
           <h1 class="text-base font-bold text-slate-900 sm:text-lg">HolderProof &amp; VeriCredit-Idx</h1>
-          <p class="text-xs text-slate-500">Lyquor Network 3-of-4 BFT Verifiable Historical Indexer &amp; Multi-Gate Console</p>
+          <p class="text-sm text-slate-500">Evidence console · Saved results and browser simulations</p>
         </div>
       </div>
 
@@ -67,8 +68,14 @@
   <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 space-y-6">
     <!-- TAB 1: P0 Indexer Certificate + Dual Gates -->
     <section id="panelOverview" class="space-y-6">
+      <article id="importedBalanceCertificate" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" hidden>
+        <h2 class="text-base font-bold text-slate-900">Imported balance certificate</h2>
+        <p class="mt-1 text-sm text-slate-600">Use Reset Defaults to return to the block 1000 simulations.</p>
+        <dl id="importedCertificateFields" class="mt-4 grid gap-4 sm:grid-cols-2"></dl>
+      </article>
+
       <!-- Indexer Card -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div id="fixtureCertificateExample" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <div class="flex items-center gap-2">
@@ -128,7 +135,7 @@
       </div>
 
       <!-- Dual Gate Comparison -->
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div id="fixtureGateExamples" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Airdrop Gate -->
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
           <div>
@@ -544,6 +551,7 @@
     const DEFAULT_STATE = () => ({
       activeTab: 'overview',
       selectedHolder: 'alice',
+      importedBalance: null,
       certStatus: 'Finalized',
       signers: [
         'Node-ve3t...fj6ia (signer #0)',
@@ -657,7 +665,42 @@
       });
     }
 
+    function renderImportedBalance(certificate) {
+      const { checkpoint } = certificate;
+      const fields = [
+        ['Holder', certificate.holder],
+        ['Snapshot block', certificate.block_number],
+        ['Balance (fixture units)', BigInt(certificate.balance).toLocaleString()],
+        ['Status', certificate.status],
+        ['Signers', [...new Set(certificate.signer_ids)].join(', ')],
+        ['Transfer events', checkpoint.event_count],
+        ['Query hash', certificate.query_hash],
+        ['Event Merkle root', checkpoint.event_merkle_root]
+      ];
+      const entries = fields.map(([label, value]) => {
+        const entry = document.createElement('div');
+        const term = document.createElement('dt');
+        const description = document.createElement('dd');
+        term.className = 'text-sm font-semibold text-slate-600';
+        description.className = 'mt-1 break-all text-sm text-slate-900 mono';
+        term.textContent = label;
+        description.textContent = value;
+        entry.append(term, description);
+        return entry;
+      });
+      document.getElementById('importedCertificateFields').replaceChildren(...entries);
+    }
+
     function renderOverview() {
+      const imported = state.importedBalance;
+      document.getElementById('importedBalanceCertificate').hidden = !imported;
+      document.getElementById('fixtureCertificateExample').hidden = Boolean(imported);
+      document.getElementById('fixtureGateExamples').hidden = Boolean(imported);
+      if (imported) {
+        renderImportedBalance(imported);
+        return;
+      }
+
       const h = HOLDERS[state.selectedHolder];
       const finalized = state.certStatus === 'Finalized';
 
@@ -759,6 +802,11 @@
       }).join('');
     }
 
+    function escapeHtml(value) {
+      const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+      return String(value).replace(/[&<>]/g, (char) => entities[char]);
+    }
+
     function renderSepolia() {
       const s = state.sepolia;
       document.getElementById('sepBlock').textContent = String(s.block);
@@ -770,11 +818,11 @@
 
       document.getElementById('epochTableBody').innerHTML = state.epochs.map((ep) => `
         <tr class="hover:bg-slate-50/80">
-          <td class="px-3 py-2.5 font-semibold mono text-slate-900">Epoch #${ep.epochId}</td>
-          <td class="px-3 py-2.5 mono text-slate-700">[${ep.from}, ${ep.to}]</td>
-          <td class="px-3 py-2.5 text-right mono text-slate-700">${ep.holders}</td>
+          <td class="px-3 py-2.5 font-semibold mono text-slate-900">Epoch #${escapeHtml(ep.epochId)}</td>
+          <td class="px-3 py-2.5 mono text-slate-700">[${escapeHtml(ep.from)}, ${escapeHtml(ep.to)}]</td>
+          <td class="px-3 py-2.5 text-right mono text-slate-700">${escapeHtml(ep.holders)}</td>
           <td class="px-3 py-2.5 text-right mono font-semibold text-teal-700">${ep.signers} / 4</td>
-          <td class="px-3 py-2.5"><span class="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">${ep.status}</span></td>
+          <td class="px-3 py-2.5"><span class="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">${escapeHtml(ep.status)}</span></td>
         </tr>
       `).join('');
     }
@@ -815,19 +863,19 @@
       document.getElementById('e3EvidenceGrid').innerHTML = state.e3Evidence.map((item) => `
         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 min-w-0 overflow-hidden">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="text-xs sm:text-sm font-bold text-slate-900">${item.title}</span>
-            <span class="shrink-0 rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 mono">${item.badge}</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-900">${escapeHtml(item.title)}</span>
+            <span class="shrink-0 rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 mono">${escapeHtml(item.badge)}</span>
           </div>
           ${Array.isArray(item.fields) && item.fields.length
             ? `<div class="mt-2.5 space-y-1 text-xs">
                 ${item.fields.map(([k, v]) => `
                   <div class="flex items-start justify-between gap-3 rounded-md bg-white/80 px-2 py-1 border border-slate-100">
-                    <span class="shrink-0 font-medium text-slate-500 mono">${k}</span>
-                    <span class="text-right text-slate-800 mono break-all">${v}</span>
+                    <span class="shrink-0 font-medium text-slate-500 mono">${escapeHtml(k)}</span>
+                    <span class="text-right text-slate-800 mono break-all">${escapeHtml(v)}</span>
                   </div>
                 `).join('')}
               </div>`
-            : `<p class="mt-2 text-xs text-slate-600 leading-relaxed break-all">${item.detail || ''}</p>`
+            : `<p class="mt-2 text-xs text-slate-600 leading-relaxed break-all">${escapeHtml(item.detail || '')}</p>`
           }
         </div>
       `).join('');
@@ -1082,14 +1130,9 @@
             switchTab('sepolia');
             renderSepolia();
             showToast(`Imported ${state.epochs.length} periodic Epoch Checkpoints`);
-          } else if (data.query_hash && data.checkpoint) {
-            state.certStatus = data.status || 'Finalized';
-            state.eventCount = data.checkpoint.event_count || 308;
-            state.createdAt = data.created_at || 11;
-            state.merkleRoot = data.checkpoint.event_merkle_root || state.merkleRoot;
-            if (Array.isArray(data.signer_ids) && data.signer_ids.length) {
-              state.signers = data.signer_ids.map((id, i) => `${id} (signer #${i})`);
-            }
+          } else if (data.query_hash && data.checkpoint && Array.isArray(data.signer_ids)
+            && typeof data.balance === 'string' && /^\d+$/.test(data.balance)) {
+            state.importedBalance = data;
             switchTab('overview');
             renderOverview();
             showToast('Imported local QueryCertificate JSON');

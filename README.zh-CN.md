@@ -6,7 +6,7 @@
 
 四个本地委员会节点重放同一份有序事件。至少三个节点就完整事实达成一致后，Lyquor 原生两阶段预言机对该事实出证，Indexer 将结果写入网络状态。空投和治理 Gate 共用余额证书，各自判断资格。信用 Gate 读取信用证书，并给出费率和借贷 LTV。
 
-[课程报告初稿（英文）](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [测试指引](docs/guides/TESTING.md) · [独立证据演示控制台](ui/holderproof_vericredit_idx_console.html)
+[课程报告初稿（英文）](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md)
 
 ---
 
@@ -181,6 +181,11 @@ flowchart LR
 ## 7. 快速开始、验收命令与端口索引
 
 ### 7.1 环境要求与一键命令
+
+运行 `make web` 启动本地 devnet，然后打开 `http://127.0.0.1:8765`。
+选择样例持有者和 `0–1000` 内的区块，即可查询该区块的余额证书。
+空投和治理的资格快照固定在区块 `1000`。
+[Web 使用说明](docs/guides/WEB_GUIDE.md)
 
 已验证环境：Rust `1.99.0`（含 `wasm32-unknown-unknown`）、Lyquor LDK `0.8.4`、Foundry `1.7.1`、Python `3.10+`。
 

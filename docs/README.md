@@ -5,6 +5,7 @@
 ## 课程报告
 
 - [CS5298 课程报告初稿（英文）](reports/CS5298_FINAL_REPORT_DRAFT.md)
+- [Web 使用说明](guides/WEB_GUIDE.md)
 
 ## 方案 05 验收
 

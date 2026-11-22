@@ -12,6 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = "0x5298000000000000000000000000000000000001"
+FIXTURE_END_BLOCK = 1000
 # Public disposable Anvil key, used only for local development.
 DEV_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
@@ -39,8 +40,8 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--block", type=int, required=True)
     parser.add_argument("--endpoint", default="ws://127.0.0.1:10087/ws")
     arguments = parser.parse_args()
-    if arguments.token.lower() != TOKEN or not 0 <= arguments.block <= 1000:
-        parser.error("P0 supports the fixture token and finalized fixture blocks 0..1000")
+    if arguments.token.lower() != TOKEN or not 0 <= arguments.block <= FIXTURE_END_BLOCK:
+        parser.error(f"P0 supports the fixture token and finalized fixture blocks 0..{FIXTURE_END_BLOCK}")
     try:
         holder = arguments.holder
         if len(holder) != 42 or not holder.startswith("0x") or int(holder, 16) == 0:
@@ -50,13 +51,17 @@ def parse_arguments() -> argparse.Namespace:
     return arguments
 
 
-def read_indexer_address() -> str:
+def read_deployment() -> dict[str, str]:
     """Read the deployment produced by reproduce-step4.sh; never execute it."""
     state = {}
     for line in (ROOT / ".run/step4/state.env").read_text().splitlines():
         key, value = line.split("=", 1)
         state[key] = shlex.split(value)[0] if value else ""
-    return state["INDEXER_CONTRACT"]
+    return state
+
+
+def read_indexer_address() -> str:
+    return read_deployment()["INDEXER_CONTRACT"]
 
 
 def submit_query(indexer: str, arguments: argparse.Namespace) -> None:

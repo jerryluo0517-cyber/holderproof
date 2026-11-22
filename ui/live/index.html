@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7f8">
+  <title>HolderProof · Live balance proofs</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/" aria-label="HolderProof home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        HolderProof
+      </a>
+      <nav aria-label="Console views">
+        <a href="/" aria-current="page">Live query</a>
+        <a href="/evidence">Evidence console</a>
+      </nav>
+      <p id="connection" class="connection" data-state="checking">
+        <span aria-hidden="true"></span><span id="connection-label">Connecting</span>
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title">Historical balance proof</h1>
+      <p>Query a historical balance on the local Lyquor network. At block 1,000, see how the airdrop and governance gates use the same certificate.</p>
+    </section>
+
+    <div class="workspace">
+      <section class="query" aria-labelledby="query-title">
+        <h2 id="query-title">Run a query</h2>
+        <form id="query-form">
+          <label for="holder">Fixture holder</label>
+          <div class="select-wrap">
+            <select id="holder" name="holder" aria-describedby="holder-address">
+              <option value="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">Alice</option>
+              <option value="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">Bob</option>
+              <option value="0xcccccccccccccccccccccccccccccccccccccccc">Carol</option>
+              <option value="0xdddddddddddddddddddddddddddddddddddddddd">Dave</option>
+            </select>
+          </div>
+          <code id="holder-address" class="holder-address"></code>
+
+          <label for="block">Snapshot block</label>
+          <input id="block" name="block" type="number" min="0" max="1000" step="1" value="1000"
+                 inputmode="numeric" required aria-describedby="block-note">
+          <p id="block-note" class="field-note">Enter a block from 0 to 1,000. Both gates use block 1,000 for eligibility.</p>
+
+          <button id="run-query" type="submit">Run live query</button>
+          <p id="query-status" class="query-status" role="status"></p>
+        </form>
+        <div class="dataset-line"><span>Dataset</span><code>holderproof-fixture-5298-v1</code></div>
+      </section>
+
+      <section id="results" class="results" aria-label="Query results" aria-busy="true">
+        <article class="certificate">
+          <div class="certificate-heading">
+            <h2>Balance certificate</h2>
+            <span id="certificate-status" class="pill" data-tone="neutral">Waiting</span>
+          </div>
+          <div class="certificate-balance">
+            <p id="balance">—</p>
+            <span>fixture units</span>
+          </div>
+          <dl class="certificate-facts">
+            <div><dt>Holder</dt><dd id="result-holder">—</dd></div>
+            <div><dt>Block</dt><dd id="result-block">—</dd></div>
+            <div><dt>Signers</dt><dd id="result-signers">—</dd></div>
+            <div><dt>Transfer events</dt><dd id="result-events">—</dd></div>
+          </dl>
+          <details id="certificate-details" hidden>
+            <summary>Certificate details</summary>
+            <dl class="proof-fields">
+              <div><dt>Query hash</dt><dd><code id="query-hash"></code></dd></div>
+              <div><dt>Event Merkle root</dt><dd><code id="event-root"></code></dd></div>
+            </dl>
+            <button id="save-certificate" class="text-button" type="button">Download certificate JSON</button>
+          </details>
+        </article>
+
+        <section class="gate-section" aria-labelledby="gates-title">
+          <div class="gates-heading">
+            <h2 id="gates-title">Eligibility decisions</h2>
+            <p id="shared-proof">Matched to the certificate by query hash.</p>
+          </div>
+          <div class="gate-grid">
+            <article class="gate">
+              <div class="gate-heading">
+                <h3>Airdrop</h3>
+                <span id="airdrop-status" class="pill" data-tone="neutral">Waiting</span>
+              </div>
+              <p><span>Minimum balance</span><strong id="airdrop-threshold">—</strong></p>
+            </article>
+            <article class="gate">
+              <div class="gate-heading">
+                <h3>Governance</h3>
+                <span id="governance-status" class="pill" data-tone="neutral">Waiting</span>
+              </div>
+              <p><span>Minimum balance</span><strong id="governance-threshold">—</strong></p>
+            </article>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

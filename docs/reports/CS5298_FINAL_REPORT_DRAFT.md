@@ -2,7 +2,7 @@
 
 **CS5298 Final Project Report · First draft · 22 November 2026**
 
-This report describes the three-of-four committee design introduced in commit `c11e69c`. The public repository contains the source code and reproduction instructions. [HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof) · [Design baseline](https://github.com/jerryluo0517-cyber/holderproof/tree/c11e69c)
+This report describes the three-of-four committee design introduced in commit `c11e69c`. The project repository contains the source code and reproduction instructions. [HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof) · [Design baseline](https://github.com/jerryluo0517-cyber/holderproof/tree/c11e69c)
 
 ## Abstract
 
@@ -42,7 +42,7 @@ flowchart LR
     I -->|"Sepolia balance certificate"| K["Sepolia certificate reader"]
 ```
 
-Each member replays events locally. The Indexer stores certificates and epoch checkpoints in shared network state. Each gate stores its configuration and action or quote records. Users run queries through the CLI and use the standalone browser console to inspect built-in examples or import evidence as JSON.
+Each member replays events locally. The Indexer stores certificates and epoch checkpoints in shared network state. Each gate stores its configuration and action or quote records. The CLI and local web console accept fixture blocks from 0 to 1000. For a query at block 1000, the web console also requests eligibility decisions from both gates, whose policies use that snapshot. The console can export the complete balance certificate as JSON. The separate evidence view displays saved certificates, checkpoint and audit records, and browser simulations. [Web user guide](../guides/WEB_GUIDE.md)
 
 | Oracle topic | Certified result |
 |---|---|
@@ -110,11 +110,23 @@ The Credit Gate returned the expected score, fee and loan-to-value quote for eac
 | Bob | 495 | Base | 30 basis points | 60% |
 | Carol | 250 | Base | 30 basis points | 60% |
 
-### 5.3 Query latency and usability
+### 5.3 Local web console
+
+The web checks ran against the local Lyquor devnet. Alice's certificate showed
+50,000 at block 0, 57,685 at block 950, and 62,685 at block 1000. The historical
+queries left gate state unchanged and the page marked both decisions as
+`Not evaluated`. At block 1000, the page showed the airdrop decision as
+eligible and the governance decision as ineligible. The API returned a client
+error for out-of-range or fractional blocks. Importing the saved block 950
+certificate into the evidence console displayed its block, balance and signer
+IDs. To repeat the browser checks, run `make web` and query Alice at blocks
+1000 and 950. [Web user guide](../guides/WEB_GUIDE.md)
+
+### 5.4 Query latency and usability
 
 The latency benchmark used the earlier 2-of-3 implementation at `db1532f`. Five sequential first-time queries on one running local network had a median of 58.10 ms from submission to readable certificate. The median for the certification step was 34.22 ms. A comparable 3-of-4 latency measurement is pending. [Benchmark method and results](PLAN_06_MEMBER_EVALUATION.md)
 
-User 1’s run is part of the team’s internal evaluation. The separate usability study calls for at least three participants outside the team to record setup effort, certificate results, gate decisions and any assistance they receive. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
+User 1’s run is part of the team’s internal evaluation. The separate usability study calls for at least three participants outside the team. The guided trial records the revision, environment, elapsed time, certificate and gate results in a feedback form. Participants add any assistance, difficulties or suggestions. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
 
 ## 6. Limitations and Reflection
 
@@ -124,7 +136,7 @@ User 1’s run is part of the team’s internal evaluation. The separate usabili
 
 **Credit policy.** Same-counterparty matching within a fixed window captures one form of repeated trading. The synthetic cases measure whether the implementation follows that rule. Estimating repayment risk would require representative data and calibration of the score and quote tiers.
 
-**Reproduction.** The CLI gives participants commands and outputs they can record. It requires compatible versions of Rust, Lyquor and Foundry, along with available local ports. Participants can use the standalone console to inspect examples and exported evidence. External walkthroughs will help identify which setup steps and certificate fields need clearer explanations.
+**Reproduction.** The CLI and live web console require compatible versions of Rust, Lyquor and Foundry, along with available local ports. The evidence console gives participants a way to inspect examples and exported evidence. External walkthroughs will help identify which setup steps and certificate fields need clearer explanations.
 
 ## 7. Contributions and Attribution
 

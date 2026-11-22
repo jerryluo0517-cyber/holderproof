@@ -27,3 +27,6 @@ python3 scripts/record_external_test.py E01
 
 如果本轮启动了 demo，交回证据后运行 `make stop-demo`。团队根据表单区分独立完成、
 协助后完成和未完成。参与者可用反馈栏注明尝试前的依赖安装用时。
+
+想额外试用网页时，可以在停止本轮 demo 后按[Web 使用说明](WEB_GUIDE.md)启动。
+如有网页相关反馈，可在交回表单时一并附上。
