@@ -89,8 +89,8 @@ make web
 
 网页演示把两个 Gate 配置为多用户模式，使用固定的资格快照和既有门槛。
 网页和 devnet 运行在本机。结束演示时按 `Ctrl+C` 关闭网页服务，然后执行
-`make stop-demo` 关闭 devnet。本地网页使用 `8765` 端口。外部用户试用仍使用
-[任务单](EXTERNAL_USER_TEST.md)的表单生成流程。
+`make stop-demo` 关闭 devnet。本地网页使用 `8765` 端口。外部用户按
+[任务单](EXTERNAL_USER_TEST.md)任选终端输入或 Web 测试，两条路线都生成 `feedback.md`。
 
 ## 4. 自动验收
 

@@ -2,6 +2,8 @@
 
 **Live query** 在本地 Lyquor 网络运行余额查询。**Evidence console** 用于查看已经保存的证书和验收结果，也提供可以在浏览器里操作的样例。
 
+参加外部试用时，按[外部试用任务单](EXTERNAL_USER_TEST.md)选择终端输入或 Web 测试。Web 路线用 `python3 scripts/record_external_test.py E01 --web` 启动，完成后会生成 `feedback.md`。
+
 ## 启动与停止
 
 在仓库根目录运行以下命令。依赖和端口要求见[测试操作指引](TESTING.md)。如果之前启动过自己的 demo，先运行 `make stop-demo`。
@@ -55,5 +57,3 @@ make web
 | `.run/acceptance/e3-results.json` | `make e3` 保存的动作、撤销与委员会暂停结果。 |
 
 运行[完整验收脚本](../../scripts/run-3of4-acceptance.sh)后，也可以从对应的 `.run/acceptance/3of4-*/` 批次目录中选取这些文件。报告取证时记录实际测试的提交号和文件来源。
-
-需要提交外部试用反馈时，请使用[外部试用任务单](EXTERNAL_USER_TEST.md)里的表单生成脚本。

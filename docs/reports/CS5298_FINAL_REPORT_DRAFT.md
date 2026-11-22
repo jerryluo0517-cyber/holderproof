@@ -126,7 +126,7 @@ IDs. To repeat the browser checks, run `make web` and query Alice at blocks
 
 The latency benchmark used the earlier 2-of-3 implementation at `db1532f`. Five sequential first-time queries on one running local network had a median of 58.10 ms from submission to readable certificate. The median for the certification step was 34.22 ms. A comparable 3-of-4 latency measurement is pending. [Benchmark method and results](PLAN_06_MEMBER_EVALUATION.md)
 
-User 1’s run is part of the team’s internal evaluation. The separate usability study calls for at least three participants outside the team. The guided trial records the revision, environment, elapsed time, certificate and gate results in a feedback form. Participants add any assistance, difficulties or suggestions. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
+User 1’s run is part of the team’s internal evaluation. The separate usability study calls for at least three participants outside the team. Each participant can complete the same Alice query at block 1000 through either the terminal or the browser. The guided trial records the route, revision, environment, elapsed time, certificate and gate results in a feedback form. Participants add any assistance, difficulties or suggestions. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
 
 ## 6. Limitations and Reflection
 
