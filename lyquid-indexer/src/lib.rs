@@ -36,6 +36,7 @@ mod models;
 mod tests;
 mod credit;
 mod sepolia;
+mod dispersion;
 
 state! {
     // Per-node replay cache is never sequenced as shared state.
@@ -86,6 +87,11 @@ state! {
     network sepolia_query_holder: Address = Address::ZERO;
     network latest_sepolia_query_hash: String = String::new();
     network sepolia_certificates: HashMap<String, QueryCertificate> = new_hashmap();
+
+    // Time-skewed observation dispersion guard (Network State policy, default 1% = 100 bps).
+    network max_dispersion_bps: u64 = 100;
+    network last_median_observation: U256 = U256::ZERO;
+    network last_dispersion_bps: u64 = 0;
 }
 
 #[method::network(export = eth)]
@@ -1012,4 +1018,41 @@ fn get_sepolia_certificate_json(ctx: &_, holder: Address) -> LyquidResult<String
         .get(&key)
         .ok_or_else(|| invalid("sepolia certificate not found"))?;
     serde_json::to_string(cert).map_err(|e| invalid(e.to_string()))
+}
+
+#[method::network(export = eth)]
+fn configure_max_dispersion_bps(ctx: &mut _, max_bps: u64) -> LyquidResult<bool> {
+    if ctx.caller != *ctx.network.initializer {
+        return Err(invalid("only initializer can configure max_dispersion_bps"));
+    }
+    if max_bps == 0 || max_bps > 10_000 {
+        return Err(invalid("max_dispersion_bps must be in 1..=10000"));
+    }
+    *ctx.network.max_dispersion_bps = max_bps;
+    Ok(true)
+}
+
+/// Network-state validator for time-skewed oracle observations (f = (n - 1) / 3).
+#[method::network(export = eth)]
+fn validate_time_skewed_observations(
+    ctx: &mut _,
+    signer_ids: Vec<u32>,
+    values: Vec<u64>,
+) -> LyquidResult<u64> {
+    if signer_ids.len() != values.len() {
+        return Err(invalid("signer_ids and values length mismatch"));
+    }
+    let f = (holderproof_types::COMMITTEE_SIZE - 1) / 3;
+    let pairs: Vec<(u32, u128)> = signer_ids
+        .into_iter()
+        .zip(values.into_iter().map(|v| v as u128))
+        .collect();
+    let res = dispersion::aggregate_with_dispersion_guard(
+        &pairs,
+        f,
+        *ctx.network.max_dispersion_bps,
+    )?;
+    *ctx.network.last_median_observation = U256::from(res.median);
+    *ctx.network.last_dispersion_bps = res.dispersion_bps;
+    Ok(res.median as u64)
 }

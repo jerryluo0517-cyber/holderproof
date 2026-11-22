@@ -61,3 +61,6 @@ docs:
 
 sepolia-check:
 	python3 scripts/verify_sepolia.py
+
+epoch-check:
+	verify_epoch_checkpoints.py

@@ -334,3 +334,14 @@ fn credit_certificate_valid_and_tampered_rejection() {
 
     assert!(validate_credit_certificate(&cert, user, 0, 999).is_err());
 }
+
+#[test]
+fn credit_report_staleness_ttl_is_enforced() {
+    use crate::credit::is_stale;
+    // created_at = 50, max_staleness = 200 -> 250 块以内有效，251 块起过期回退
+    assert!(!is_stale(50, 50, 200));
+    assert!(!is_stale(250, 50, 200));
+    assert!(is_stale(251, 50, 200));
+    // 防 u64::MAX 加法溢出
+    assert!(!is_stale(u64::MAX, u64::MAX, 200));
+}

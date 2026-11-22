@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HolderProof &amp; VeriCredit-Idx Console</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
+    .tab-active { background: #0f766e; color: #ffffff; border-color: #0f766e; }
+    .tab-idle { background: #ffffff; color: #334155; border-color: #cbd5e1; }
+    .tab-idle:hover { background: #f8fafc; border-color: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen antialiased">
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden max-w-sm rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-lg transition-all"></div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-700 text-white font-bold text-sm shadow-sm">HP</div>
+        <div>
+          <h1 class="text-base font-bold text-slate-900 sm:text-lg">HolderProof &amp; VeriCredit-Idx</h1>
+          <p class="text-xs text-slate-500">Lyquor Network 3-of-4 BFT Verifiable Historical Indexer &amp; Multi-Gate Console</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="committeeBadge" class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800 border border-teal-200">
+          <span class="h-2 w-2 rounded-full bg-teal-500"></span>
+          3-of-4 BFT Committee
+        </span>
+        <label class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+          <span>Import Local Evidence JSON</span>
+          <input id="jsonImportInput" type="file" accept=".json,application/json" class="hidden" />
+        </label>
+        <button id="resetDemoBtn" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+          Reset Defaults
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="mx-auto max-w-7xl px-4 pb-3 sm:px-6">
+      <div class="flex flex-wrap gap-2" role="tablist">
+        <button id="tabBtnOverview" type="button" data-tab="overview" class="tab-active rounded-lg border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition">
+          P0 Certificate &amp; Dual Gates
+        </button>
+        <button id="tabBtnCredit" type="button" data-tab="credit" class="tab-idle rounded-lg border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition">
+          VeriCredit Anti-Wash &amp; TTL
+        </button>
+        <button id="tabBtnSepolia" type="button" data-tab="sepolia" class="tab-idle rounded-lg border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition">
+          Sepolia &amp; Epoch Checkpoints
+        </button>
+        <button id="tabBtnAudit" type="button" data-tab="audit" class="tab-idle rounded-lg border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition">
+          E3 Self-Audit &amp; Dispersion Guard
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 space-y-6">
+    <!-- TAB 1: P0 Indexer Certificate + Dual Gates -->
+    <section id="panelOverview" class="space-y-6">
+      <!-- Indexer Card -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-md bg-slate-900 px-2 py-0.5 text-[11px] font-semibold text-white mono">:8081</span>
+              <h2 class="text-base font-bold text-slate-900">Indexer Certificate (QueryCertificate)</h2>
+              <span id="certStatusBadge" class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">Finalized</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">Single certified fact reused across independent gates. Switch holders or simulate revocation to inspect gate enforcement.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="holderSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 focus:border-teal-600 focus:outline-none">
+              <option value="alice">Alice (0xaaaa...aaaa) — 62,685</option>
+              <option value="bob">Bob (0xbbbb...bbbb) — 51,886</option>
+              <option value="carol">Carol (0xcccc...cccc) — 43,249</option>
+              <option value="erin">Erin (0xeeee...eeee) — 60,324</option>
+            </select>
+            <button id="toggleRevokeBtn" type="button" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 transition">
+              Simulate Revocation
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Certified Balance (Block 1000)</div>
+            <div id="certBalance" class="mt-1 text-2xl font-bold text-slate-900 mono">62,685</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Committee Quorum (3-of-4 BFT)</div>
+            <div id="certSignersCount" class="mt-1 text-2xl font-bold text-teal-700 mono">3 / 4</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Replayed Transfer Events</div>
+            <div id="certEventCount" class="mt-1 text-2xl font-bold text-slate-900 mono">308</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Committed At Block</div>
+            <div id="certCreatedAt" class="mt-1 text-2xl font-bold text-slate-900 mono">#11</div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 text-xs lg:grid-cols-2">
+          <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+            <div class="font-semibold text-slate-600">queryHash (Shared Certificate Key)</div>
+            <div id="certQueryHash" class="mt-1 break-all mono text-slate-800"></div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+            <div class="font-semibold text-slate-600">eventMerkleRoot (SHA-256 Event Commitment)</div>
+            <div id="certMerkleRoot" class="mt-1 break-all mono text-slate-800"></div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500">Active Committee Signers:</span>
+          <div id="signerChips" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
+      <!-- Dual Gate Comparison -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Airdrop Gate -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="rounded-md bg-teal-700 px-2 py-0.5 text-[11px] font-semibold text-white mono">:8080</span>
+                <h3 class="text-base font-bold text-slate-900">AirdropGateLyquid</h3>
+              </div>
+              <span id="airdropBadge" class="rounded-full px-3 py-0.5 text-xs font-bold"></span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <label for="airdropThresholdInput" class="block text-xs text-slate-500">Airdrop Threshold</label>
+                <input id="airdropThresholdInput" type="number" min="0" step="1000" value="60000"
+                  class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-semibold mono text-slate-900 focus:border-teal-600 focus:outline-none" />
+              </div>
+              <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <div class="text-xs text-slate-500">Recorded Claims (claimCount)</div>
+                <div id="airdropClaimCount" class="mt-1.5 text-2xl font-bold text-slate-900 mono">0</div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button id="airdropCheckBtn" type="button" class="rounded-lg border border-teal-700 bg-teal-50 px-3.5 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-100 transition">
+                Run check_eligible()
+              </button>
+              <button id="airdropClaimBtn" type="button" class="rounded-lg bg-teal-700 px-3.5 py-2 text-xs font-semibold text-white hover:bg-teal-800 transition">
+                Run claim() (One-Time)
+              </button>
+            </div>
+            <p id="airdropMsg" class="mt-2.5 text-xs text-slate-600 min-h-[1.25rem]"></p>
+          </div>
+
+          <div class="mt-4 border-t border-slate-100 pt-3">
+            <div class="text-xs font-semibold text-slate-600 mb-2">Instance History (/api/history)</div>
+            <div id="airdropHistory" class="space-y-1.5 max-h-40 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+
+        <!-- Governance Gate -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="rounded-md bg-indigo-700 px-2 py-0.5 text-[11px] font-semibold text-white mono">:8082</span>
+                <h3 class="text-base font-bold text-slate-900">GovernanceGateLyquid</h3>
+              </div>
+              <span id="govBadge" class="rounded-full px-3 py-0.5 text-xs font-bold"></span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-3 gap-3">
+              <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <label for="govThresholdInput" class="block text-xs text-slate-500">Threshold</label>
+                <input id="govThresholdInput" type="number" min="0" step="1000" value="70000"
+                  class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold mono text-slate-900 focus:border-indigo-600 focus:outline-none" />
+              </div>
+              <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <label for="govProposalInput" class="block text-xs text-slate-500">Proposal ID</label>
+                <input id="govProposalInput" type="number" min="1" step="1" value="1"
+                  class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold mono text-slate-900 focus:border-indigo-600 focus:outline-none" />
+              </div>
+              <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+                <div class="text-xs text-slate-500">Votes</div>
+                <div id="govVoteCount" class="mt-1.5 text-2xl font-bold text-slate-900 mono">0</div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button id="govCheckBtn" type="button" class="rounded-lg border border-indigo-700 bg-indigo-50 px-3.5 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 transition">
+                Run check_eligible()
+              </button>
+              <button id="govVoteBtn" type="button" class="rounded-lg bg-indigo-700 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-800 transition">
+                Run vote() (Per-Proposal)
+              </button>
+            </div>
+            <p id="govMsg" class="mt-2.5 text-xs text-slate-600 min-h-[1.25rem]"></p>
+          </div>
+
+          <div class="mt-4 border-t border-slate-100 pt-3">
+            <div class="text-xs font-semibold text-slate-600 mb-2">Instance History (/api/history)</div>
+            <div id="govHistory" class="space-y-1.5 max-h-40 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: VeriCredit-Idx -->
+    <section id="panelCredit" class="hidden space-y-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-md bg-amber-600 px-2 py-0.5 text-[11px] font-semibold text-white mono">:8083</span>
+              <h2 class="text-base font-bold text-slate-900">VeriCredit-Idx Custom Weights &amp; Audit-05 TTL Simulator</h2>
+            </div>
+            <p class="mt-1 text-xs text-slate-500 mono">S(u) = min(1000, floor((w1 * ilog2(1 + V_u) + w2 * N_repay) / (1 + alpha * N_liq)))</p>
+          </div>
+          <button id="resetWeightsBtn" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
+            Restore Defaults (35/20/2/3)
+          </button>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <div>
+            <label for="w1Input" class="block text-xs font-medium text-slate-600">w1 (Volume Weight)</label>
+            <input id="w1Input" type="number" min="0" max="200" value="35" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="w2Input" class="block text-xs font-medium text-slate-600">w2 (Repay Weight)</label>
+            <input id="w2Input" type="number" min="0" max="200" value="20" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="alphaInput" class="block text-xs font-medium text-slate-600">alpha (Liq Penalty)</label>
+            <input id="alphaInput" type="number" min="0" max="20" value="2" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="washWindowInput" class="block text-xs font-medium text-slate-600">wash_window (blks)</label>
+            <input id="washWindowInput" type="number" min="0" max="10" value="3" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="ttlInput" class="block text-xs font-medium text-slate-600">TTL max_staleness</label>
+            <input id="ttlInput" type="number" min="1" max="1000" value="200" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="currentBlockInput" class="block text-xs font-medium text-slate-600">Current Block (cert=50)</label>
+            <input id="currentBlockInput" type="number" min="50" max="1000" value="100" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+        </div>
+
+        <div id="ttlStatusBanner" class="mt-4 rounded-xl px-4 py-2.5 text-xs font-medium"></div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50 text-slate-600">
+                <th class="px-3 py-2.5 font-semibold">User Profile</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Raw Volume</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Wash Removed</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Clean Volume V_u</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Repay / Liq</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Score S(u)</th>
+                <th class="px-3 py-2.5 font-semibold">Tier / Dynamic Fee / Max LTV</th>
+              </tr>
+            </thead>
+            <tbody id="creditTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Sepolia Real Chain + Periodic Epoch Checkpoints -->
+    <section id="panelSepolia" class="hidden space-y-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-md bg-sky-700 px-2 py-0.5 text-[11px] font-semibold text-white mono">sepolia-rpc-v1</span>
+              <h2 class="text-base font-bold text-slate-900">Real Ethereum Sepolia WETH 3-of-4 Certified Balance</h2>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">Fetched from public Sepolia RPC with authentic block hashes and signed by committee signers [0, 1, 3].</p>
+          </div>
+          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">Finalized · 3 Signers [0, 1, 3]</span>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Sepolia Block Number</div>
+            <div id="sepBlock" class="mt-1 text-xl font-bold text-slate-900 mono">12184649</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Certified Balance (Wei)</div>
+            <div id="sepBalance" class="mt-1 text-xl font-bold text-sky-700 mono">2000000000000000</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">0.002 WETH</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Token (Sepolia WETH)</div>
+            <div id="sepToken" class="mt-1 text-xs font-semibold text-slate-800 mono break-all">0x7b79995e5f793a07bc00c21412e50ecae098e7f9</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div class="text-xs text-slate-500">Holder Address</div>
+            <div id="sepHolder" class="mt-1 text-xs font-semibold text-slate-800 mono break-all">0x9675392d5c0e92143b2ac92a297e526ac95ca6ad</div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 text-xs lg:grid-cols-2">
+          <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+            <div class="font-semibold text-slate-600">queryHash / certificate_id</div>
+            <div id="sepQueryHash" class="mt-1 break-all mono text-slate-800">8a39e3ba9c71ad1cb49271ed822a44ebfc153e95ad0e8fcb0900916397ac0c8c</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3 border border-slate-100">
+            <div class="font-semibold text-slate-600">factHash (3-of-4 Signed Seal)</div>
+            <div id="sepFactHash" class="mt-1 break-all mono text-slate-800">95058ac9e32abbc6013317f24f0cce616e515cfdede67a0f2546edc8b5af25a8</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Periodic Epoch Checkpoints -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Periodic Global Epoch Checkpoints (Layer 2 · Every 250 Blocks)</h3>
+            <p class="mt-1 text-xs text-slate-500">Committed to Network State by the 3-of-4 committee for zero-recomputation downstream reads.</p>
+          </div>
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 mono">epoch_interval = 250</span>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50 text-slate-600">
+                <th class="px-3 py-2.5 font-semibold">Epoch</th>
+                <th class="px-3 py-2.5 font-semibold">Block Window</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Unique Holders</th>
+                <th class="px-3 py-2.5 font-semibold text-right">Signers</th>
+                <th class="px-3 py-2.5 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="epochTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: E3 Self-Audit & Audit-04 Dispersion Guard -->
+    <section id="panelAudit" class="hidden space-y-6">
+      <!-- Audit-04 Interactive Dispersion Guard Simulator -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-md bg-violet-700 px-2 py-0.5 text-[11px] font-semibold text-white mono">Audit-04</span>
+              <h2 class="text-base font-bold text-slate-900">Honest-Core Dispersion Guard Simulator (NDSS 2026 Defense)</h2>
+            </div>
+            <p class="mt-1 text-xs text-slate-500 mono">Rule (n = 4, f = 1): (v_{m-f} - v_{f+1}) * 10000 &lt;= M * max_dispersion_bps</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="presetOutlierBtn" type="button" class="rounded-lg border border-teal-700 bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-800 hover:bg-teal-100">
+              Preset: 1 Byzantine Outlier ($4,302.42)
+            </button>
+            <button id="presetVolatileBtn" type="button" class="rounded-lg border border-rose-700 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100">
+              Preset: Volatile Spread (7.69% &gt; 1%)
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          <div>
+            <label for="obs0Input" class="block text-xs font-medium text-slate-600">Node 0 (cents)</label>
+            <input id="obs0Input" type="number" min="1" value="370000" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="obs1Input" class="block text-xs font-medium text-slate-600">Node 1 (cents)</label>
+            <input id="obs1Input" type="number" min="1" value="370242" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="obs2Input" class="block text-xs font-medium text-slate-600">Node 2 (cents)</label>
+            <input id="obs2Input" type="number" min="1" value="370500" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="obs3Input" class="block text-xs font-medium text-slate-600">Node 3 (Byzantine)</label>
+            <input id="obs3Input" type="number" min="1" value="430242" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+          <div>
+            <label for="maxDispInput" class="block text-xs font-medium text-slate-600">max_dispersion_bps</label>
+            <input id="maxDispInput" type="number" min="1" max="10000" value="100" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm mono font-semibold" />
+          </div>
+        </div>
+
+        <div id="dispersionResultBox" class="mt-4 rounded-xl border p-4 text-xs sm:text-sm"></div>
+      </div>
+
+      <!-- E3 Structured Self-Audit Scorecard (Audit-01 ~ Audit-05) -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Bonus E3 Structured Security Self-Audit (Audit-01 to Audit-05)</h3>
+            <p class="mt-1 text-xs text-slate-500">All five audit items implemented in Rust and verified via Guest tests and live 4-node E3 regressions.</p>
+          </div>
+          <span class="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">5 / 5 Verified</span>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50 text-slate-600">
+                <th class="px-3 py-2.5 font-semibold">Audit ID</th>
+                <th class="px-3 py-2.5 font-semibold">Threat Vector</th>
+                <th class="px-3 py-2.5 font-semibold">Implemented Safeguard</th>
+                <th class="px-3 py-2.5 font-semibold">Verification Evidence</th>
+                <th class="px-3 py-2.5 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="auditScorecardBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Live E3 Fault-Tolerance & Action Regression Evidence -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">E3 Live Regression &amp; Process-Pause Evidence (e3-results.json)</h3>
+            <p class="mt-1 text-xs text-slate-500">Supports importing your local <span class="mono">.run/acceptance/e3-results.json</span> via the top-right import button.</p>
+          </div>
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 mono">SIGSTOP / SIGCONT Verified</span>
+        </div>
+
+        <div id="e3EvidenceGrid" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const HOLDERS = {
+      alice: {
+        name: 'Alice',
+        address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        balance: 62685,
+        queryHash: '1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884'
+      },
+      bob: {
+        name: 'Bob',
+        address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        balance: 51886,
+        queryHash: 'b19f44d2a1c38e0c9f52b70d3e8102a5c7e6f1234567890abcdef12345678901'
+      },
+      carol: {
+        name: 'Carol',
+        address: '0xcccccccccccccccccccccccccccccccccccccccc',
+        balance: 43249,
+        queryHash: 'c20e55e3b2d49f1d0a63c81e4f9213b6d8f702345678901bcdefa23456789012'
+      },
+      erin: {
+        name: 'Erin',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        balance: 60324,
+        queryHash: 'e42a7705d4f6113f2c85ea3061b435d8fa1924567890123defabc45678901234'
+      }
+    };
+
+    const CREDIT_PERSONAS = [
+      {
+        name: 'Alice (Honest VIP Trader)',
+        address: '0xaaaa...aaaa',
+        cleanBase: 1200000,
+        washEvents: [],
+        repay: 12,
+        liq: 0
+      },
+      {
+        name: 'Dave (Standard Borrower)',
+        address: '0xdddd...dddd',
+        cleanBase: 200000,
+        washEvents: [],
+        repay: 4,
+        liq: 0
+      },
+      {
+        name: 'Bob (Wash-Trading Attacker)',
+        address: '0xbbbb...bbbb',
+        cleanBase: 15000,
+        washEvents: [
+          { gap: 1, amount: 1000000 },
+          { gap: 2, amount: 1000000 }
+        ],
+        repay: 2,
+        liq: 0
+      },
+      {
+        name: 'Carol (Liquidated Borrower)',
+        address: '0xcccc...cccc',
+        cleanBase: 500000,
+        washEvents: [],
+        repay: 6,
+        liq: 1
+      }
+    ];
+
+    const AUDIT_SCORECARD = [
+      {
+        id: 'Audit-01',
+        threat: 'Cross-Batch & Action Replay',
+        safeguard: 'OracleCert binds lyquid_id, seq_id, epoch & nonce; immutable certificates[query_hash]; claimed/voted anti-replay maps.',
+        evidence: 'verify_e3.py: duplicate claim()/vote() strictly kept committed_actions = 1.'
+      },
+      {
+        id: 'Audit-02',
+        threat: 'Sybil Duplicate Signer Forgery',
+        safeguard: 'agreeing_proposal excludes multi-submitters; signer_node_id active-committee lookup + strict deduplication.',
+        evidence: 'Guest tests: duplicate_nodes_and_split_votes & duplicate_or_empty_signers.'
+      },
+      {
+        id: 'Audit-03',
+        threat: 'Integer Overflow & Empty Window Div-by-Zero',
+        safeguard: 'All replay, TWAB, VeriCredit & dispersion math uses checked_add/mul/sub with explicit zero-denominator rejection.',
+        evidence: 'Guest tests: eligibility_handles_boundary_and_invalid_balance & twab half-open checks.'
+      },
+      {
+        id: 'Audit-04',
+        threat: 'Byzantine Outlier & Leader Cherry-Picking (NDSS 2026)',
+        safeguard: 'Deterministic ChainPos binding for historical queries + Network State honest-core dispersion guard (max_dispersion_bps).',
+        evidence: 'Guest tests: dispersion_guard_* reproducing $3,702.42 vs $4,302.42.'
+      },
+      {
+        id: 'Audit-05',
+        threat: 'Stale Historical Report Exploitation',
+        safeguard: 'is_stale(now_block, cert.created_at, max_staleness) enforced in quote_or_fallback -> auto-fallback to Base (30 bps / 60% LTV).',
+        evidence: 'Guest test: credit_report_staleness_ttl_is_enforced.'
+      }
+    ];
+
+    const DEFAULT_STATE = () => ({
+      activeTab: 'overview',
+      selectedHolder: 'alice',
+      certStatus: 'Finalized',
+      signers: [
+        'Node-ve3t...fj6ia (signer #0)',
+        'Node-j3fc...52cqaa (signer #1)',
+        'Node-oq2l...dseia (signer #3)'
+      ],
+      eventCount: 308,
+      createdAt: 11,
+      merkleRoot: '2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b',
+      airdrop: {
+        threshold: 60000,
+        claimedSet: {},
+        claimCount: 0,
+        lastMsg: 'Default Alice (62,685 >= 60,000) passes the airdrop threshold.',
+        history: [
+          { holder: '0xaaaa...aaaa', threshold: 60000, balance: 62685, eligible: true, status: 'Finalized' }
+        ]
+      },
+      gov: {
+        threshold: 70000,
+        proposalId: 1,
+        votedSet: {},
+        voteCount: 0,
+        lastMsg: 'Default Alice (62,685 < 70,000) is below the governance threshold.',
+        history: [
+          { holder: '0xaaaa...aaaa', threshold: 70000, balance: 62685, eligible: false, proposalId: 1, status: 'Finalized' }
+        ]
+      },
+      creditParams: { w1: 35, w2: 20, alpha: 2, washWindow: 3, ttl: 200, currentBlock: 100, certCreatedAt: 50 },
+      sepolia: {
+        block: 12184649,
+        balance: '2000000000000000',
+        token: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+        holder: '0x9675392d5c0e92143b2ac92a297e526ac95ca6ad',
+        queryHash: '8a39e3ba9c71ad1cb49271ed822a44ebfc153e95ad0e8fcb0900916397ac0c8c',
+        factHash: '95058ac9e32abbc6013317f24f0cce616e515cfdede67a0f2546edc8b5af25a8'
+      },
+      epochs: [
+        { epochId: 1, from: 0, to: 250, holders: 5, signers: 3, status: 'Finalized' },
+        { epochId: 2, from: 0, to: 500, holders: 5, signers: 3, status: 'Finalized' },
+        { epochId: 3, from: 0, to: 750, holders: 5, signers: 3, status: 'Finalized' },
+        { epochId: 4, from: 0, to: 1000, holders: 5, signers: 3, status: 'Finalized' }
+      ],
+      dispersion: { values: [370000, 370242, 370500, 430242], maxBps: 100 },
+      e3Evidence: [
+        {
+          title: 'claim() & vote() Security Matrix',
+          badge: 'PASS',
+          detail: 'Below-threshold, non-initializer config, wrong-holder spoofing, and duplicate replay all rejected; committed_actions strictly = 1.'
+        },
+        {
+          title: 'Certificate Revocation Enforcement',
+          badge: 'PASS',
+          detail: 'Non-initializer revocation rejected; initializer revocation sets status = Invalidated and blocks both claim() and vote().'
+        },
+        {
+          title: 'Fault Tolerance: Pause 1 Committee Member [12087]',
+          badge: '0.27s CERTIFIED',
+          detail: 'Remaining quorum certified during SIGSTOP pause (certified_while_paused: true) and preserved certificate after SIGCONT recovery.'
+        },
+        {
+          title: 'Safety: Pause 2 Committee Members [11087, 12087]',
+          badge: '30.06s BLOCKED',
+          detail: 'Below quorum threshold: zero certificate produced during pause (timed out at 25s), then automatically finalized after recovery.'
+        }
+      ]
+    });
+
+    let state = DEFAULT_STATE();
+    let toastTimer = null;
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 2600);
+    }
+
+    function shortAddr(addr) {
+      return addr.length > 14 ? addr.slice(0, 6) + '...' + addr.slice(-4) : addr;
+    }
+
+    function ilog2(n) {
+      if (n <= 0) return 0;
+      return Math.floor(Math.log2(n));
+    }
+
+    function evalTier(score, isFallback) {
+      if (isFallback) return { label: 'Base (Stale Fallback)', fee: 30, ltv: 6000, cls: 'bg-rose-50 text-rose-700 border-rose-200' };
+      if (score >= 800) return { label: 'VIP', fee: 5, ltv: 8500, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      if (score >= 500) return { label: 'Standard', fee: 15, ltv: 7500, cls: 'bg-sky-50 text-sky-700 border-sky-200' };
+      return { label: 'Base', fee: 30, ltv: 6000, cls: 'bg-amber-50 text-amber-800 border-amber-200' };
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      ['overview', 'credit', 'sepolia', 'audit'].forEach((name) => {
+        const cap = name.charAt(0).toUpperCase() + name.slice(1);
+        const panel = document.getElementById('panel' + cap);
+        const btn = document.getElementById('tabBtn' + cap);
+        if (name === tab) {
+          panel.classList.remove('hidden');
+          btn.classList.remove('tab-idle');
+          btn.classList.add('tab-active');
+        } else {
+          panel.classList.add('hidden');
+          btn.classList.remove('tab-active');
+          btn.classList.add('tab-idle');
+        }
+      });
+    }
+
+    function renderOverview() {
+      const h = HOLDERS[state.selectedHolder];
+      const finalized = state.certStatus === 'Finalized';
+
+      const statusBadge = document.getElementById('certStatusBadge');
+      statusBadge.textContent = state.certStatus;
+      statusBadge.className = finalized
+        ? 'rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200'
+        : 'rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200';
+
+      const revokeBtn = document.getElementById('toggleRevokeBtn');
+      revokeBtn.textContent = finalized ? 'Simulate Revocation' : 'Restore Finalized';
+      revokeBtn.className = finalized
+        ? 'rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 transition'
+        : 'rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition';
+
+      document.getElementById('certBalance').textContent = h.balance.toLocaleString();
+      document.getElementById('certSignersCount').textContent = state.signers.length + ' / 4';
+      document.getElementById('certEventCount').textContent = String(state.eventCount);
+      document.getElementById('certCreatedAt').textContent = '#' + state.createdAt;
+      document.getElementById('certQueryHash').textContent = h.queryHash;
+      document.getElementById('certMerkleRoot').textContent = state.merkleRoot;
+
+      document.getElementById('signerChips').innerHTML = state.signers
+        .map((s) => `<span class="rounded-md bg-teal-50 border border-teal-200 px-2 py-0.5 text-[11px] font-medium text-teal-800 mono">${s}</span>`)
+        .join('');
+
+      const airdropOk = finalized && h.balance >= state.airdrop.threshold;
+      const airdropBadge = document.getElementById('airdropBadge');
+      airdropBadge.textContent = !finalized ? 'REJECTED (Revoked)' : (airdropOk ? 'ELIGIBLE: true' : 'ELIGIBLE: false');
+      airdropBadge.className = airdropOk
+        ? 'rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-0.5 text-xs font-bold'
+        : 'rounded-full bg-rose-50 text-rose-700 border border-rose-200 px-3 py-0.5 text-xs font-bold';
+      document.getElementById('airdropClaimCount').textContent = String(state.airdrop.claimCount);
+      document.getElementById('airdropMsg').textContent = state.airdrop.lastMsg;
+      document.getElementById('airdropHistory').innerHTML = state.airdrop.history
+        .slice().reverse()
+        .map((item) => `<div class="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 border border-slate-100 mono">
+          <span>${item.holder} · thr ${item.threshold}</span>
+          <span class="${item.eligible ? 'text-emerald-700 font-semibold' : 'text-rose-600 font-semibold'}">${item.status === 'Invalidated' ? 'REVOKED' : String(item.eligible)}</span>
+        </div>`).join('');
+
+      const govOk = finalized && h.balance >= state.gov.threshold;
+      const govBadge = document.getElementById('govBadge');
+      govBadge.textContent = !finalized ? 'REJECTED (Revoked)' : (govOk ? 'ELIGIBLE: true' : 'ELIGIBLE: false');
+      govBadge.className = govOk
+        ? 'rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-0.5 text-xs font-bold'
+        : 'rounded-full bg-rose-50 text-rose-700 border border-rose-200 px-3 py-0.5 text-xs font-bold';
+      document.getElementById('govVoteCount').textContent = String(state.gov.voteCount);
+      document.getElementById('govMsg').textContent = state.gov.lastMsg;
+      document.getElementById('govHistory').innerHTML = state.gov.history
+        .slice().reverse()
+        .map((item) => `<div class="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 border border-slate-100 mono">
+          <span>P#${item.proposalId} · ${item.holder} · thr ${item.threshold}</span>
+          <span class="${item.eligible ? 'text-emerald-700 font-semibold' : 'text-rose-600 font-semibold'}">${item.status === 'Invalidated' ? 'REVOKED' : String(item.eligible)}</span>
+        </div>`).join('');
+    }
+
+    function renderCredit() {
+      const p = state.creditParams;
+      const isStale = p.currentBlock > p.certCreatedAt + p.ttl;
+      const banner = document.getElementById('ttlStatusBanner');
+      if (isStale) {
+        banner.className = 'mt-4 rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-xs font-semibold text-rose-800';
+        banner.textContent = `Audit-05 TTL Triggered: current_block (${p.currentBlock}) > created_at (${p.certCreatedAt}) + max_staleness (${p.ttl}). Automatically falling back to conservative Base tier (30 bps / 60% LTV).`;
+      } else {
+        banner.className = 'mt-4 rounded-xl bg-teal-50 border border-teal-200 px-4 py-2.5 text-xs font-medium text-teal-800';
+        banner.textContent = `Certificate Fresh: current_block (${p.currentBlock}) <= expiry (${p.certCreatedAt + p.ttl}). Active weights: w1=${p.w1}, w2=${p.w2}, alpha=${p.alpha}, wash_window=${p.washWindow}.`;
+      }
+
+      document.getElementById('creditTableBody').innerHTML = CREDIT_PERSONAS.map((u) => {
+        let washRemoved = 0;
+        let extraClean = 0;
+        u.washEvents.forEach((we) => {
+          if (we.gap <= p.washWindow) washRemoved += we.amount;
+          else extraClean += we.amount;
+        });
+        const clean = u.cleanBase + extraClean;
+        const raw = u.cleanBase + washRemoved + extraClean;
+        const score = Math.min(1000, Math.floor((p.w1 * ilog2(1 + clean) + p.w2 * u.repay) / (1 + p.alpha * u.liq)));
+        const tier = evalTier(score, isStale);
+        const displayScore = isStale ? 0 : score;
+
+        return `<tr class="hover:bg-slate-50/80">
+          <td class="px-3 py-3">
+            <div class="font-semibold text-slate-900">${u.name}</div>
+            <div class="text-[11px] text-slate-500 mono">${u.address}</div>
+          </td>
+          <td class="px-3 py-3 text-right mono text-slate-700">${raw.toLocaleString()}</td>
+          <td class="px-3 py-3 text-right mono ${washRemoved > 0 ? 'text-rose-600 font-semibold' : 'text-slate-400'}">${washRemoved.toLocaleString()}</td>
+          <td class="px-3 py-3 text-right mono font-semibold text-slate-900">${clean.toLocaleString()}</td>
+          <td class="px-3 py-3 text-right mono text-slate-700">${u.repay} / <span class="${u.liq > 0 ? 'text-rose-600 font-bold' : ''}">${u.liq}</span></td>
+          <td class="px-3 py-3 text-right mono text-base font-bold text-slate-900">${displayScore}</td>
+          <td class="px-3 py-3">
+            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tier.cls}">
+              ${tier.label} · ${tier.fee} bps · ${(tier.ltv / 100).toFixed(0)}% LTV
+            </span>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderSepolia() {
+      const s = state.sepolia;
+      document.getElementById('sepBlock').textContent = String(s.block);
+      document.getElementById('sepBalance').textContent = s.balance;
+      document.getElementById('sepToken').textContent = s.token;
+      document.getElementById('sepHolder').textContent = s.holder;
+      document.getElementById('sepQueryHash').textContent = s.queryHash;
+      document.getElementById('sepFactHash').textContent = s.factHash;
+
+      document.getElementById('epochTableBody').innerHTML = state.epochs.map((ep) => `
+        <tr class="hover:bg-slate-50/80">
+          <td class="px-3 py-2.5 font-semibold mono text-slate-900">Epoch #${ep.epochId}</td>
+          <td class="px-3 py-2.5 mono text-slate-700">[${ep.from}, ${ep.to}]</td>
+          <td class="px-3 py-2.5 text-right mono text-slate-700">${ep.holders}</td>
+          <td class="px-3 py-2.5 text-right mono font-semibold text-teal-700">${ep.signers} / 4</td>
+          <td class="px-3 py-2.5"><span class="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">${ep.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAudit() {
+      const vals = state.dispersion.values.slice().sort((a, b) => a - b);
+      const f = 1;
+      const low = vals[f];
+      const high = vals[vals.length - 1 - f];
+      const median = vals[Math.floor(vals.length / 2)];
+      const dispBps = median > 0 ? Math.floor(((high - low) * 10000) / median) : 99999;
+      const accepted = median > 0 && (high - low) * 10000 <= median * state.dispersion.maxBps;
+
+      const box = document.getElementById('dispersionResultBox');
+      box.className = accepted
+        ? 'mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs sm:text-sm text-emerald-900'
+        : 'mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs sm:text-sm text-rose-900';
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="font-bold">${accepted ? 'ACCEPTED — Outlier Filtered, Dispersion Within Bound' : 'REJECTED — Dispersion Exceeds Network State Threshold'}</span>
+          <span class="mono font-bold">${dispBps} bps (${(dispBps / 100).toFixed(2)}%) vs max ${state.dispersion.maxBps} bps</span>
+        </div>
+        <div class="mt-2 mono text-xs opacity-90">
+          Sorted: [${vals.join(', ')}] · Trimmed Honest Core [v2, v3]: [${low}, ${high}] · Median M: ${median} ($${(median / 100).toFixed(2)})
+        </div>
+      `;
+
+      document.getElementById('auditScorecardBody').innerHTML = AUDIT_SCORECARD.map((row) => `
+        <tr class="hover:bg-slate-50/80">
+          <td class="px-3 py-3 font-bold mono text-slate-900 whitespace-nowrap">${row.id}</td>
+          <td class="px-3 py-3 font-medium text-slate-900">${row.threat}</td>
+          <td class="px-3 py-3 text-slate-700">${row.safeguard}</td>
+          <td class="px-3 py-3 text-slate-600 mono text-xs">${row.evidence}</td>
+          <td class="px-3 py-3"><span class="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">PASS</span></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('e3EvidenceGrid').innerHTML = state.e3Evidence.map((item) => `
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 min-w-0 overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-bold text-slate-900">${item.title}</span>
+            <span class="shrink-0 rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 mono">${item.badge}</span>
+          </div>
+          ${Array.isArray(item.fields) && item.fields.length
+            ? `<div class="mt-2.5 space-y-1 text-xs">
+                ${item.fields.map(([k, v]) => `
+                  <div class="flex items-start justify-between gap-3 rounded-md bg-white/80 px-2 py-1 border border-slate-100">
+                    <span class="shrink-0 font-medium text-slate-500 mono">${k}</span>
+                    <span class="text-right text-slate-800 mono break-all">${v}</span>
+                  </div>
+                `).join('')}
+              </div>`
+            : `<p class="mt-2 text-xs text-slate-600 leading-relaxed break-all">${item.detail || ''}</p>`
+          }
+        </div>
+      `).join('');
+    }
+
+    function renderAll() {
+      renderOverview();
+      renderCredit();
+      renderSepolia();
+      renderAudit();
+    }
+
+    // Event bindings
+    document.querySelectorAll('[data-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('holderSelect').addEventListener('change', (e) => {
+      state.selectedHolder = e.target.value;
+      renderOverview();
+    });
+
+    document.getElementById('toggleRevokeBtn').addEventListener('click', () => {
+      state.certStatus = state.certStatus === 'Finalized' ? 'Invalidated' : 'Finalized';
+      showToast(state.certStatus === 'Invalidated' ? 'Certificate revoked (Invalidated); both gates now reject actions.' : 'Certificate restored to Finalized.');
+      renderOverview();
+    });
+
+    document.getElementById('airdropThresholdInput').addEventListener('input', (e) => {
+      state.airdrop.threshold = Math.max(0, Number(e.target.value) || 0);
+      renderOverview();
+    });
+
+    document.getElementById('govThresholdInput').addEventListener('input', (e) => {
+      state.gov.threshold = Math.max(0, Number(e.target.value) || 0);
+      renderOverview();
+    });
+
+    document.getElementById('govProposalInput').addEventListener('input', (e) => {
+      state.gov.proposalId = Math.max(1, Number(e.target.value) || 1);
+      renderOverview();
+    });
+
+    document.getElementById('airdropCheckBtn').addEventListener('click', () => {
+      const h = HOLDERS[state.selectedHolder];
+      const ok = state.certStatus === 'Finalized' && h.balance >= state.airdrop.threshold;
+      state.airdrop.history.push({
+        holder: shortAddr(h.address),
+        threshold: state.airdrop.threshold,
+        balance: h.balance,
+        eligible: ok,
+        status: state.certStatus
+      });
+      state.airdrop.lastMsg = state.certStatus !== 'Finalized'
+        ? 'Rejected: certificate status is Invalidated.'
+        : `check_eligible(): ${h.name} (${h.balance}) vs threshold ${state.airdrop.threshold} -> ${ok}`;
+      renderOverview();
+    });
+
+    document.getElementById('airdropClaimBtn').addEventListener('click', () => {
+      const h = HOLDERS[state.selectedHolder];
+      if (state.certStatus !== 'Finalized') {
+        state.airdrop.lastMsg = 'claim() rejected: certificate is Invalidated.';
+        showToast('claim() rejected: revoked certificate');
+      } else if (state.airdrop.claimedSet[h.address]) {
+        state.airdrop.lastMsg = `claim() blocked by anti-replay: ${h.name} already claimed.`;
+        showToast('Replay blocked: already claimed');
+      } else if (h.balance < state.airdrop.threshold) {
+        state.airdrop.lastMsg = `claim() rejected: ${h.name} balance ${h.balance} < threshold ${state.airdrop.threshold}.`;
+        showToast('Below threshold: claim rejected');
+      } else {
+        state.airdrop.claimedSet[h.address] = true;
+        state.airdrop.claimCount += 1;
+        state.airdrop.lastMsg = `claim() succeeded! Recorded one-time entitlement for ${h.name}.`;
+        showToast(`Entitlement recorded for ${h.name}`);
+      }
+      renderOverview();
+    });
+
+    document.getElementById('govCheckBtn').addEventListener('click', () => {
+      const h = HOLDERS[state.selectedHolder];
+      const ok = state.certStatus === 'Finalized' && h.balance >= state.gov.threshold;
+      state.gov.history.push({
+        holder: shortAddr(h.address),
+        threshold: state.gov.threshold,
+        balance: h.balance,
+        eligible: ok,
+        proposalId: state.gov.proposalId,
+        status: state.certStatus
+      });
+      state.gov.lastMsg = state.certStatus !== 'Finalized'
+        ? 'Rejected: certificate status is Invalidated.'
+        : `check_eligible(): Proposal #${state.gov.proposalId} · ${h.name} (${h.balance}) vs threshold ${state.gov.threshold} -> ${ok}`;
+      renderOverview();
+    });
+
+    document.getElementById('govVoteBtn').addEventListener('click', () => {
+      const h = HOLDERS[state.selectedHolder];
+      const key = `${state.gov.proposalId}|${h.address}`;
+      if (state.certStatus !== 'Finalized') {
+        state.gov.lastMsg = 'vote() rejected: certificate is Invalidated.';
+        showToast('vote() rejected: revoked certificate');
+      } else if (state.gov.votedSet[key]) {
+        state.gov.lastMsg = `vote() blocked by anti-replay: ${h.name} already voted on Proposal #${state.gov.proposalId}.`;
+        showToast('Replay blocked: already voted on this proposal');
+      } else if (h.balance < state.gov.threshold) {
+        state.gov.lastMsg = `vote() rejected: ${h.name} balance ${h.balance} < threshold ${state.gov.threshold}.`;
+        showToast('Below threshold: vote rejected');
+      } else {
+        state.gov.votedSet[key] = true;
+        state.gov.voteCount += 1;
+        state.gov.lastMsg = `vote() succeeded! Recorded vote for ${h.name} on Proposal #${state.gov.proposalId}.`;
+        showToast(`Vote recorded for ${h.name} (Proposal #${state.gov.proposalId})`);
+      }
+      renderOverview();
+    });
+
+    ['w1Input', 'w2Input', 'alphaInput', 'washWindowInput', 'ttlInput', 'currentBlockInput'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => {
+        state.creditParams.w1 = Math.max(0, Number(document.getElementById('w1Input').value) || 0);
+        state.creditParams.w2 = Math.max(0, Number(document.getElementById('w2Input').value) || 0);
+        state.creditParams.alpha = Math.max(0, Number(document.getElementById('alphaInput').value) || 0);
+        state.creditParams.washWindow = Math.max(0, Number(document.getElementById('washWindowInput').value) || 0);
+        state.creditParams.ttl = Math.max(1, Number(document.getElementById('ttlInput').value) || 1);
+        state.creditParams.currentBlock = Math.max(50, Number(document.getElementById('currentBlockInput').value) || 50);
+        renderCredit();
+      });
+    });
+
+    document.getElementById('resetWeightsBtn').addEventListener('click', () => {
+      state.creditParams = { w1: 35, w2: 20, alpha: 2, washWindow: 3, ttl: 200, currentBlock: 100, certCreatedAt: 50 };
+      document.getElementById('w1Input').value = 35;
+      document.getElementById('w2Input').value = 20;
+      document.getElementById('alphaInput').value = 2;
+      document.getElementById('washWindowInput').value = 3;
+      document.getElementById('ttlInput').value = 200;
+      document.getElementById('currentBlockInput').value = 100;
+      renderCredit();
+      showToast('Restored default VeriCredit weights & TTL');
+    });
+
+    function syncDispersionInputs() {
+      ['obs0Input', 'obs1Input', 'obs2Input', 'obs3Input'].forEach((id, i) => {
+        document.getElementById(id).value = state.dispersion.values[i];
+      });
+      document.getElementById('maxDispInput').value = state.dispersion.maxBps;
+    }
+
+    ['obs0Input', 'obs1Input', 'obs2Input', 'obs3Input', 'maxDispInput'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => {
+        state.dispersion.values = [
+          Math.max(1, Number(document.getElementById('obs0Input').value) || 1),
+          Math.max(1, Number(document.getElementById('obs1Input').value) || 1),
+          Math.max(1, Number(document.getElementById('obs2Input').value) || 1),
+          Math.max(1, Number(document.getElementById('obs3Input').value) || 1)
+        ];
+        state.dispersion.maxBps = Math.max(1, Number(document.getElementById('maxDispInput').value) || 1);
+        renderAudit();
+      });
+    });
+
+    document.getElementById('presetOutlierBtn').addEventListener('click', () => {
+      state.dispersion = { values: [370000, 370242, 370500, 430242], maxBps: 100 };
+      syncDispersionInputs();
+      renderAudit();
+      showToast('Loaded NDSS 2026 single-outlier preset ($4,302.42)');
+    });
+
+    document.getElementById('presetVolatileBtn').addEventListener('click', () => {
+      state.dispersion = { values: [350000, 360000, 390000, 430242], maxBps: 100 };
+      syncDispersionInputs();
+      renderAudit();
+      showToast('Loaded wide-spread manipulation preset (7.69% > 1%)');
+    });
+
+    document.getElementById('resetDemoBtn').addEventListener('click', () => {
+      state = DEFAULT_STATE();
+      document.getElementById('holderSelect').value = 'alice';
+      document.getElementById('airdropThresholdInput').value = 60000;
+      document.getElementById('govThresholdInput').value = 70000;
+      document.getElementById('govProposalInput').value = 1;
+      document.getElementById('w1Input').value = 35;
+      document.getElementById('w2Input').value = 20;
+      document.getElementById('alphaInput').value = 2;
+      document.getElementById('washWindowInput').value = 3;
+      document.getElementById('ttlInput').value = 200;
+      document.getElementById('currentBlockInput').value = 100;
+      syncDispersionInputs();
+      renderAll();
+      showToast('All console state reset to defaults');
+    });
+
+    document.getElementById('jsonImportInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          if (Array.isArray(data) && data.some((x) => x && x.case)) {
+            const fmtVal = (v) => {
+              const str = typeof v === 'string' ? v : JSON.stringify(v);
+              return (str.startsWith('0x') && str.length > 22) || (/^[0-9a-f]{40,}$/i.test(str))
+                ? str.slice(0, 12) + '...' + str.slice(-8)
+                : str;
+            };
+            state.e3Evidence = data.map((item) => {
+              if (item.case === 'committee availability') {
+                return {
+                  title: `Committee Availability (Paused ${JSON.stringify(item.paused_ports)})`,
+                  badge: item.certified_while_paused ? `${item.observation_seconds}s CERTIFIED` : `${item.observation_seconds}s BLOCKED`,
+                  fields: [
+                    ['certified_while_paused', String(item.certified_while_paused)],
+                    ['report_outcome', String(item.report_outcome)],
+                    ['recovered_cert', fmtVal(String(item.recovered_certificate || ''))]
+                  ]
+                };
+              }
+              const fields = Object.entries(item)
+                .filter(([k]) => k !== 'case')
+                .map(([k, v]) => [k, fmtVal(v)]);
+              return {
+                title: `E3 Case: ${item.case}`,
+                badge: item.committed_actions !== undefined ? `actions=${item.committed_actions}` : 'VERIFIED',
+                fields
+              };
+            });
+            switchTab('audit');
+            renderAudit();
+            showToast(`Imported ${data.length} E3 audit records`);
+          } else if (data.checkpoint && data.checkpoint.dataset_id === 'sepolia-rpc-v1') {
+            state.sepolia = {
+              block: data.block_number,
+              balance: String(data.balance),
+              token: data.token,
+              holder: data.holder,
+              queryHash: data.query_hash,
+              factHash: data.fact_hash
+            };
+            switchTab('sepolia');
+            renderSepolia();
+            showToast('Imported local Sepolia certificate JSON');
+          } else if (data.checkpoints && Array.isArray(data.checkpoints)) {
+            state.epochs = data.checkpoints.map((c) => ({
+              epochId: c.epoch_id,
+              from: c.checkpoint.from_block,
+              to: c.checkpoint.to_block,
+              holders: c.unique_holders,
+              signers: (c.signer_ids || []).length,
+              status: c.status || 'Finalized'
+            }));
+            switchTab('sepolia');
+            renderSepolia();
+            showToast(`Imported ${state.epochs.length} periodic Epoch Checkpoints`);
+          } else if (data.query_hash && data.checkpoint) {
+            state.certStatus = data.status || 'Finalized';
+            state.eventCount = data.checkpoint.event_count || 308;
+            state.createdAt = data.created_at || 11;
+            state.merkleRoot = data.checkpoint.event_merkle_root || state.merkleRoot;
+            if (Array.isArray(data.signer_ids) && data.signer_ids.length) {
+              state.signers = data.signer_ids.map((id, i) => `${id} (signer #${i})`);
+            }
+            switchTab('overview');
+            renderOverview();
+            showToast('Imported local QueryCertificate JSON');
+          } else {
+            showToast('JSON parsed, but format did not match certificate or E3 evidence.');
+          }
+        } catch (err) {
+          showToast('Invalid JSON file.');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

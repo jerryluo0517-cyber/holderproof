@@ -2,7 +2,7 @@
 //! atomic `call!` to quote dynamic DEX swap fees (bps) and lending LTV (bps).
 
 use holderproof_gate_core::{
-    credit::{certified_credit, evaluate_tier},
+    credit::{certified_credit, evaluate_tier, is_stale},
     invalid,
 };
 use lyquid::prelude::*;
@@ -23,6 +23,7 @@ state! {
     network last_query_hash: String = String::new();
     network quote_count: u64 = 0;
     network last_fallback: bool = false;
+    network max_staleness: u64 = 200; // 报告有效期（区块数），默认 200 块
 }
 
 #[method::network(export = eth)]
@@ -50,6 +51,15 @@ fn configure(
     *ctx.network.start_block = start_block;
     *ctx.network.end_block = end_block;
     *ctx.network.quote_count = 0;
+    Ok(true)
+}
+
+#[method::network(export = eth)]
+fn configure_staleness(ctx: &mut _, max_staleness: u64) -> LyquidResult<bool> {
+    if ctx.caller != *ctx.network.initializer {
+        return Err(invalid("only initializer can configure max_staleness"));
+    }
+    *ctx.network.max_staleness = max_staleness;
     Ok(true)
 }
 
@@ -96,6 +106,22 @@ fn quote_or_fallback(ctx: &mut _, user: Address) -> LyquidResult<u64> {
         *ctx.network.end_block,
     ) {
         Ok(cert) => {
+            let now_block = lyquor_api::chain_pos()?.block();
+            if is_stale(now_block, cert.created_at, *ctx.network.max_staleness) {
+                let default_tier = evaluate_tier(0);
+                *ctx.network.last_user = user;
+                *ctx.network.last_score = 0;
+                *ctx.network.last_fee_bps = default_tier.fee_bps;
+                *ctx.network.last_ltv_bps = default_tier.ltv_bps;
+                *ctx.network.last_tier = "Base (Stale Fallback)".to_string();
+                *ctx.network.last_clean_volume = "0".to_string();
+                *ctx.network.last_wash_removed = "0".to_string();
+                *ctx.network.last_query_hash = cert.query_hash;
+                *ctx.network.last_fallback = true;
+                *ctx.network.quote_count += 1;
+                trigger!(record_quote(), TriggerMode::Commit);
+                return Ok(default_tier.fee_bps);
+            }
             let tier = evaluate_tier(cert.metrics.score);
             *ctx.network.last_user = user;
             *ctx.network.last_score = cert.metrics.score;

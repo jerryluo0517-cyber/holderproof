@@ -239,3 +239,49 @@ fn sepolia_replay_matches_fetched_ground_truth() {
     assert_eq!(fact.checkpoint.event_merkle_root, expected["merkle_root"].as_str().unwrap());
     assert_eq!(fact.checkpoint.dataset_id, holderproof_types::SEPOLIA_DATASET_ID);
 }
+
+#[test]
+fn dispersion_guard_filters_single_byzantine_outlier() {
+    use crate::dispersion::aggregate_with_dispersion_guard;
+
+    // 复现 NDSS 2026 论文案例：诚实节点约 $3,702.42，1 个拜占庭节点篡改为 $4,302.42
+    // f = 1 (n = 4), max_dispersion_bps = 100 (1%)
+    let obs = vec![
+        (0u32, 370_000u128),
+        (1, 370_242),
+        (2, 370_500),
+        (3, 430_242), // 恶意极端值
+    ];
+    let res = aggregate_with_dispersion_guard(&obs, 1, 100).unwrap();
+    assert_eq!(res.honest_low, 370_242);
+    assert_eq!(res.honest_high, 370_500);
+    assert_eq!(res.median, 370_500);
+    assert!(res.dispersion_bps <= 100);
+}
+
+#[test]
+fn dispersion_guard_rejects_wide_spread_or_manipulation() {
+    use crate::dispersion::aggregate_with_dispersion_guard;
+
+    // 市场剧烈分叉导致诚实核心区间 [360000, 390000] 离散度达 ~7.69% > 1%
+    let volatile = vec![
+        (0u32, 350_000u128),
+        (1, 360_000),
+        (2, 390_000),
+        (3, 430_242),
+    ];
+    assert!(aggregate_with_dispersion_guard(&volatile, 1, 100).is_err());
+    // 放宽阈值至 10% (1000 bps) 时才允许通过
+    assert!(aggregate_with_dispersion_guard(&volatile, 1, 1000).is_ok());
+}
+
+#[test]
+fn dispersion_guard_rejects_duplicates_and_insufficient_quorum() {
+    use crate::dispersion::aggregate_with_dispersion_guard;
+
+    let dup = vec![(0u32, 370_000u128), (0, 370_100), (1, 370_200)];
+    assert!(aggregate_with_dispersion_guard(&dup, 1, 100).is_err());
+
+    let too_few = vec![(0u32, 370_000u128), (1, 370_100)];
+    assert!(aggregate_with_dispersion_guard(&too_few, 1, 100).is_err());
+}

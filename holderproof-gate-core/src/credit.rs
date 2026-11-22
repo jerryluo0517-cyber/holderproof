@@ -37,6 +37,11 @@ pub fn evaluate_tier(score: u64) -> CreditTier {
     }
 }
 
+/// Audit-05: returns true when `current_block > created_at + max_staleness`.
+pub fn is_stale(current_block: u64, created_at: u64, max_staleness: u64) -> bool {
+    current_block > created_at.saturating_add(max_staleness)
+}
+
 pub fn certified_credit(
     indexer: Address,
     user: Address,
