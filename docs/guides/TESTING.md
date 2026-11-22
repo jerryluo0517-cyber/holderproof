@@ -63,7 +63,7 @@ curl -fsS http://127.0.0.1:8082/api/result | python3 -m json.tool
 两个 Gate 的 `queryHash` 应与证书的 `query_hash` 一致。资格的差异来自各自门槛。
 两个 Gate 的 `/api/history` 也可查看此前的资格检查记录。
 
-团队外参与者可用[独立试用任务单](EXTERNAL_USER_TEST.md)记录耗时、实际结果和卡点。
+团队外参与者可以按[独立试用任务单](EXTERNAL_USER_TEST.md)运行引导脚本，自动生成反馈表。
 完成后关闭本次启动的 demo。
 
 ```bash
