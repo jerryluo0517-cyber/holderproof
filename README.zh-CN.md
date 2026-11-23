@@ -182,6 +182,10 @@ flowchart LR
 
 ### 7.1 环境要求与一键命令
 
+**Windows（WSL2 Ubuntu）**：先按 [Windows 启动指南](docs/guides/WINDOWS_WSL.md) 准备环境，
+再从仓库根目录运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`。
+同一入口支持 `setup`、`check`、`test`、`status` 和 `stop`；可通过 `-Distribution` 指定发行版。
+
 运行 `make web` 启动本地 devnet，然后打开 `http://127.0.0.1:8765`。
 选择样例持有者和 `0–1000` 内的区块，即可查询该区块的余额证书。
 空投和治理的资格快照固定在区块 `1000`。

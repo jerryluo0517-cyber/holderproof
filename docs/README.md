@@ -6,6 +6,7 @@
 
 - CS5298 课程报告（英文）[PDF](reports/CS5298_FINAL_REPORT.pdf) · [Markdown](reports/CS5298_FINAL_REPORT.md)
 - [Web 使用说明](guides/WEB_GUIDE.md)
+- [Windows 启动指南（WSL2 Ubuntu）](guides/WINDOWS_WSL.md)
 
 ## 方案 05 验收
 
