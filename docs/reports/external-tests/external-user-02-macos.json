@@ -1,295 +1,219 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "participant_id": "external-user-02",
-  "study_record": "technical_reproduction",
+  "study_record": "functional_test",
   "repository": "https://github.com/jerryluo0517-cyber/holderproof",
   "feedback_form_received": false,
-  "latest_retest": {
-    "commit": "2552c5e91c3231d924179841dbab7d7e770aad7a",
-    "date": "2026-11-23",
-    "timezone": "Asia/Hong_Kong",
-    "execution": "Codex-assisted retest",
-    "independent_human_trial": false,
-    "host": {
-      "os": "macOS",
-      "product_version": "26.6.2",
-      "build": "25G83",
-      "darwin": "25.6.0",
-      "architecture": "arm64",
-      "shell": "zsh / bash"
+  "independent_human_trial_verified": false,
+  "commit": "2552c5e91c3231d924179841dbab7d7e770aad7a",
+  "date": "2026-11-23",
+  "timezone": "Asia/Hong_Kong",
+  "host": {
+    "os": "macOS",
+    "product_version": "26.6.2",
+    "build": "25G83",
+    "darwin": "25.6.0",
+    "architecture": "arm64",
+    "shell": "zsh / bash"
+  },
+  "environment": {
+    "rust": "1.99.0",
+    "cargo": "1.99.0",
+    "rust_target": "wasm32-unknown-unknown",
+    "python": "3.10.22",
+    "lyquor_ldk": "0.8.4",
+    "shaker": "0.8.4+54c5e11",
+    "foundry": "1.7.1",
+    "solidity": "0.8.28",
+    "make": "3.81",
+    "custom_ldk_environment_variables": true,
+    "source_modifications": false
+  },
+  "checks": {
+    "00-environment-check": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 0.786
     },
-    "environment": {
-      "rust": "1.99.0",
-      "cargo": "1.99.0",
-      "rust_target": "wasm32-unknown-unknown",
-      "python": "3.10.22",
-      "lyquor_ldk": "0.8.4",
-      "shaker": "0.8.4+54c5e11",
-      "foundry": "1.7.1",
-      "solidity": "0.8.28",
-      "make": "3.81",
-      "custom_ldk_environment_variables": true,
-      "source_modifications": false
+    "01-full-3of4-acceptance": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 224.162
     },
-    "checks": {
-      "00-environment-check": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 0.786
-      },
-      "01-full-3of4-acceptance": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 224.162
-      },
-      "02-cargo-check-all-targets": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 1.691
-      },
-      "03-cargo-fmt-check": {
-        "status": "fail",
-        "exit_code": 1,
-        "duration_seconds": 0.614
-      },
-      "04-cargo-clippy": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 2.5
-      },
-      "05-python-compileall": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 0.074
-      },
-      "06-git-diff-check": {
-        "status": "pass",
-        "exit_code": 0,
-        "duration_seconds": 0.041
-      },
-      "07-environment-spaces": {
-        "status": "pass",
-        "exit_code": 0,
-        "scope": "environment check only"
-      },
-      "manual_query_and_idempotency": {
-        "status": "pass",
-        "exit_code": 0
-      },
-      "browser_live_query": {
-        "status": "pass",
-        "certificate_details": "pass"
-      },
-      "browser_certificate_download": {
-        "status": "unverified_tool_timeout",
-        "exit_code": null
-      }
+    "02-cargo-check-all-targets": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 1.691
     },
-    "functional_results": {
-      "fixture_checks_passed": 9,
-      "python_tests_passed": 6,
-      "indexer_guest_passed": 21,
-      "gate_core_guest_passed": 15,
-      "historical_transfer_logs": 308,
-      "historical_balance_queries": 18,
-      "committee_availability": "one paused: certificate; two paused: no certificate in observation window; recovery: certificate",
-      "epoch_blocks": [
-        250,
-        500,
-        750,
-        1000
-      ],
-      "epoch_event_counts": [
-        89,
-        172,
-        255,
-        308
-      ],
-      "credit_scores": {
-        "alice": 940,
-        "dave": 675,
-        "bob": 495,
-        "carol": 250
-      },
-      "sepolia": {
-        "source": "repository embedded historical snapshot",
-        "block": 12184649,
-        "event_count": 169,
-        "balance_wei": "2000000000000000",
-        "weth": "0.002",
-        "signer_count": 3
-      },
-      "browser": {
-        "1000": {
-          "balance": "62685",
-          "airdrop": "Eligible",
-          "governance": "Ineligible"
-        },
-        "950": {
-          "balance": "57685",
-          "airdrop": "Not evaluated",
-          "governance": "Not evaluated"
-        }
-      },
-      "manual_query": {
-        "block": 1000,
-        "balance": "62685",
-        "certificate_status": "Finalized",
-        "signer_count": 3,
-        "repeated_query_same_certificate": true,
-        "gate_query_hash_match": true,
-        "airdrop_eligible": true,
-        "governance_eligible": false
-      }
+    "03-cargo-fmt-check": {
+      "status": "fail",
+      "exit_code": 1,
+      "duration_seconds": 0.614
     },
-    "static_checks": {
-      "format_files_affected": 11,
-      "format_diff_sections": 31,
-      "clippy_exit_code": 0,
-      "clippy_unique_warnings": {
-        "unused_doc_comments": 5,
-        "manual_is_multiple_of": 1
-      }
+    "04-cargo-clippy": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 2.5
     },
-    "query_latency": {
-      "method": "Five sequential queries on a fresh running 3-of-4 local demo; monotonic_ns; preexistence checked before each query; query and certification calls include local CLI subprocess overhead.",
-      "limitations": "Same-machine warm-service sequential queries; includes CLI overhead; not directly comparable to early 2-of-3 results.",
-      "sample_count": 5,
-      "median_total_ms": 218.950875,
-      "samples": [
-        {
-          "holder": "alice",
-          "block": 900,
-          "balance": "47685",
-          "signer_count": 3,
-          "certificate_preexisted": false,
-          "query_confirmation_ms": 43.970958,
-          "certification_ms": 651.380584,
-          "total_ms": 695.351542
-        },
-        {
-          "holder": "alice",
-          "block": 950,
-          "balance": "57685",
-          "signer_count": 3,
-          "certificate_preexisted": false,
-          "query_confirmation_ms": 40.529959,
-          "certification_ms": 630.832666,
-          "total_ms": 671.362625
-        },
-        {
-          "holder": "bob",
-          "block": 1000,
-          "balance": "51886",
-          "signer_count": 3,
-          "certificate_preexisted": false,
-          "query_confirmation_ms": 44.612833,
-          "certification_ms": 83.210042,
-          "total_ms": 127.822875
-        },
-        {
-          "holder": "carol",
-          "block": 1000,
-          "balance": "43249",
-          "signer_count": 3,
-          "certificate_preexisted": false,
-          "query_confirmation_ms": 88.105875,
-          "certification_ms": 130.845,
-          "total_ms": 218.950875
-        },
-        {
-          "holder": "dave",
-          "block": 1000,
-          "balance": "51856",
-          "signer_count": 3,
-          "certificate_preexisted": false,
-          "query_confirmation_ms": 88.233541,
-          "certification_ms": 127.729709,
-          "total_ms": 215.96325
-        }
-      ]
+    "05-python-compileall": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 0.074
     },
-    "evidence": {
-      "raw_logs_reviewed": 17,
-      "files_verified_against_sha256_manifest": 55
+    "06-git-diff-check": {
+      "status": "pass",
+      "exit_code": 0,
+      "duration_seconds": 0.041
     },
-    "cleanup": {
-      "services_stopped": true,
-      "test_ports_free": true,
-      "git_status_clean": true
+    "07-environment-spaces": {
+      "status": "pass",
+      "exit_code": 0,
+      "scope": "environment check only"
+    },
+    "manual_query_and_idempotency": {
+      "status": "pass",
+      "exit_code": 0
+    },
+    "browser_live_query": {
+      "status": "pass",
+      "certificate_details": "pass"
+    },
+    "browser_certificate_download": {
+      "status": "unverified_tool_timeout",
+      "exit_code": null
     }
   },
-  "prior_run": {
-    "schema_version": 1,
-    "participant_id": "external-user-02",
-    "study_record": "technical_reproduction",
-    "feedback_form_received": false,
-    "independence_recorded": false,
-    "elapsed_time_recorded": false,
-    "environment": {
-      "os": "macOS",
-      "kernel": "Darwin 25.6.0",
-      "architecture": "arm64",
-      "python": "3.10.22",
-      "rust": "1.99.0",
-      "lyquor_ldk": "0.8.4+54c5e11",
-      "foundry": "1.7.1",
-      "solidity": "0.8.28"
+  "functional_results": {
+    "fixture_checks_passed": 9,
+    "python_tests_passed": 6,
+    "indexer_guest_passed": 21,
+    "gate_core_guest_passed": 15,
+    "historical_transfer_logs": 308,
+    "historical_balance_queries": 18,
+    "committee_availability": "one paused: certificate; two paused: no certificate in observation window; recovery: certificate",
+    "epoch_blocks": [
+      250,
+      500,
+      750,
+      1000
+    ],
+    "epoch_event_counts": [
+      89,
+      172,
+      255,
+      308
+    ],
+    "credit_scores": {
+      "alice": 940,
+      "dave": 675,
+      "bob": 495,
+      "carol": 250
     },
-    "repository": "https://github.com/jerryluo0517-cyber/holderproof",
-    "commit": "383e7e116fd1193ee6d0b58715b60991fdbe8234",
-    "date": "2026-11-23",
-    "overall": "passed",
-    "environment_adaptation": "temporary LDK path adjustment; restored after testing",
-    "checks": {
-      "make check": {
-        "exit_code": 0,
-        "fixture_checks": 9,
-        "python_tests": 6
+    "sepolia": {
+      "source": "repository embedded historical snapshot",
+      "block": 12184649,
+      "event_count": 169,
+      "balance_wei": "2000000000000000",
+      "weth": "0.002",
+      "signer_count": 3
+    },
+    "browser": {
+      "1000": {
+        "balance": "62685",
+        "airdrop": "Eligible",
+        "governance": "Ineligible"
       },
-      "guest-test": {
-        "exit_code": 0,
-        "indexer_passed": 21,
-        "gate_core_passed": 15
-      },
-      "manual_demo_and_query": {
-        "exit_code": 0
-      },
-      "run-3of4-acceptance.sh": {
-        "exit_code": 0,
-        "e3": "passed",
-        "epoch": "passed",
-        "credit": "passed",
-        "sepolia": "passed"
-      },
-      "browser_live_query": {
-        "1000": {
-          "balance": "62685",
-          "airdrop": "Eligible",
-          "governance": "Ineligible"
-        },
-        "950": {
-          "balance": "57685",
-          "airdrop": "Not evaluated",
-          "governance": "Not evaluated"
-        }
+      "950": {
+        "balance": "57685",
+        "airdrop": "Not evaluated",
+        "governance": "Not evaluated"
       }
     },
-    "git_status": "",
-    "verification": {
-      "balance_signer_count": 3,
+    "manual_query": {
+      "block": 1000,
+      "balance": "62685",
+      "certificate_status": "Finalized",
+      "signer_count": 3,
+      "repeated_query_same_certificate": true,
       "gate_query_hash_match": true,
-      "evm_transfer_count": 308,
-      "archival_balance_checks": 18,
-      "epoch_blocks": [
-        250,
-        500,
-        750,
-        1000
-      ],
-      "sepolia_block": 12184649,
-      "sepolia_events": 169,
-      "sepolia_weth_wei": "2000000000000000"
+      "airdrop_eligible": true,
+      "governance_eligible": false
     }
+  },
+  "static_checks": {
+    "format_files_affected": 11,
+    "format_diff_sections": 31,
+    "clippy_exit_code": 0,
+    "clippy_unique_warnings": {
+      "unused_doc_comments": 5,
+      "manual_is_multiple_of": 1
+    }
+  },
+  "query_latency": {
+    "method": "Five sequential queries on a fresh running 3-of-4 local demo; monotonic_ns; preexistence checked before each query; query and certification calls include local CLI subprocess overhead.",
+    "limitations": "Same-machine warm-service sequential queries; includes CLI overhead; not directly comparable to early 2-of-3 results.",
+    "sample_count": 5,
+    "median_total_ms": 218.950875,
+    "samples": [
+      {
+        "holder": "alice",
+        "block": 900,
+        "balance": "47685",
+        "signer_count": 3,
+        "certificate_preexisted": false,
+        "query_confirmation_ms": 43.970958,
+        "certification_ms": 651.380584,
+        "total_ms": 695.351542
+      },
+      {
+        "holder": "alice",
+        "block": 950,
+        "balance": "57685",
+        "signer_count": 3,
+        "certificate_preexisted": false,
+        "query_confirmation_ms": 40.529959,
+        "certification_ms": 630.832666,
+        "total_ms": 671.362625
+      },
+      {
+        "holder": "bob",
+        "block": 1000,
+        "balance": "51886",
+        "signer_count": 3,
+        "certificate_preexisted": false,
+        "query_confirmation_ms": 44.612833,
+        "certification_ms": 83.210042,
+        "total_ms": 127.822875
+      },
+      {
+        "holder": "carol",
+        "block": 1000,
+        "balance": "43249",
+        "signer_count": 3,
+        "certificate_preexisted": false,
+        "query_confirmation_ms": 88.105875,
+        "certification_ms": 130.845,
+        "total_ms": 218.950875
+      },
+      {
+        "holder": "dave",
+        "block": 1000,
+        "balance": "51856",
+        "signer_count": 3,
+        "certificate_preexisted": false,
+        "query_confirmation_ms": 88.233541,
+        "certification_ms": 127.729709,
+        "total_ms": 215.96325
+      }
+    ]
+  },
+  "evidence": {
+    "raw_logs_reviewed": 17,
+    "files_verified_against_sha256_manifest": 55
+  },
+  "cleanup": {
+    "services_stopped": true,
+    "test_ports_free": true,
+    "git_status_clean": true
   }
 }
