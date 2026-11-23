@@ -4,7 +4,7 @@
 
 Direction 3 · Verifiable Indexer
 
-[HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof) · [Evidence baseline `948dc94`](https://github.com/jerryluo0517-cyber/holderproof/tree/948dc94)
+[HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof) · [Current source (`main`)](https://github.com/jerryluo0517-cyber/holderproof/tree/main)
 
 ## Abstract
 
@@ -176,9 +176,7 @@ E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker`
 |---|---|
 | `jerryluo0517-cyber` | Balance certification, common gate checks, dual-gate integration, historical EVM comparison, Web console and external-trial tooling. [`154939c`](https://github.com/jerryluo0517-cyber/holderproof/commit/154939c) · [`b87c980`](https://github.com/jerryluo0517-cyber/holderproof/commit/b87c980) · [`46ef730`](https://github.com/jerryluo0517-cyber/holderproof/commit/46ef730) |
 | `hwzhang0317` | Credit replay and Gate, checkpoint and Sepolia paths, related fixtures and the dispersion check. [`5f3a904`](https://github.com/jerryluo0517-cyber/holderproof/commit/5f3a904) · [`d55a449`](https://github.com/jerryluo0517-cyber/holderproof/commit/d55a449) |
-| Third team member | [INSERT THIRD TEAM MEMBER NAME & CONTRIBUTIONS] |
-
-Git attributes the Windows PowerShell launcher, WSL2 runtime and startup guide to `Hitori-Chan`. [`878842d`](https://github.com/jerryluo0517-cyber/holderproof/commit/878842da7ef8e666de3ee667f8e6fe582cf802b9)
+| `Hitori-Chan` | Windows PowerShell launcher, WSL2 Ubuntu runtime script and Windows startup guide. [`878842d`](https://github.com/jerryluo0517-cyber/holderproof/commit/878842da7ef8e666de3ee667f8e6fe582cf802b9) |
 
 The implementation relies on Lyquor LDK for execution and certified calls, and on Foundry Anvil for the local EVM comparison. The repository contains the synthetic fixtures and captured Sepolia snapshot used in evaluation. [Lyquor LDK](https://docs.lyquor.dev/docs/ldk/build-deploy-test/) · [Anvil](https://www.getfoundry.sh/anvil/index.html)
 
