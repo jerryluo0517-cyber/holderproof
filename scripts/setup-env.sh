@@ -79,7 +79,10 @@ check_ldk() {
 
 install_environment() {
     say "Installing Lyquor development environment"
-    if [[ -f "$LYQUOR_LDK_DIR/scripts/localnet.sh" && -r "$LYQUOR_LDK_DIR/scripts/localnet.sh" ]]; then
+    if [[ -f "$LYQUOR_LDK_DIR/scripts/localnet.sh" && -r "$LYQUOR_LDK_DIR/scripts/localnet.sh" ]] \
+        && command -v shaker >/dev/null 2>&1 \
+        && command -v lyquor >/dev/null 2>&1 \
+        && command -v ladle >/dev/null 2>&1; then
         pass "Lyquor LDK already installed; skipping download"
     elif [[ "$LYQUOR_LDK_DIR" != "$HOME/.shakenup/ldk" ]]; then
         require_lyquor_localnet

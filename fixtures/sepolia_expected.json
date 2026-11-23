@@ -3,13 +3,13 @@
   "chain_id": 11155111,
   "token": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
   "rpc_url": "https://ethereum-sepolia-rpc.publicnode.com",
-  "from_block": 12184050,
-  "to_block": 12184649,
-  "block_hash_start": "0xe2fd2b8deafc800f3cd741f7ddb7ca6b378392f034447443cbc5dcb5c2b4a216",
-  "block_hash": "0x50330dba274dee8072f2746286e182034794c0b1137916c8e37c86eafd1f6820",
-  "event_count": 169,
-  "merkle_root": "9acafecea371399557c469c313be78d09aa958a953e83c3cd6f09a580cedce4c",
-  "sample_holder": "0x9675392d5c0e92143b2ac92a297e526ac95ca6ad",
-  "sample_window_balance": "2000000000000000",
-  "onchain_latest_balance": "135185560107136235019"
+  "from_block": 12188186,
+  "to_block": 12188785,
+  "block_hash_start": "0x014c8f946d4edc621e2654e9b80e7c955eba7d620fc2ecca04f39dedd6df7f7f",
+  "block_hash": "0xc0370ddcd296c4a182dea665d8034d37ae0443a3b61da88c1f3ebaab432195ab",
+  "event_count": 215,
+  "merkle_root": "8305837520f447140a8a16dfaa46c600c23a1749b80a692a36edb3d283277610",
+  "sample_holder": "0x6c1bbfd6330ca6c3f27c29b3a3330db2b6b0980a",
+  "sample_window_balance": "61398085361568879",
+  "onchain_latest_balance": "1168736690822639331"
 }

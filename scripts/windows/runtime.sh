@@ -44,6 +44,12 @@ case "${1:-check}" in
         fi
         echo 'No managed Windows runtime found for this checkout.'
         ;;
+    trial)
+        shift
+        # 试用结束后自动清理本轮启动的本地链，无需用户手动 make stop-demo
+        trap 'bash scripts/stop-step4.sh >/dev/null 2>&1 || true' EXIT
+        python3 scripts/record_external_test.py "$@"
+        ;;
     serve)
         command -v flock >/dev/null || { echo 'Install util-linux (flock).' >&2; exit 1; }
         exec 9>"$RUN_DIR/runtime.lock"
@@ -80,5 +86,5 @@ PY
         web_pid=$!
         wait "$web_pid"
         ;;
-    *) echo "Usage: $0 {setup|check|test|serve|status|stop}" >&2; exit 2 ;;
+    *) echo "Usage: $0 {setup|check|test|trial|serve|status|stop}" >&2; exit 2 ;;
 esac
