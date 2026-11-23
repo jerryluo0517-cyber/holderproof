@@ -11,7 +11,7 @@ BLOCK=1000
 THRESHOLD=60000
 ANVIL_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
-export PATH="$HOME/.shakenup/bin:$PATH"
+source "$ROOT/scripts/lyquor-env.sh"
 
 require_tool() {
     command -v "$1" >/dev/null 2>&1 || {
@@ -125,7 +125,8 @@ state_write() {
     } > "$STATE_FILE"
 }
 
-for tool in shaker cast curl lsof python3; do
+require_lyquor_localnet
+for tool in shaker lyquor cast anvil curl lsof python3; do
     require_tool "$tool"
 done
 for port in 8545 10087 11087 12087 13087 8080 8081 8082; do

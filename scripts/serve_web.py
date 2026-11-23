@@ -5,8 +5,6 @@ from argparse import Namespace
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
-import os
-from pathlib import Path
 import re
 import subprocess
 import sys
@@ -181,7 +179,6 @@ class WebHandler(BaseHTTPRequestHandler):
 
 
 def main() -> int:
-    os.environ["PATH"] = f"{Path.home() / '.shakenup/bin'}:{os.environ.get('PATH', '')}"
     try:
         with ThreadingHTTPServer((HOST, PORT), WebHandler) as server:
             prepare_demo_gates()

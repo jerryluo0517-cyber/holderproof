@@ -10,6 +10,8 @@ import subprocess
 import time
 from urllib.request import urlopen
 
+from lyquor_env import lyquor_command
+
 ROOT = Path(__file__).resolve().parents[1]
 # Public, disposable Anvil development key, never a real wallet.
 DEV_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -36,9 +38,11 @@ def wait_result(port, predicate):
 
 
 def send(contract, signature, *args):
-    subprocess.run(["cast", "send", contract, signature, *map(str, args),
-                    "--private-key", DEV_KEY, "--rpc-url", "http://127.0.0.1:8545", "--quiet"],
-                   check=True, capture_output=True, text=True, timeout=30)
+    command = lyquor_command(
+        "cast", "send", contract, signature, *map(str, args),
+        "--private-key", DEV_KEY, "--rpc-url", "http://127.0.0.1:8545", "--quiet",
+    )
+    subprocess.run(command, check=True, capture_output=True, text=True, timeout=30)
 
 
 def exercise_gates(certificate, airdrop):

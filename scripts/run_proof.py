@@ -10,6 +10,8 @@ import subprocess
 import time
 from typing import Any
 
+from lyquor_env import lyquor_command
+
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = "0x5298000000000000000000000000000000000001"
 FIXTURE_END_BLOCK = 1000
@@ -20,7 +22,7 @@ DEV_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 def cast(*arguments: object) -> str:
     """Run cast without shell interpolation and return its textual result."""
     return subprocess.check_output(
-        ["cast", *map(str, arguments)],
+        lyquor_command("cast", *map(str, arguments)),
         text=True,
         stderr=subprocess.PIPE,
         timeout=30,

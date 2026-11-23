@@ -2,12 +2,13 @@
 """Verify real Sepolia Transfer logs through the 3-of-4 sepolia_proof committee."""
 
 import json
-import os
 from pathlib import Path
 import shlex
 import subprocess
 import time
 from urllib.request import urlopen
+
+from lyquor_env import lyquor_command
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN_DIR = ROOT / ".run/step4"
@@ -22,9 +23,9 @@ def require(cond, msg):
 
 
 def run(cmd, timeout=60):
-    env = os.environ.copy()
-    env["PATH"] = f"{Path.home() / '.shakenup/bin'}:{env.get('PATH', '')}"
-    return subprocess.check_output(cmd, text=True, stderr=subprocess.PIPE, timeout=timeout, env=env).strip()
+    return subprocess.check_output(
+        lyquor_command(*cmd), text=True, stderr=subprocess.PIPE, timeout=timeout,
+    ).strip()
 
 
 def read_json(port, path):

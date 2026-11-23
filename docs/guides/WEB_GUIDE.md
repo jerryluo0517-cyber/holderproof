@@ -6,7 +6,7 @@
 
 ## 启动与停止
 
-在仓库根目录运行以下命令。依赖和端口要求见[测试操作指引](TESTING.md)。如果之前启动过自己的 demo，先运行 `make stop-demo`。
+在仓库根目录运行以下命令。依赖、端口和自定义 LDK 路径见[测试操作指引](TESTING.md)。如果之前启动过自己的 demo，先运行 `make stop-demo`。
 
 ```bash
 make check-env

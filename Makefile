@@ -1,5 +1,7 @@
 .PHONY: fixture verify test rust-check check demo web stop-demo setup-env check-env verify-live guest-test historical-check acceptance docs e3 credit-check sepolia-check epoch-check
 
+LYQUOR_ENV := bash ./scripts/lyquor-env.sh
+
 fixture:
 	python3 fixtures/generate_fixture.py
 
@@ -34,12 +36,12 @@ verify-live:
 	python3 scripts/verify_step4.py
 
 guest-test:
-	shaker test lyquid-indexer/Cargo.toml
-	shaker test holderproof-gate-core/Cargo.toml
+	$(LYQUOR_ENV) shaker test lyquid-indexer/Cargo.toml
+	$(LYQUOR_ENV) shaker test holderproof-gate-core/Cargo.toml
 
 historical-check:
-	forge build --root evm
-	python3 scripts/verify_historical_balance.py
+	$(LYQUOR_ENV) forge build --root evm
+	$(LYQUOR_ENV) python3 scripts/verify_historical_balance.py
 
 acceptance: check guest-test
 	./scripts/reproduce-step4.sh
@@ -47,8 +49,8 @@ acceptance: check guest-test
 
 # Uses a fresh local demo and records the lifecycle evidence.
 e3: acceptance
-	python3 scripts/verify_e3.py
-	python3 scripts/verify_committee_availability.py
+	$(LYQUOR_ENV) python3 scripts/verify_e3.py
+	$(LYQUOR_ENV) python3 scripts/verify_committee_availability.py
 
 credit-check:
 	python3 fixtures/generate_credit_fixture.py

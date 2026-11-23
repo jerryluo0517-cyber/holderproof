@@ -26,7 +26,7 @@ for arg in "$@"; do
     esac
 done
 
-export PATH="$HOME/.shakenup/bin:$HOME/.cargo/bin:$PATH"
+source "$ROOT/scripts/lyquor-env.sh"
 
 say() { printf '\n==> %s\n' "$*"; }
 pass() { printf '  [PASS] %s\n' "$*"; }
@@ -44,7 +44,7 @@ PY
 
 check_prerequisites() {
     say "Checking base tools"
-    for tool in curl git python3 make; do
+    for tool in curl git python3 make lsof; do
         command -v "$tool" >/dev/null 2>&1 || fail "missing required tool: $tool"
         pass "$tool"
     done
@@ -68,19 +68,21 @@ check_rust() {
 
 check_ldk() {
     say "Checking Lyquor LDK"
-    [[ -d "$HOME/.shakenup/ldk" ]] || fail "Lyquor LDK not found at ~/.shakenup/ldk"
-    for tool in shaker lyquor ladle; do
-        command -v "$tool" >/dev/null 2>&1 || fail "missing Lyquor tool: $tool"
+    require_lyquor_localnet
+    pass "localnet script at $LYQUOR_LDK_DIR/scripts/localnet.sh"
+    for tool in shaker lyquor ladle cast anvil forge; do
+        command -v "$tool" >/dev/null 2>&1 || fail "missing tool: $tool"
         pass "$tool"
     done
-    command -v forge >/dev/null 2>&1 || fail "Foundry forge is not installed"
     pass "forge $(forge --version 2>/dev/null | head -n1)"
 }
 
 install_environment() {
     say "Installing Lyquor development environment"
-    if [[ -d "$HOME/.shakenup/ldk" ]]; then
+    if [[ -f "$LYQUOR_LDK_DIR/scripts/localnet.sh" && -r "$LYQUOR_LDK_DIR/scripts/localnet.sh" ]]; then
         pass "Lyquor LDK already installed; skipping download"
+    elif [[ "$LYQUOR_LDK_DIR" != "$HOME/.shakenup/ldk" ]]; then
+        require_lyquor_localnet
     else
         command -v curl >/dev/null 2>&1 || fail "curl is required"
         local installer
@@ -97,7 +99,6 @@ install_environment() {
     rustup toolchain install "$REQUIRED_RUST" --profile minimal --no-self-update
     rustup default "$REQUIRED_RUST"
     rustup target add wasm32-unknown-unknown --toolchain "$REQUIRED_RUST"
-    export PATH="$HOME/.shakenup/bin:$HOME/.cargo/bin:$PATH"
 }
 
 run_project_checks() {

@@ -2,13 +2,14 @@
 """End-to-end verification for the VeriCredit-Idx enhancement scenario."""
 
 import json
-import os
 from pathlib import Path
 import shlex
 import subprocess
 import time
 from urllib.error import URLError
 from urllib.request import urlopen
+
+from lyquor_env import lyquor_command
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN_DIR = ROOT / ".run/step4"
@@ -31,15 +32,9 @@ def require(cond, msg):
         raise RuntimeError(msg)
 
 
-def env_with_ldk():
-    env = os.environ.copy()
-    env["PATH"] = f"{Path.home() / '.shakenup/bin'}:{env.get('PATH', '')}"
-    return env
-
-
 def run(cmd, timeout=60):
     return subprocess.check_output(
-        cmd, text=True, stderr=subprocess.PIPE, timeout=timeout, env=env_with_ldk()
+        lyquor_command(*cmd), text=True, stderr=subprocess.PIPE, timeout=timeout,
     ).strip()
 
 
@@ -173,8 +168,8 @@ def main():
 
     serve_log = (RUN_DIR / "serve-credit.log").open("w")
     serve_proc = subprocess.Popen(
-        ["shaker", "serve", "--endpoint", WS_RPC, "--listen", f"127.0.0.1:{CREDIT_PORT}", gate_lyquid],
-        stdout=serve_log, stderr=serve_log, env=env_with_ldk(),
+        lyquor_command("shaker", "serve", "--endpoint", WS_RPC, "--listen", f"127.0.0.1:{CREDIT_PORT}", gate_lyquid),
+        stdout=serve_log, stderr=serve_log,
     )
     try:
         wait_url(f"http://127.0.0.1:{CREDIT_PORT}/lyquid/info", "VeriCreditGate proxy")

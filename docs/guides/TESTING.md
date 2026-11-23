@@ -16,12 +16,19 @@ cd holderproof
 和 lsof。若检查失败，先按错误信息补齐依赖。仓库也提供
 `./scripts/setup-env.sh` 安装或补齐 Lyquor、Rust 工具链，并执行基础回归。
 
-如果终端找不到已安装的 `shaker`、`cast` 或 `forge`，可在当前终端补充默认安装路径后重试。
+在 macOS 或 Linux 上，可自行选择仓库的克隆目录。配置路径时用引号包住含空格的目录名。LDK 默认从
+`~/.shakenup/ldk` 加载。若工具链装在其他位置，设置相应的变量后再检查和启动。
 
 ```bash
-export PATH="$HOME/.shakenup/bin:$HOME/.cargo/bin:$PATH"
-command -v shaker cast forge anvil lsof
+export LYQUOR_LDK_DIR="/path/to/Lyquor LDK"
+export LYQUOR_BIN_DIR="/path/to/lyquor/bin"
+make check-env
 ```
+
+`LYQUOR_LDK_DIR` 指向包含 `scripts/localnet.sh` 的 LDK 根目录。
+`LYQUOR_BIN_DIR` 会优先用于查找工具。如果 `shaker`、`lyquor` 和 Foundry 等命令
+已经在 `PATH` 上，只需要设置 LDK 目录。保留同一终端中的设置，供 `make demo`、
+`make web`、外部试用和自动验收共同使用。
 
 本地节点及诊断服务需要空闲的 TCP 端口
 `8545`、`10087`、`11087`、`12087`、`13087`、`8080`、`8081`、`8082`。
