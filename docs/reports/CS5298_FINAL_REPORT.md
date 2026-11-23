@@ -10,6 +10,8 @@ Direction 3 · Verifiable Indexer
 
 HolderProof makes a historical token balance available as a certificate that multiple applications can act on. Four Lyquor committee members replay an ordered event history. At least three must agree on the complete query result and its checkpoint before the Indexer records a certified fact. Airdrop and Governance apply separate policies to the same balance certificate. VeriCredit-Idx uses the same certification mechanism for credit activity and supplies the Credit Gate with a separate credit certificate. Acceptance on a local devnet reconciled 308 EVM Transfer logs and 18 historical balance reads, verified four epoch checkpoints and four credit quotes, and certified a balance derived from a captured window of 169 Sepolia WETH events. Three external participants attempted the application. Two completed the Web workflow without assistance. The third passed basic checks on native Windows and could not start the demo because the Lyquor toolchain was unavailable in that environment.
 
+A subsequent compatibility check documented the Windows launcher on a prepared WSL2 Ubuntu environment.
+
 ## 1. Problem Analysis
 
 Airdrop operators and governance developers can both use token balances at an agreed snapshot block. Their applications must identify the same chain, token, holder and block before applying their own policies. In the HolderProof fixture, an airdrop requires 60,000 units at block 1,000 and a governance proposal requires 70,000. Alice holds 62,685 units at that block and qualifies for the airdrop. The governance policy gives a different answer for the same account and certified balance.
@@ -45,6 +47,8 @@ flowchart LR
 ```
 
 Four processes on one local devnet host serve as committee members. Each process replays its own copy of the relevant fixture and uses instance state for node-local proposal data. The Indexer writes certified facts to network state. The downstream applications read the shared records through Lyquor and maintain their own policy state. The CLI and Web console submit queries and expose the resulting diagnostics. [Indexer state and oracle methods](../../lyquid-indexer/src/lib.rs) · [Web guide](../guides/WEB_GUIDE.md)
+
+On Windows, the PowerShell launcher starts and monitors the Ubuntu runtime. Anvil, the four Lyquor nodes and the Web server run inside WSL2. The Windows browser connects to the local Web console. [Launcher](../../scripts/windows/holderproof.ps1) · [WSL2 runtime](../../scripts/windows/runtime.sh)
 
 | Oracle topic | Certified result |
 |---|---|
@@ -131,6 +135,8 @@ The default matcher removed 2,000,000 units of reversal volume from Bob’s acti
 
 The recorded Web checks returned Alice’s fixture balances of 50,000, 57,685 and 62,685 at blocks 0, 950 and 1,000 respectively. The two qualification cards showed `Not evaluated` at blocks 0 and 950. At block 1,000, the airdrop reported eligible and governance reported ineligible. The request handler rejects fractional or out-of-range blocks. The evidence view displayed the imported block 950 certificate’s block, balance and signers. The separate browser download check in the `2552c5e` record timed out. [Balance references](../../fixtures/expected_results.json) · [Web guide](../guides/WEB_GUIDE.md) · [Request handler](../../scripts/serve_web.py) · [Archived Web checks](external-tests/EXTERNAL_USER_02_MACOS.md#功能与补充检查)
 
+The Windows compatibility record at `878842d` covers a prepared WSL2 Ubuntu environment. It reports successful startup from a path containing spaces, status, repeated startup checks, stop and restart. A Windows HTTP request confirmed the Alice block 1,000 result. The launcher's `test` action passed 9 fixture checks, 6 Python tests, workspace compilation and 36 Rust guest tests. [WSL2 verification notes](../guides/WINDOWS_WSL.md#3-验证网页) · [`878842d`](https://github.com/jerryluo0517-cyber/holderproof/commit/878842da7ef8e666de3ee667f8e6fe582cf802b9)
+
 ### 5.4 Query latency
 
 Each run measured five sequential first-time queries after starting a local network. Both medians include query confirmation and certification. The 3-of-4 run explicitly checked that each certificate was absent before querying and included local CLI overhead. Quorum size varied alongside the code revision and environment, so attributing the difference to quorum size would require a controlled comparison. [2-of-3 benchmark](PLAN_06_MEMBER_EVALUATION.md) · [3-of-4 benchmark](external-tests/EXTERNAL_USER_02_MACOS.md#五次首次查询计时)
@@ -152,7 +158,7 @@ The external task asks a participant to retrieve a balance certificate and verif
 
 E02 and E03 each produced a `Finalized` certificate with three distinct signers. Both gates in each run referenced the certificate’s query hash. The durations include environment checking, demo startup and result confirmation. They measure participant workflows and use a different interval from the query benchmark. E03’s earlier terminal attempt ended before demo startup and remains part of the E03 record. [E01 archive](external-tests/EXTERNAL_USER_01_WINDOWS.md) · [E02 Web archive](external-tests/EXTERNAL_USER_02_MACOS.md#web-试用) · [E03 archive](external-tests/EXTERNAL_USER_03_MACOS.md)
 
-E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker` before the demo step. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder. The recorder checks both gate outcomes against the selected holder’s reference balance and writes the chosen holder to the feedback form. Bob’s session exercised the case in which neither gate grants eligibility. [Updated task sheet](../guides/EXTERNAL_USER_TEST.md) · [Web trial recorder](../../scripts/record_external_test.py)
+E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker` before the demo step. The Windows instructions now show how to run the feedback recorder in WSL2 Ubuntu. E01’s original trial remains an environment-blocked result at `34e1fad`. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder, which checks eligibility against the selected holder’s reference balance and records the holder in the feedback form. [Windows trial instructions](../guides/EXTERNAL_USER_TEST.md#windows-外部试用) · [Web trial recorder](../../scripts/record_external_test.py)
 
 ## 6. Limitations and Reflection
 
@@ -162,7 +168,7 @@ E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker`
 
 **Credit calibration.** The synthetic cases test the behavior of the fixed-window matching rule and the score mapping. They provide no basis for calibrating lending risk against real outcomes. Representative account histories and a separate calibration study would be needed before using the quotes for lending decisions.
 
-**Reproduction.** E01’s logs identify a concrete native Windows toolchain barrier. The two successful Web sessions establish task completion under the recorded macOS setup. Fresh installations on independently managed hosts and further platform trials would extend the reproducibility evidence. [Environment requirements](../guides/TESTING.md)
+**Reproduction.** The two completed external Web trials cover the recorded macOS setup. The Windows check covers an already provisioned WSL2 Ubuntu installation. A clean Windows installation and an external WSL2 trial remain to be evaluated. [Environment requirements](../guides/TESTING.md) · [Windows startup guide](../guides/WINDOWS_WSL.md)
 
 ## 7. Contributions and Attribution
 
@@ -172,6 +178,8 @@ E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker`
 | `hwzhang0317` | Credit replay and Gate, checkpoint and Sepolia paths, related fixtures and the dispersion check. [`5f3a904`](https://github.com/jerryluo0517-cyber/holderproof/commit/5f3a904) · [`d55a449`](https://github.com/jerryluo0517-cyber/holderproof/commit/d55a449) |
 | Third team member | [INSERT THIRD TEAM MEMBER NAME & CONTRIBUTIONS] |
 
+Git attributes the Windows PowerShell launcher, WSL2 runtime and startup guide to `Hitori-Chan`. [`878842d`](https://github.com/jerryluo0517-cyber/holderproof/commit/878842da7ef8e666de3ee667f8e6fe582cf802b9)
+
 The implementation relies on Lyquor LDK for execution and certified calls, and on Foundry Anvil for the local EVM comparison. The repository contains the synthetic fixtures and captured Sepolia snapshot used in evaluation. [Lyquor LDK](https://docs.lyquor.dev/docs/ldk/build-deploy-test/) · [Anvil](https://www.getfoundry.sh/anvil/index.html)
 
 ## 8. AI Use Statement
@@ -180,7 +188,7 @@ OpenAI Codex assisted with reviewing and refactoring certificate validation, bui
 
 ## 9. Conclusion
 
-HolderProof certified a historical balance once and let two independently deployed policy gates act on that fact. The local evaluation checked agreement with historical EVM reads, certificate reuse, application actions and quorum recovery. VeriCredit-Idx applied the same oracle model to credit quotes, alongside separate checkpoint and Sepolia paths. The external trials confirmed the two Web scenarios and identified the toolchain boundary that blocked native Windows setup.
+HolderProof certified a historical balance once and let two independently deployed policy gates act on that fact. The local evaluation checked agreement with historical EVM reads, certificate reuse, application actions and quorum recovery. VeriCredit-Idx applied the same oracle model to credit quotes, alongside separate checkpoint and Sepolia paths. Two external Web trials completed. The later compatibility check documented a WSL2 route around the native Windows setup barrier.
 
 ## References
 

@@ -6,7 +6,7 @@
 
 四个本地委员会节点重放同一份有序事件。至少三个节点就完整事实达成一致后，Lyquor 原生两阶段预言机对该事实出证，Indexer 将结果写入网络状态。空投和治理 Gate 共用余额证书，各自判断资格。信用 Gate 读取信用证书，并给出费率和借贷 LTV。
 
-[课程报告（英文）](docs/reports/CS5298_FINAL_REPORT.md) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md)
+[课程报告（英文）](docs/reports/CS5298_FINAL_REPORT.md) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md) · [Windows WSL2 启动](docs/guides/WINDOWS_WSL.md)
 
 ---
 
@@ -182,11 +182,13 @@ flowchart LR
 
 ### 7.1 环境要求与一键命令
 
-**Windows（WSL2 Ubuntu）**：先按 [Windows 启动指南](docs/guides/WINDOWS_WSL.md) 准备环境，
-再从仓库根目录运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`。
-同一入口支持 `setup`、`check`、`test`、`status` 和 `stop`；可通过 `-Distribution` 指定发行版。
+**Windows（WSL2 Ubuntu）**。准备好环境后，从仓库根目录运行
+`powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`。
+PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器还支持 `setup`、`check`、`test`、`status` 和 `stop`。Bash 命令和外部试用记录脚本在 Ubuntu 中执行。[Windows 启动指南](docs/guides/WINDOWS_WSL.md) · [外部试用说明](docs/guides/EXTERNAL_USER_TEST.md#windows-外部试用)
 
-运行 `make web` 启动本地 devnet，然后打开 `http://127.0.0.1:8765`。
+**macOS 和 Linux**。运行 `make web` 启动本地 devnet。
+
+启动后在浏览器打开 `http://127.0.0.1:8765`。
 选择样例持有者和 `0–1000` 内的区块，即可查询该区块的余额证书。
 空投和治理的资格快照固定在区块 `1000`。
 [Web 使用说明](docs/guides/WEB_GUIDE.md)

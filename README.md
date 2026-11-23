@@ -6,7 +6,7 @@ A **3-of-4 Byzantine Fault Tolerant (BFT) Verifiable Historical On-Chain Indexer
 
 Four local committee nodes replay the same ordered events. When at least three agree on a full fact, Lyquor's two-phase oracle certifies it and the Indexer writes it to network state. The Airdrop and Governance gates read the same balance certificate and apply their own policies. The Credit Gate reads a credit certificate and returns a fee and loan-to-value quote.
 
-[Course report](docs/reports/CS5298_FINAL_REPORT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md)
+[Course report](docs/reports/CS5298_FINAL_REPORT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md) · [Windows WSL2 startup](docs/guides/WINDOWS_WSL.md)
 
 ---
 
@@ -182,12 +182,13 @@ flowchart LR
 
 ### 7.1 Prerequisites & Commands
 
-**Windows (WSL2 Ubuntu):** follow the [Windows startup guide](docs/guides/WINDOWS_WSL.md).
-From the repository root, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start` after setup.
-The launcher also supports `setup`, `check`, `test`, `status` and `stop`, with an optional `-Distribution` name.
+**Windows (WSL2 Ubuntu).** Complete setup, then run
+`powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`
+from the repository root. PowerShell manages the runtime and Ubuntu runs the devnet and Web service. The launcher also supports `setup`, `check`, `test`, `status` and `stop`. Run Bash commands and the external feedback recorder in Ubuntu. [Windows startup guide](docs/guides/WINDOWS_WSL.md) · [External trial instructions](docs/guides/EXTERNAL_USER_TEST.md#windows-外部试用)
 
-Run `make web` to start a fresh local devnet and open the live console at
-`http://127.0.0.1:8765`. Choose a fixture holder and a block from 0 to 1000
+**macOS and Linux.** Run `make web` to start a fresh local devnet.
+
+Open the live console at `http://127.0.0.1:8765`. Choose a fixture holder and a block from 0 to 1000
 to inspect a historical certificate. Both gate decisions are available at
 their policy snapshot, block 1000. The Web guide explains the controls and
 how to import saved evidence. [Web user guide](docs/guides/WEB_GUIDE.md)

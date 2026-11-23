@@ -6,9 +6,7 @@
 ## 任选一条测试路线
 
 克隆仓库，从仓库根目录运行所选命令，把 `E01` 换成团队给你的编号。
-依赖和端口要求见[测试操作指引](TESTING.md)。如果你此前启动过自己的 demo，先关闭网页服务并执行 `make stop-demo`。
-
-完整试用需要能启动 Lyquor LDK 和 `shaker` 的环境。请先在 macOS 或 Linux 上完成环境检查。原生 Windows 的试用记录显示，缺少这两项依赖时，基础检查可以通过，但 demo 无法启动。遇到这种情况，照常交回脚本生成的反馈表。
+完整试用需要 Lyquor LDK 和 `shaker`。macOS 和 Linux 用户在本机终端运行，Windows 用户在 WSL2 Ubuntu 运行。开始前先关闭自己此前启动的演示，避免占用端口。[测试操作指引](TESTING.md) · [Windows 外部试用](#windows-外部试用)
 
 | 测试路线 | 启动命令 | 在哪里核对结果 |
 |---|---|---|
@@ -31,6 +29,19 @@
 Web 路线也可以指定 `--holder alice|bob|carol|dave`。例如，`python3 scripts/record_external_test.py E02 --web --holder bob` 会记录 Bob 在区块 `1000` 的查询。Bob 的余额应为 `51886`，低于两个 Gate 的门槛。
 
 也可以先在网页查询 Bob 的区块 `950`，查看余额 `46886` 的历史证书。此时两张资格卡显示 **Not evaluated**。随后查询区块 `1000` 并回到终端确认，脚本会将区块 `1000` 的证书与资格结果写入表单。历史区块的观察可写入反馈。
+
+### Windows 外部试用
+
+1. 按 Windows 启动指南准备 WSL2 Ubuntu，并在 PowerShell 运行 `-Action setup` 和 `-Action check`。如果已经用启动器启动了演示，先在 PowerShell 执行 `-Action stop`，让试用脚本启动本轮服务。[Windows 启动指南](WINDOWS_WSL.md)
+2. 打开 Ubuntu 终端，进入同一份仓库。对于克隆在 Windows 盘符上的仓库，可用 `wslpath` 转换路径。示例中的路径和编号分别替换为实际仓库位置和分配的编号。
+
+   ```bash
+   cd "$(wslpath -u 'D:\Course Projects\holderproof')"
+   python3 scripts/record_external_test.py E01 --web
+   ```
+
+3. 可以在 Windows 浏览器打开 <http://127.0.0.1:8765/>。Web 查询完成后回到 Ubuntu 终端填写反馈。走终端路线时，省去 `--web`。在反馈栏注明使用 WSL2 Ubuntu。
+4. 保存表单后，如本轮启动了 demo，在 Ubuntu 终端执行 `make stop-demo`。
 
 ## 交回结果
 

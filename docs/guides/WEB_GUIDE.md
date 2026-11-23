@@ -2,18 +2,28 @@
 
 **Live query** 在本地 Lyquor 网络运行余额查询。**Evidence console** 用于查看已经保存的证书和验收结果，也提供可以在浏览器里操作的样例。
 
-参加外部试用时，按[外部试用任务单](EXTERNAL_USER_TEST.md)选择终端输入或 Web 测试。Web 路线用 `python3 scripts/record_external_test.py E01 --web` 启动，完成后会生成 `feedback.md`。
+参加外部试用时，运行记录脚本生成 `feedback.md`。macOS 和 Linux 用户在本机终端运行，Windows 用户在 WSL2 Ubuntu 运行。[外部试用任务单](EXTERNAL_USER_TEST.md)
 
 ## 启动与停止
 
-在仓库根目录运行以下命令。依赖、端口和自定义 LDK 路径见[测试操作指引](TESTING.md)。如果之前启动过自己的 demo，先运行 `make stop-demo`。
+**macOS 和 Linux**。在仓库根目录运行以下命令。如果之前启动过自己的 demo，先关闭网页服务并执行 `make stop-demo`。[依赖和端口](TESTING.md)
 
 ```bash
 make check-env
 make web
 ```
 
-终端显示 `HolderProof live console` 后，打开[本地网页](http://127.0.0.1:8765/)。测试者在各自电脑上运行这两条命令。测试结束时，按 `Ctrl+C` 停止网页服务，然后运行 `make stop-demo` 关闭本地测试网络。
+终端显示 `HolderProof live console` 后打开网页。测试结束时，按 `Ctrl+C` 停止网页服务，再运行 `make stop-demo`。
+
+**Windows（WSL2 Ubuntu）**。完成准备后，在仓库根目录的 PowerShell 运行以下命令。[Windows 启动指南](WINDOWS_WSL.md)
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start
+```
+
+看到 `HolderProof is ready` 后在 Windows 浏览器打开网页。结束时将上面的 `-Action start` 换成 `-Action stop`。
+
+两种方式均使用[本地网页](http://127.0.0.1:8765/)。
 
 ## Live query
 

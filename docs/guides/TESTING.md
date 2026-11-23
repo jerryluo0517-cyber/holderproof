@@ -1,7 +1,9 @@
 # HolderProof 测试操作指引
 
 第一次试用请从「手动查询与资格判断」开始。团队验收可以直接使用
-`make e3`，它包含 P0 验收和 E3 回归。以下命令均从仓库根目录运行。
+`make e3`，它包含 P0 验收和 E3 回归。下文的 Bash 命令从 macOS、Linux 或 WSL2 Ubuntu 的仓库根目录运行。
+
+Windows 用户先准备 WSL2 Ubuntu，可用 PowerShell 启动器执行环境检查、基础和 Guest 测试、Web 启停。需要生成试用表单时，在 Ubuntu 运行记录脚本。[Windows 启动指南](WINDOWS_WSL.md) · [Windows 外部试用](EXTERNAL_USER_TEST.md#windows-外部试用)
 
 ## 1. 环境检查
 
@@ -29,6 +31,8 @@ make check-env
 `LYQUOR_BIN_DIR` 会优先用于查找工具。如果 `shaker`、`lyquor` 和 Foundry 等命令
 已经在 `PATH` 上，只需要设置 LDK 目录。保留同一终端中的设置，供 `make demo`、
 `make web`、外部试用和自动验收共同使用。
+
+Windows 的 PowerShell 启动器提供 `-Action check`。请在安装工具时所用的 Ubuntu 用户下执行检查。[启动器命令](WINDOWS_WSL.md#2-启动检查和停止)
 
 本地节点及诊断服务需要空闲的 TCP 端口
 `8545`、`10087`、`11087`、`12087`、`13087`、`8080`、`8081`、`8082`。
@@ -79,11 +83,13 @@ make stop-demo
 
 ## 3. 浏览器查询
 
-从仓库根目录运行以下命令。如果此前已启动自己的 demo，先用 `make stop-demo` 停止。
+macOS 和 Linux 用户从仓库根目录运行以下命令。如果此前已启动自己的 demo，先用 `make stop-demo` 停止。
 
 ```bash
 make web
 ```
+
+Windows 用户在 PowerShell 用启动器执行 `-Action start`，完成查询后用同一入口执行 `-Action stop`。[Windows 启停命令](WINDOWS_WSL.md#2-启动检查和停止)
 
 打开 [本地查询页面](http://127.0.0.1:8765/)，选择一个样例持有者，输入 `0–1000` 的整数区块，
 再点击 **Run live query**。例如，Alice 在区块 `950` 的余额为 `57685`。
@@ -95,7 +101,7 @@ make web
 字段含义、模拟操作和可导入的文件见[Web 使用说明](WEB_GUIDE.md)。
 
 网页演示把两个 Gate 配置为多用户模式，使用固定的资格快照和既有门槛。
-网页和 devnet 运行在本机。结束演示时按 `Ctrl+C` 关闭网页服务，然后执行
+通过 `make web` 启动时，结束演示可按 `Ctrl+C` 关闭网页服务，再执行
 `make stop-demo` 关闭 devnet。本地网页使用 `8765` 端口。外部用户按
 [任务单](EXTERNAL_USER_TEST.md)任选终端输入或 Web 测试，两条路线都生成 `feedback.md`。
 
@@ -103,6 +109,8 @@ make web
 
 运行完整 3-of-4 验收前，先停止自己此前启动的 demo，确认本地测试端口和 `8083` 空闲。
 从仓库根目录执行以下命令。
+
+Windows 启动器的 `-Action test` 覆盖 `make check guest-test`。要执行下面的完整验收，请打开 Ubuntu 终端。
 
 ```bash
 ./scripts/run-3of4-acceptance.sh

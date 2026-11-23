@@ -1,6 +1,6 @@
 # Windows 启动指南（WSL2）
 
-Windows 使用浏览器和 PowerShell；Rust 构建、四个 Lyquor 节点、Anvil 和 Web 服务运行在 **WSL2 Ubuntu**。这条路径不是 Windows 原生 Lyquor。Live query 默认使用本地 fixture，不连接 Sepolia RPC，也不需要钱包或真实资金。
+在 Windows 中用 PowerShell 管理演示，并在 Windows 浏览器查询。Rust 构建、四个 Lyquor 节点、Anvil 和 Web 服务在 **WSL2 Ubuntu** 内运行。Live query 使用本地 fixture。
 
 ## 1. 首次准备
 
@@ -46,7 +46,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproo
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action stop
 ```
 
-`test` 执行 Python/fixture 检查、workspace 编译和 Guest 测试；`start` 启动新 devnet、部署 Indexer 和两个 Gate、生成证书并执行现有 Step 4 验收，然后运行 Web。重复 `start` 会报告已有服务。停止后再启动会重新创建演示状态。
+`test` 执行 fixture 检查、Python 测试、workspace 编译和 Guest 测试。`start` 启动新 devnet，部署 Indexer 和两个 Gate，执行 Step 4 验收并启动 Web。重复 `start` 会报告已有服务。停止后再启动会重新创建演示状态。完整 3-of-4 验收在 Ubuntu 终端运行。[完整验收步骤](TESTING.md#4-自动验收)
 
 发行版不叫 Ubuntu 时，在**每次**调用时加 `-Distribution Ubuntu-24.04`（替换为 `wsl -l -v` 中的名称）。其他发行版需要自行适配系统依赖，本文只覆盖 Ubuntu。默认用户必须是安装工具的 Linux 用户。
 
@@ -58,11 +58,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproo
 - Alice / block 950：余额 57,685，两种 Gate 显示 Not evaluated。
 - Windows PowerShell：`Invoke-RestMethod http://127.0.0.1:8765/api/snapshot` 可查看响应。
 
-完整交互说明见 [Web 指南](WEB_GUIDE.md)。Evidence console 内的模拟操作与 Live query 有不同执行边界。
+Live query 和 Evidence console 的操作见 [Web 指南](WEB_GUIDE.md)。
 
-2026-11-23 在已有工具的 Windows + Ubuntu WSL2 环境验证了：含空格路径启动、状态查询、重复启动、停止与重启；Windows HTTP 响应符合上述 Alice / block 1000 预期。通过 Windows `test` 入口完成 9 项 fixture 检查、6 项 Python 测试、workspace 编译及 36 项 Guest 测试。首次全新系统安装仍需按本文准备 WSL 和系统依赖，未在空白虚拟机上重装验证。
+2026-11-23 的验证在工具已安装的 Windows + WSL2 Ubuntu 环境进行，覆盖含空格路径启动、状态查询、重复启动、停止和重启。Windows HTTP 响应符合上述 Alice 区块 1000 的预期。`test` 通过了 9 项 fixture 检查、6 项 Python 测试、workspace 编译及 36 项 Guest 测试。空白系统的首次安装待验证。[WSL2 启动器提交](https://github.com/jerryluo0517-cyber/holderproof/commit/878842da7ef8e666de3ee667f8e6fe582cf802b9)
 
-## 4. 排错
+## 4. 外部试用和反馈
+
+完成环境检查后，在 Ubuntu 终端运行外部试用记录脚本，由脚本启动本轮服务。如果 PowerShell 启动器已启动演示，请先通过 `-Action stop` 停止。Web 路线可用 Windows 浏览器完成查询，再回 Ubuntu 终端填写反馈。[Windows 外部试用步骤](EXTERNAL_USER_TEST.md#windows-外部试用)
+
+## 5. 排错
 
 - **发行版不存在或未初始化**：运行 `wsl -l -v`，打开对应 Ubuntu 完成初始化，并检查 `-Distribution`。
 - **缺少工具**：先安装上述 apt 包，再执行 `setup`；检查工具是否安装在同一 WSL 用户下。已有自定义 LDK 可在 Linux 环境设置 `LYQUOR_LDK_DIR` / `LYQUOR_BIN_DIR`。
