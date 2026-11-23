@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "test_date": "2026-11-23",
+  "timezone": "Asia/Shanghai",
+  "repository": "https://github.com/jerryluo0517-cyber/holderproof",
+  "branch": "main",
+  "commit": "34e1fad2562d7003c51c6025b5aca536c5a9d2b0",
+  "host": {
+    "build": "22631.6199",
+    "shell": "Git Bash",
+    "reported_os": "Windows 10 Home China 23H2",
+    "build_family": "Windows 11 23H2 according to Microsoft",
+    "edition_confirmation": "pending winver output"
+  },
+  "environment": {
+    "make": "4.4.1",
+    "lyquor_ldk": false,
+    "rust": "1.99.0",
+    "python": "3.12.1",
+    "rust_target": "wasm32-unknown-unknown"
+  },
+  "checks": [
+    {
+      "name": "environment_check",
+      "command": "./scripts/setup-env.sh --check",
+      "exit_code": 1,
+      "status": "blocked",
+      "detail": "Lyquor LDK missing"
+    },
+    {
+      "name": "fixture_generation",
+      "command": "python fixtures/generate_fixture.py",
+      "exit_code": 0,
+      "status": "pass",
+      "event_count": 308,
+      "merkle_root": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b"
+    },
+    {
+      "name": "fixture_verification",
+      "command": "python scripts/verify_fixture.py",
+      "exit_code": 0,
+      "status": "pass",
+      "checks_passed": 9,
+      "checks_total": 9
+    },
+    {
+      "name": "python_unittest",
+      "command": "python -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "status": "pass",
+      "tests_passed": 6,
+      "tests_total": 6
+    },
+    {
+      "name": "make_check",
+      "command": "make check",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "name": "cargo_check_workspace",
+      "command": "cargo check --workspace --target wasm32-unknown-unknown",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "name": "cargo_check_all_targets",
+      "command": "cargo check --workspace --all-targets --target wasm32-unknown-unknown",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "name": "guest_tests",
+      "command": "make guest-test",
+      "exit_code": 2,
+      "status": "blocked",
+      "detail": "shaker not found",
+      "tests_expected": 36,
+      "tests_run": 0
+    },
+    {
+      "name": "demo",
+      "command": "make demo",
+      "exit_code": 2,
+      "status": "blocked",
+      "detail": "shaker not found"
+    },
+    {
+      "name": "cargo_fmt_check",
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 1,
+      "status": "fail",
+      "diff_hunks": 31,
+      "files_affected": 11
+    },
+    {
+      "name": "cargo_clippy",
+      "command": "cargo clippy --workspace --all-targets --target wasm32-unknown-unknown",
+      "exit_code": 0,
+      "status": "pass_with_warnings",
+      "unused_doc_comments": 5,
+      "manual_is_multiple_of": 1
+    },
+    {
+      "name": "python_compileall",
+      "command": "python -m compileall -q scripts fixtures tests",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "name": "git_diff_check",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "not_executed": [
+    "full 3-of-4 demo",
+    "live certificate and two gates",
+    "web query at blocks 1000 and 950",
+    "E3 acceptance",
+    "epoch checkpoints",
+    "credit check",
+    "Sepolia check"
+  ],
+  "participant_id": "external-user-01",
+  "outcome": "incomplete_environment_blocked",
+  "source_materials": [
+    "participant's README.md",
+    "participant's summary.json"
+  ],
+  "raw_logs_received": false
+}

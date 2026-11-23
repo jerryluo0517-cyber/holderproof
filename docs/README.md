@@ -17,6 +17,7 @@
 ## 方案 06 评测
 
 - [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（3-of-4 本人验收及 2-of-3 早期基准）
+- [外部用户 1 · Windows 测试结果](reports/external-tests/EXTERNAL_USER_01_WINDOWS.md)（基础检查通过，Lyquor LDK 环境受阻）
 
 ## 03/04 文档快照
 
