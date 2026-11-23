@@ -2,7 +2,7 @@
 
 **2026 年 11 月 23 日 · 原生 Windows（Git Bash） · 未完成，环境受阻**
 
-外部用户 1 在 GitHub `main` 的 `34e1fad` 上进行测试。`make check` 通过。当前测试环境缺少 Lyquor LDK 和 `shaker`，在启动本地 devnet 前受阻。此次记录适合用于评估 Windows 用户的环境准备步骤。详情见[结构化结果](external-user-01-windows.json)。
+外部用户 1 独立在 GitHub `main` 的 `34e1fad` 上进行测试。`make check` 通过。当前测试环境缺少 Lyquor LDK 和 `shaker`，在启动本地 devnet 前受阻。此次记录适合用于评估 Windows 用户的环境准备步骤。详情见[结构化结果](external-user-01-windows.json)。
 
 ## 环境
 

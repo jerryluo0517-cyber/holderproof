@@ -6,7 +6,7 @@
 
 四个本地委员会节点重放同一份有序事件。至少三个节点就完整事实达成一致后，Lyquor 原生两阶段预言机对该事实出证，Indexer 将结果写入网络状态。空投和治理 Gate 共用余额证书，各自判断资格。信用 Gate 读取信用证书，并给出费率和借贷 LTV。
 
-[课程报告初稿（英文）](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md)
+[课程报告（英文）](docs/reports/CS5298_FINAL_REPORT.md) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md)
 
 ---
 

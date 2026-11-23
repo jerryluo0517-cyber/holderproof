@@ -6,7 +6,7 @@ A **3-of-4 Byzantine Fault Tolerant (BFT) Verifiable Historical On-Chain Indexer
 
 Four local committee nodes replay the same ordered events. When at least three agree on a full fact, Lyquor's two-phase oracle certifies it and the Indexer writes it to network state. The Airdrop and Governance gates read the same balance certificate and apply their own policies. The Credit Gate reads a credit certificate and returns a fee and loan-to-value quote.
 
-[Course report draft](docs/reports/CS5298_FINAL_REPORT_DRAFT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md)
+[Course report](docs/reports/CS5298_FINAL_REPORT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md)
 
 ---
 

@@ -124,6 +124,7 @@
     "Sepolia check"
   ],
   "participant_id": "external-user-01",
+  "operation_mode_reported_by_team": "independent",
   "outcome": "incomplete_environment_blocked",
   "source_materials": [
     "participant's README.md",

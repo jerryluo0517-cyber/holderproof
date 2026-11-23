@@ -1,6 +1,38 @@
 {
   "schema_version": 3,
   "participant_id": "external-user-02",
+  "web_usability_trial": {
+    "trial_id": "E02",
+    "participant_status": "outside_project_team",
+    "test_date": "2026-11-23",
+    "commit": "46ef730e939618ca75153f9385971570026bce5e",
+    "host": {
+      "os": "macOS",
+      "version": "27.0",
+      "architecture": "arm64",
+      "python": "3.12.10",
+      "provided_by": "project_team"
+    },
+    "route": "web",
+    "outcome": "completed_without_assistance",
+    "elapsed_seconds": 67.5,
+    "assistance_source": "participant_feedback",
+    "participant_feedback": "无",
+    "query": {
+      "fixture_holder": "Bob",
+      "block": 1000,
+      "balance": "51886",
+      "certificate_status": "Finalized",
+      "distinct_signers": 3,
+      "query_hash": "277ebfd76c99b43a7002066d3a7d246e675d09a491ed0238f247d8851ee935be",
+      "gate_query_hashes_match": true
+    },
+    "gates": {
+      "airdrop": {"threshold": "60000", "eligible": false},
+      "governance": {"threshold": "70000", "eligible": false}
+    },
+    "evidence_reviewed": ["feedback.md", "certificate.json", "web.log"]
+  },
   "study_record": "functional_test",
   "repository": "https://github.com/jerryluo0517-cyber/holderproof",
   "feedback_form_received": false,

@@ -1,10 +1,10 @@
 # HolderProof 文档索引
 
-更新于 2026-11-23。当前 `main` 使用 3-of-4 委员会。课程报告初稿中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
+更新于 2026-11-23。当前 `main` 使用 3-of-4 委员会。课程报告中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
 
 ## 课程报告
 
-- [CS5298 课程报告初稿（英文）](reports/CS5298_FINAL_REPORT_DRAFT.md)
+- CS5298 课程报告（英文）[PDF](reports/CS5298_FINAL_REPORT.pdf) · [Markdown](reports/CS5298_FINAL_REPORT.md)
 - [Web 使用说明](guides/WEB_GUIDE.md)
 
 ## 方案 05 验收
@@ -18,7 +18,7 @@
 
 - [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（3-of-4 本人验收及 2-of-3 早期基准）
 - [外部用户 1 · Windows 测试结果](reports/external-tests/EXTERNAL_USER_01_WINDOWS.md)（基础检查通过，Lyquor LDK 环境受阻）
-- [外部用户 2 · macOS 测试结果](reports/external-tests/EXTERNAL_USER_02_MACOS.md)（`2552c5e` 功能验收与查询计时）
+- [外部用户 2 · macOS 测试结果](reports/external-tests/EXTERNAL_USER_02_MACOS.md)（E02 独立完成 Web 试用，附功能验收与查询计时）
 - [外部用户 3 · macOS Web 试用结果](reports/external-tests/EXTERNAL_USER_03_MACOS.md)（E03 独立完成）
 
 ## 03/04 文档快照
