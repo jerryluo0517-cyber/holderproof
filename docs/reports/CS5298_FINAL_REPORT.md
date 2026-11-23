@@ -2,29 +2,31 @@
 
 **CS5298 Final Project Report · 23 November 2026**
 
-The project follows Direction 3, Verifiable Indexer, and evaluates the three-of-four design on a Lyquor local devnet. The public repository contains the source, test scripts and evidence summaries. [HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof)
+Direction 3 · Verifiable Indexer
+
+[HolderProof repository](https://github.com/jerryluo0517-cyber/holderproof) · [Evidence baseline `948dc94`](https://github.com/jerryluo0517-cyber/holderproof/tree/948dc94)
 
 ## Abstract
 
-HolderProof certifies historical token balances so applications can use one result to make different eligibility decisions. Four committee members replay the same ordered events. Lyquor certifies the result once at least three members agree on the complete fact. The Airdrop and Governance gates read the resulting certificate and apply their own thresholds. VeriCredit-Idx uses the same certification process to turn activity within a block window into fee and loan-to-value quotes. The local evaluation reconciled 308 EVM Transfer logs and 18 historical balance reads, and verified both gates, four epoch checkpoints, four credit quotes and a certificate for a captured Sepolia WETH window. Three external users tested independently. Two completed the assigned query and eligibility checks, and one encountered a Windows setup barrier.
+HolderProof makes a historical token balance available as a certificate that multiple applications can act on. Four Lyquor committee members replay an ordered event history. At least three must agree on the complete query result and its checkpoint before the Indexer records a certified fact. Airdrop and Governance apply separate policies to the same balance certificate. VeriCredit-Idx uses the same certification mechanism for credit activity and supplies the Credit Gate with a separate credit certificate. Acceptance on a local devnet reconciled 308 EVM Transfer logs and 18 historical balance reads, verified four epoch checkpoints and four credit quotes, and certified a balance derived from a captured window of 169 Sepolia WETH events. Three external participants attempted the application. Two completed the Web workflow without assistance. The third passed basic checks on native Windows and could not start the demo because the Lyquor toolchain was unavailable in that environment.
 
 ## 1. Problem Analysis
 
-An airdrop and a governance proposal can both use a holder’s token balance at a snapshot block. Each application needs the answer for the same token, account and position in the chain’s history. An archival RPC endpoint can return contract state at that block. A shared indexer can serve both applications, provided that each can identify the input history, verify the issuer and check the certificate when it acts. [Ethereum JSON-RPC](https://ethereum.org/developers/docs/apis/json-rpc/)
+Airdrop operators and governance developers can both use token balances at an agreed snapshot block. Their applications must identify the same chain, token, holder and block before applying their own policies. In the HolderProof fixture, an airdrop requires 60,000 units at block 1,000 and a governance proposal requires 70,000. Alice holds 62,685 units at that block and qualifies for the airdrop. The governance policy gives a different answer for the same account and certified balance.
 
-HolderProof addresses two requirements. Committee members need a reproducible way to derive the same result from the same history. Applications then need to reuse that result while retaining control over their own thresholds, actions and records. A certificate links the answer to the original query and the checkpoint for the input data.
+An archival RPC endpoint can answer a historical `balanceOf` call. The caller depends on the endpoint for that answer. A GraphQL subgraph serves structured entities derived from indexed events. Its query interface gives applications a way to retrieve processed data. HolderProof addresses the next step in the eligibility workflow by persisting an issuer-bound fact that another Lyquid can read and check during a state transition. Airdrop and Governance can then use the same certified output while maintaining their own eligibility rules and records. [Ethereum JSON-RPC](https://ethereum.org/developers/docs/apis/json-rpc/) · [ERC-20](https://eips.ethereum.org/EIPS/eip-20) · [The Graph subgraphs](https://thegraph.com/docs/en/subgraphs/overview/)
 
-The target users are airdrop operators and governance developers that need to apply different policies to the same historical balance. For example, a distribution may require 60,000 tokens while a governance proposal requires 70,000. If both refer to block 1,000, a single holder may qualify for one action and fall short of the other. A shared certificate lets both applications check which history produced the balance and apply their policies independently.
-
-The ERC-20 standard defines the `Transfer` event and the `balanceOf` interface. A historical RPC read supplies a balance from an endpoint. A subgraph provides structured event-derived data through GraphQL. HolderProof serves a different integration point by writing an issuer-bound certificate that application Lyquids can read during their own state transitions. Reusing that certificate removes the need for each gate to run its own event index for the same snapshot. [ERC-20 standard](https://eips.ethereum.org/EIPS/eip-20) · [The Graph, Subgraphs Overview](https://thegraph.com/docs/en/subgraphs/overview/)
+The distinction matters when the balance authorizes an action. An application must connect the returned amount to the specific request and source before it records a claim or vote. In HolderProof, the query hash identifies the request, the checkpoint identifies the history used for the calculation, and the configured Indexer and attached oracle evidence establish provenance for the receiving application. [Certificate rules](../operations/step4-certificate.md)
 
 ## 2. Original Contribution
 
-HolderProof combines deterministic event replay with a certificate that independently deployed Lyquids can read in the same call that checks eligibility. The Indexer certifies the query, balance and checkpoint together. The Airdrop and Governance gates use shared validation code and store their own policies and action records. A certified balance of 62,685 meets the example airdrop threshold of 60,000 and falls below the governance threshold of 70,000.
+The project implements deterministic transfer replay, an issuer-bound certificate schema and a shared validation core. Its central design choice is to certify a complete fact, including the query, balance and input checkpoint, and let each consumer apply its own policy. The same fixture balance certificate serves the two eligibility gates. Each gate owns its configuration and action records, so a threshold change can occur without redefining the historical fact.
 
-VeriCredit-Idx extends the design to activity within a block window. Its query includes the user, window and scoring parameters. The Credit Gate uses the certified score to return a fee and a loan-to-value (LTV) quote. A separate oracle topic certifies checkpoint summaries at selected blocks, allowing readers to compare event counts and commitments over time.
+The Indexer publishes periodic checkpoints for aggregate history and issues holder certificates on demand. A checkpoint commits to the event prefix through an epoch boundary. An individual certificate fixes the query and replay result for a requested holder. This layout provides a shared record of aggregate history without writing one certificate for every holder at every epoch.
 
-The project implements the event replays, fact schemas, checkpoint layout, gate policies and evaluation scripts. Lyquor provides certified calls and cross-Lyquid execution. Publishing periodic checkpoints and issuing holder certificates on demand lets the network expose aggregate history at fixed intervals while it stores individual results only when requested. The distinguishing feature is how these mechanisms work together in the eligibility workflow. [Lyquor certified calls](https://docs.lyquor.dev/docs/ldk/oracle/)
+VeriCredit-Idx extends the workflow to activity in a block window. Its replay discounts matched short-window reversals between the same counterparties, then uses clean volume, repayment counts and liquidation counts to compute a score. The Credit Gate maps that certified score to fee and loan-to-value (LTV) terms. The credit certificate binds the scoring parameters alongside the input window, so a different wash window produces a different query.
+
+Lyquor LDK supplies two-phase oracle calls, authenticated certified execution, shared network state and synchronous cross-Lyquid calls. The project supplies the replay, fact and checkpoint schemas, proposal agreement rule, application validation, policy mapping and test fixtures. [Lyquor certified calls](https://docs.lyquor.dev/docs/ldk/oracle/) · [Indexer implementation](../../lyquid-indexer/src/lib.rs) · [Gate core](../../holderproof-gate-core/src/lib.rs)
 
 ## 3. Technical Design
 
@@ -32,168 +34,161 @@ The project implements the event replays, fact schemas, checkpoint layout, gate 
 
 ```mermaid
 flowchart LR
-    A["ERC-20 fixture"] --> D["Four committee members<br/>Node-local event replay"]
+    A["ERC-20 fixture"] --> D["Four committee members<br/>Node-local replay"]
     B["Credit activity fixture"] --> D
     C["Captured Sepolia WETH logs"] --> D
-    D -->|"At least 3 matching proposals"| E["Lyquor certified call"]
+    D -->|"At least three matching facts"| E["Lyquor certified call"]
     E --> I["Indexer network state"]
-    I -->|"Fixture balance certificate"| F["Airdrop Gate"]
-    I -->|"Same fixture balance certificate"| G["Governance Gate"]
-    I -->|"Credit certificate"| H["Credit Gate"]
-    I -->|"Epoch checkpoints"| J["Checkpoint reader"]
-    I -->|"Sepolia balance certificate"| K["Sepolia certificate reader"]
+    I -->|"Balance certificate"| F["Airdrop and Governance gates"]
+    I -->|"Credit certificate"| G["Credit Gate"]
+    I -->|"Epoch checkpoints and Sepolia certificates"| H["Diagnostic readers"]
 ```
 
-Each member replays events locally. The Indexer stores certificates and epoch checkpoints in shared network state. Each gate stores its configuration and action or quote records. The CLI and local web console accept fixture blocks from 0 to 1000. For a query at block 1000, the web console also requests eligibility decisions from both gates, whose policies use that snapshot. The console can export the complete balance certificate as JSON. The separate evidence view displays saved certificates, checkpoint and audit records, and browser simulations. [Web user guide](../guides/WEB_GUIDE.md)
-
-In the evaluation, four separate processes on one host serve as the committee. Each maintains its replay inputs in node-local instance state. Certificate consumers read shared records from the Indexer’s network state. Separating the replay inputs from the published result allows a gate to validate the certificate with a network-state call, then persist its decision in its own state.
+Four processes on one local devnet host serve as committee members. Each process replays its own copy of the relevant fixture and uses instance state for node-local proposal data. The Indexer writes certified facts to network state. The downstream applications read the shared records through Lyquor and maintain their own policy state. The CLI and Web console submit queries and expose the resulting diagnostics. [Indexer state and oracle methods](../../lyquid-indexer/src/lib.rs) · [Web guide](../guides/WEB_GUIDE.md)
 
 | Oracle topic | Certified result |
 |---|---|
-| `balance_proof` | A holder’s balance through the requested fixture block. |
-| `credit_proof` | A user’s activity metrics and credit score for the requested window and parameters. |
-| `checkpoint_proof` | The event count, cumulative volume, holder count and Merkle root through an epoch boundary. |
-| `sepolia_proof` | A holder’s replay result for the captured Sepolia WETH event window. |
+| `balance_proof` | Fixture balance through a specified snapshot block. |
+| `credit_proof` | Activity metrics and score for a user, block window and parameter set. |
+| `checkpoint_proof` | Event count, cumulative volume, holder count and Merkle root through an epoch boundary. |
+| `sepolia_proof` | Holder balance derived from the captured Sepolia WETH window. |
 
 ### 3.2 Certification and provenance
 
-Each committee member proposes a complete fact. For a balance query, that fact contains the canonical query, computed balance and checkpoint. The checkpoint records the dataset, block range, boundary hashes, parser version, event count and Merkle root. The Indexer excludes members who submit multiple proposals and requires identical facts from at least three distinct members. The certified write stores the fact and Lyquor’s native oracle evidence. The exported certificate includes the signer information and `Finalized` status. A repeated query uses the same hash to retrieve the stored certificate.
+A balance query includes the chain, token, holder, block and parser version. Its canonical digest provides the query hash and certificate ID. Members independently compute the balance and create a checkpoint containing the dataset identifier, block range, boundary hashes, event count, event Merkle root and parser version. The Indexer groups identical full facts and excludes duplicate proposals from a member. A certified call carries the agreed fact to the Indexer, which records the result with the native oracle certificate and signer evidence. A repeated query can return the original certificate under the same key. [Shared data types](../../holderproof-types/src/lib.rs) · [Certificate rules](../operations/step4-certificate.md)
 
-Any two quorums of three out of four overlap in at least two members. If at most one member is faulty, the overlap includes at least one honest member. If honest members approve at most one fact per instance and Lyquor enforces its certified-call rules, the honest member in the overlap prevents two conflicting facts from reaching quorum. Certification can proceed when three members can communicate and agree on the full fact. The Indexer also exposes an experimental dispersion check for time-skewed observations. [Lyquor certified calls](https://docs.lyquor.dev/docs/ldk/oracle/) · [Castro and Liskov, Practical Byzantine Fault Tolerance](https://pdos.lcs.mit.edu/6.824/papers/castro-practicalbft.pdf)
+For two three-member quorums in a four-member committee, the overlap contains at least two members. With at most one Byzantine member, that intersection contains an honest member. If honest members approve at most one fact for the same oracle instance and Lyquor enforces the certified-call rules, that member prevents conflicting facts from both obtaining quorum. Progress requires three available members that agree on the full fact. Shared input errors can still lead all four to agree on the same wrong answer. [Lyquor certified calls](https://docs.lyquor.dev/docs/ldk/oracle/) · [Practical Byzantine Fault Tolerance](https://pdos.lcs.mit.edu/6.824/papers/castro-practicalbft.pdf)
 
 ### 3.3 Gate policies
 
-The two balance gates use a network-state `call!` to read a certificate from their configured Indexer. Shared validation checks the status, query, checkpoint and issuer. It also matches the exported signer information against the native oracle evidence. Each gate compares the certified balance with its threshold. When recording a claim or vote, it reads the certificate again and requires it to be finalized. The Airdrop Gate permits one qualifying claim per caller. The Governance Gate permits one qualifying vote per caller and proposal. [Balance certificate rules](../operations/step4-certificate.md)
+The Airdrop and Governance gates use `call!` to retrieve the current certificate from their configured Indexer. Shared validation recomputes the query and fact digests, checks the checkpoint and `Finalized` status, and compares the attached signer details with the native oracle evidence. It also checks the target Lyquid, sequence backend and state reference against the expected issuer. Each gate compares the certified balance with its own threshold. A qualifying holder can claim once and vote once per proposal. The gates bind those actions to the caller and recheck the certificate when recording an action. [Shared gate validation](../../holderproof-gate-core/src/certificate.rs) · [Issuer binding](../../holderproof-gate-core/src/lib.rs)
 
-The Credit Gate reads a credit certificate and applies the following demonstration policy. With an Indexer configured, `quote_or_fallback` applies Base terms when the certificate is unavailable, invalid or stale. [Credit Gate implementation](../../lyquid-credit-gate/src/lib.rs)
+The Credit Gate checks the certificate for the requested user and the configured block window. With the Indexer configured, `quote_or_fallback` applies Base terms when the certificate is unavailable, invalid or stale. [Credit Gate implementation](../../lyquid-credit-gate/src/lib.rs)
 
 | Tier | Score | Fee | LTV |
 |---|---:|---:|---:|
-| VIP | 800–1,000 | 5 basis points | 85% |
-| Standard | 500–799 | 15 basis points | 75% |
-| Base | 0–499 | 30 basis points | 60% |
+| VIP | 800–1,000 | 5 bps | 85% |
+| Standard | 500–799 | 15 bps | 75% |
+| Base | 0–499 | 30 bps | 60% |
 
 ## 4. Implementation
 
-The Rust workspace uses Lyquor LDK 0.8.4. The `holderproof-types` crate defines queries, facts, checkpoints and certificates. The Indexer handles replay, proposals and persistence. The gate core supplies shared certificate checks. The three gate crates implement application policies, actions or quotes, and diagnostic endpoints. [Shared types](../../holderproof-types/src/lib.rs) · [Indexer](../../lyquid-indexer/src/lib.rs) · [Gate core](../../holderproof-gate-core/src/lib.rs)
+The Rust workspace uses Lyquor LDK 0.8.4. The `holderproof-types` crate defines the shared wire formats. The `lyquid-indexer` crate handles replay, proposal agreement and certificate storage. The `holderproof-gate-core` crate validates certificates and supplies shared policy logic. Airdrop, Governance and Credit run as separate Lyquids in `lyquid-consumer`, `lyquid-governance-gate` and `lyquid-credit-gate`, respectively. [Workspace manifest](../../Cargo.toml) · [Shared types](../../holderproof-types/src/lib.rs)
 
-**Balance replay.** The Indexer processes transfers in block and log order, including those at the requested block. The replay applies checked integer arithmetic. It hashes each event’s fields to form a Merkle leaf. The checkpoint ties the Merkle root to the dataset, block range and parser. The fixture uses deterministic synthetic block hashes. For the archival comparison, a test token executes the same transfers on a separate Anvil instance. The verification script maps fixture blocks to corresponding EVM blocks and reads historical balances. [Fixture replay](../../lyquid-indexer/src/fixture.rs) · [Historical EVM comparison](../../scripts/verify_historical_balance.py)
+**Fixture replay.** The parser validates source metadata and rejects duplicate event positions before replay. The Indexer uses checked integer updates and treats self-transfers as balance-neutral. It hashes the replay prefix into a Merkle root and includes that root in the checkpoint. The fixture uses synthetic block hashes. For the independent EVM comparison, a test token on Anvil executes the corresponding transfers, and the verifier maps fixture blocks to EVM heights for historical `balanceOf` reads. [Fixture replay](../../lyquid-indexer/src/fixture.rs) · [Historical EVM verifier](../../scripts/verify_historical_balance.py)
 
 ```text
 balance = 0
-for transfer in events ordered by block and log index:
-    if transfer.block > snapshot_block: stop
-    if transfer.from == holder: subtract amount
-    if transfer.to == holder: add amount
-return balance and the checkpoint for the replayed prefix
+for transfer in validated order by (block_number, log_index):
+    if transfer.block_number > snapshot_block: stop
+    if transfer.from == holder and transfer.to != holder:
+        balance = checked_subtract(balance, transfer.amount)
+    if transfer.to == holder and transfer.from != holder:
+        balance = checked_add(balance, transfer.amount)
+certify balance together with the checkpoint for the event prefix
 ```
 
-**Credit replay.** The 40-event fixture contains buys, sells, repayments and liquidations. For a given user, the algorithm matches opposite-direction swap amounts with the same counterparty within the configured wash window. The unmatched amount is the clean volume. The calculation uses integer arithmetic so that each member obtains the same score. For clean volume `V`, repayment count `R` and liquidation count `L`, the score is the integer quotient of `w1 × floor(log2(1 + V)) + w2 × R` and `1 + alpha × L`, capped at 1,000. The defaults are `w1 = 35`, `w2 = 20`, `alpha = 2` and a three-block wash window. [Credit replay](../../lyquid-indexer/src/credit.rs) · [Credit fixture answers](../../fixtures/credit_expected.json)
+**Credit scoring.** The 40-event fixture contains swaps, repayments and liquidations. For one user, replay matches opposite-direction swaps with the same counterparty within the wash window. It matches the smaller remaining amount and sums the unmatched volume as clean volume. With clean volume `V`, repayment count `R` and liquidation count `L`, the implementation uses the following integer formula. The defaults are `w1 = 35`, `w2 = 20`, `alpha = 2` and a three-block wash window. [Credit replay](../../lyquid-indexer/src/credit.rs) · [Reference fixture](../../fixtures/credit_expected.json)
 
-**Epoch checkpoints.** The verification script requests checkpoints at fixture blocks 250, 500, 750 and 1,000. Members summarize the event history through each block. The Indexer stores the certified summaries in network state. [Epoch verification script](../../scripts/verify_epoch_checkpoints.py)
+```text
+score = min(1000, (w1 * floor(log2(1 + V)) + w2 * R) // (1 + alpha * L))
+```
 
-**Sepolia replay.** The fetch script requests WETH `Transfer` logs in pages and records the boundary block hashes. The stored snapshot contains 169 normalized events from blocks 12,184,050 through 12,184,649. Starting from zero and replaying this window gives 0.002 WETH for the sample account. The snapshot metadata also includes a separate latest-balance query. [Ethereum log method](https://ethereum.github.io/execution-apis/api/methods/eth_getLogs/) · [Sepolia snapshot metadata](../../fixtures/sepolia_expected.json) · [Sepolia replay](../../lyquid-indexer/src/sepolia.rs)
+**Epoch checkpoints.** The verifier requests snapshots at blocks 250, 500, 750 and 1,000. Every member computes the cumulative fact over the prefix ending at the target block. The certified update stores a checkpoint keyed by that boundary. [Epoch verifier](../../scripts/verify_epoch_checkpoints.py)
+
+**Sepolia WETH.** The fetch script pages through WETH `Transfer` logs and records the boundary block hashes. The stored snapshot contains 169 normalized events from block 12,184,050 through 12,184,649. The replay starts at zero over the captured window and yields 0.002 WETH for the example holder. The certificate therefore represents the result of that window replay. [Fetch script](../../scripts/fetch_sepolia_logs.py) · [Snapshot metadata](../../fixtures/sepolia_expected.json) · [Sepolia replay](../../lyquid-indexer/src/sepolia.rs)
 
 ## 5. Evaluation and Results
 
 ### 5.1 Team 3-of-4 acceptance and self-audit
 
-On 22 November 2026, a team member ran `make e3`, `make epoch-check`, `make credit-check` and `make sepolia-check` on a fresh four-node local devnet at `77d5d66`. The current acceptance script runs the same classes of checks and saves JSON evidence under `.run/acceptance/`. The evaluation checks replay correctness against an independent Python implementation and an Anvil token, tests the two gates against the same certificate, and observes how the quorum behaves when members are paused. [Team acceptance record](PLAN_06_MEMBER_EVALUATION.md) · [Testing guide](../guides/TESTING.md) · [Acceptance script](../../scripts/run-3of4-acceptance.sh)
+The team ran acceptance on a fresh four-node local devnet at `77d5d66`. The current `scripts/run-3of4-acceptance.sh` entry point records the revision and environment, runs E3, epoch, credit and Sepolia checks, and saves logs and JSON in `.run/acceptance/`. The tests cover the Python reference, EVM history, live cross-Lyquid consumption and quorum recovery. [Team acceptance record](PLAN_06_MEMBER_EVALUATION.md) · [Acceptance script](../../scripts/run-3of4-acceptance.sh) · [Reproduction guide](../guides/TESTING.md)
 
 | Check | Observed result |
 |---|---|
-| Fixture, Python and Rust tests | Nine fixture checks, six Python tests and 36 Rust guest tests passed, and the workspace compiled. |
-| Balance certificate and gate reuse | Alice’s balance at block 1,000 was 62,685. The `Finalized` certificate had three distinct signers. Alice qualified for the airdrop at 60,000 and fell short of the governance threshold of 70,000. Both gates used the same query hash, and repeating the query returned the original certificate. |
-| Archival EVM comparison | All 308 Transfer logs and 18 historical `balanceOf` reads matched the Python reference. |
-| Gate actions and revocation | Each gate recorded one qualifying action and rejected repeats. The initializer could revoke a certificate, after which both gates rejected actions based on it. |
-| Committee availability | With one member paused, the other three certified the query. With two paused, the query remained uncertified during the observation window and finalized after recovery. |
-| Epoch checkpoints | All four checkpoints had three signers. Event counts rose from 89 at block 250 to 172 at 500, 255 at 750 and 308 at 1,000. |
-| Sepolia snapshot | Three members signed the certificate for block 12,184,649. Replaying the 169 Transfer events gave 0.002 WETH for the sample holder. |
+| Fixture and unit checks | 9 fixture checks, 6 Python tests and 36 Rust guest tests passed. The Rust guest tests comprised 21 Indexer and 15 Gate Core tests. |
+| Balance and reuse | Alice held 62,685 at block 1,000. The finalized certificate had three signers and retained its identity after resubmission. Both gates read the same query hash. |
+| EVM reconciliation | All 308 Transfer logs and 18 historical `balanceOf` reads matched the Python reference. |
+| Gate actions | Claim and vote checks covered qualification, caller binding and duplicate rejection. Only the initializer revoked the certificate. The revoked state blocked both actions. |
+| Quorum recovery | With one member paused, the remaining three certified a new query. With two paused, no certificate appeared during the observation window. Certification resumed after recovery. |
+| Epoch checkpoints | Blocks 250, 500, 750 and 1,000 recorded 89, 172, 255 and 308 events respectively. Each checkpoint had three signers. |
+| Sepolia snapshot | The certificate for block 12,184,649 had three signers. It covered 169 WETH Transfer events and recorded a 0.002 WETH window replay for the sample holder. |
 
-The self-audit also exercised changed checkpoint fields, signer-count checks, eligibility, caller binding and administrator-only revocation. The live pause test covers process availability and recovery. The field-level checks and the pause test exercise different failure modes. [Self-audit scenarios](PLAN_05_E3_AUDIT.md)
+The earlier E3 self-audit at the 2-of-3 baseline documents adversarial cases such as altered checkpoint fields, repeated member proposals and insufficient signers. The 3-of-4 availability observations above refer to the later team run. [E3 self-audit record](PLAN_05_E3_AUDIT.md)
 
 ### 5.2 Credit quotes
 
-The Credit Gate returned the expected score, fee and loan-to-value quote for each sample. The matching rule removed 2,000,000 units of short-window reversals from Bob’s raw volume, leaving 15,000 units of clean volume. After the operator set the wash window to zero, Bob’s score rose from 495 to 740 and the quoted fee dropped from 30 to 15 basis points. [Credit fixture answers](../../fixtures/credit_expected.json) · [User 1’s quote results](PLAN_06_MEMBER_EVALUATION.md)
-
 | Sample | Score | Tier | Fee | LTV |
 |---|---:|---|---:|---:|
-| Alice | 940 | VIP | 5 basis points | 85% |
-| Dave | 675 | Standard | 15 basis points | 75% |
-| Bob | 495 | Base | 30 basis points | 60% |
-| Carol | 250 | Base | 30 basis points | 60% |
+| Alice | 940 | VIP | 5 bps | 85% |
+| Dave | 675 | Standard | 15 bps | 75% |
+| Bob | 495 | Base | 30 bps | 60% |
+| Carol | 250 | Base | 30 bps | 60% |
+
+The default matcher removed 2,000,000 units of reversal volume from Bob’s activity, leaving 15,000 units of clean volume. Setting the wash window to zero raised Bob’s score from 495 to 740. The quote moved from Base to Standard, with the fee falling from 30 to 15 bps. This parameter test shows how the configured matching rule affects the fixture quote. [Team credit results](PLAN_06_MEMBER_EVALUATION.md) · [Expected credit metrics](../../fixtures/credit_expected.json)
 
 ### 5.3 Local web console
 
-The web checks ran against the local Lyquor devnet. Alice's certificate showed
-50,000 at block 0, 57,685 at block 950, and 62,685 at block 1000. The historical
-queries left gate state unchanged and the page marked both decisions as
-`Not evaluated`. At block 1000, the page showed the airdrop decision as
-eligible and the governance decision as ineligible. The API returned a client
-error for out-of-range or fractional blocks. Importing the saved block 950
-certificate into the evidence console displayed its block, balance and signer
-IDs. To repeat the browser checks, run `make web` and query Alice at blocks
-1000 and 950. [Web user guide](../guides/WEB_GUIDE.md)
+The recorded Web checks returned Alice’s fixture balances of 50,000, 57,685 and 62,685 at blocks 0, 950 and 1,000 respectively. The two qualification cards showed `Not evaluated` at blocks 0 and 950. At block 1,000, the airdrop reported eligible and governance reported ineligible. The request handler rejects fractional or out-of-range blocks. The evidence view displayed the imported block 950 certificate’s block, balance and signers. The separate browser download check in the `2552c5e` record timed out. [Balance references](../../fixtures/expected_results.json) · [Web guide](../guides/WEB_GUIDE.md) · [Request handler](../../scripts/serve_web.py) · [Archived Web checks](external-tests/EXTERNAL_USER_02_MACOS.md#功能与补充检查)
 
 ### 5.4 Query latency
 
-Both timing runs used five sequential first-time queries on an already running local devnet. The 3-of-4 run verified that the certificates did not yet exist and measured query confirmation and certification, including local CLI calls. The two runs used different revisions and environments, so the observed medians describe their respective setups. [2-of-3 benchmark](PLAN_06_MEMBER_EVALUATION.md) · [3-of-4 benchmark](external-tests/EXTERNAL_USER_02_MACOS.md#五次首次查询计时)
+Each run measured five sequential first-time queries after starting a local network. Both medians include query confirmation and certification. The 3-of-4 run explicitly checked that each certificate was absent before querying and included local CLI overhead. Quorum size varied alongside the code revision and environment, so attributing the difference to quorum size would require a controlled comparison. [2-of-3 benchmark](PLAN_06_MEMBER_EVALUATION.md) · [3-of-4 benchmark](external-tests/EXTERNAL_USER_02_MACOS.md#五次首次查询计时)
 
-| Committee | Revision | First-time queries | Median elapsed time |
+| Committee | Revision | Queries | Median |
 |---|---|---:|---:|
 | 2-of-3 | `db1532f` | 5 | 58.10 ms |
 | 3-of-4 | `2552c5e` | 5 | 218.95 ms |
 
 ### 5.5 External user testing
 
-Three participants outside the team operated independently. Two completed the assigned query and eligibility checks, and one stopped after encountering a Windows setup barrier. The completed Web sessions ran on the same project machine with two different participants. The feedback form records the route, revision, elapsed trial time, certificate, eligibility results and reported assistance. [External test task sheet](../guides/EXTERNAL_USER_TEST.md)
+The external task asks a participant to retrieve a balance certificate and verify airdrop and governance eligibility. Three external participants attempted the workflow independently. Two completed the assigned task, leaving one completion outstanding against the target of three. The feedback form records the test revision, elapsed trial time, assistance and results. [Trial task sheet](../guides/EXTERNAL_USER_TEST.md)
 
-| Participant | Environment and route | Observed outcome |
+| Participant | Setup | Result |
 |---|---|---|
-| E01 | Native Windows, Git Bash | Independently ran the setup and basic checks. `make check` passed. Missing Lyquor LDK and `shaker` prevented the demo from starting. |
-| E02 | macOS, Web | Completed without assistance in 67.5 s. Bob at block 1,000 had 51,886 tokens. Airdrop and governance both returned ineligible. |
-| E03 | macOS, Web | Completed without assistance in 358.4 s. Alice at block 1,000 had 62,685 tokens. The airdrop returned eligible and governance returned ineligible. |
+| E01 | Windows, Git Bash | Independently passed `make check` at `34e1fad`. Missing Lyquor LDK and `shaker` blocked live demo startup. |
+| E02 | macOS, Web | Completed without assistance in 67.5 s at `46ef730`. Bob at block 1,000 held 51,886. Both gates reported ineligible. |
+| E03 | macOS, Web | Completed without assistance in 358.4 s at `cd15cec`. Alice at block 1,000 held 62,685. Airdrop reported eligible and governance reported ineligible. |
 
-E02 and E03 each produced a finalized certificate with three distinct signers. Both gates used the certificate’s query hash. The reported trial durations run from the environment check through result confirmation. E03’s earlier terminal attempt ended before demo startup and is part of the same participant’s record. The team’s goal of three completed tasks remains one short. [E01 Windows record](external-tests/EXTERNAL_USER_01_WINDOWS.md) · [E02 Web record](external-tests/EXTERNAL_USER_02_MACOS.md#web-试用) · [E03 Web record](external-tests/EXTERNAL_USER_03_MACOS.md)
+E02 and E03 each produced a `Finalized` certificate with three distinct signers. Both gates in each run referenced the certificate’s query hash. The durations include environment checking, demo startup and result confirmation. They measure participant workflows and use a different interval from the query benchmark. E03’s earlier terminal attempt ended before demo startup and remains part of the E03 record. [E01 archive](external-tests/EXTERNAL_USER_01_WINDOWS.md) · [E02 Web archive](external-tests/EXTERNAL_USER_02_MACOS.md#web-试用) · [E03 archive](external-tests/EXTERNAL_USER_03_MACOS.md)
 
-E01’s report localizes the problem to the demo toolchain. The task sheet now calls out that requirement before startup. E02’s choice of Bob also prompted the Web feedback script to accept alternate holders and check eligibility against each holder’s expected balance. The resulting form captured a case where both gates reject eligibility. [External test task sheet](../guides/EXTERNAL_USER_TEST.md) · [Web trial recorder](../../scripts/record_external_test.py)
+E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker` before the demo step. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder. The recorder checks both gate outcomes against the selected holder’s reference balance and writes the chosen holder to the feedback form. Bob’s session exercised the case in which neither gate grants eligibility. [Updated task sheet](../guides/EXTERNAL_USER_TEST.md) · [Web trial recorder](../../scripts/record_external_test.py)
 
 ## 6. Limitations and Reflection
 
-**Input coverage.** The Merkle root commits to the events the committee received. Complete history depends on how those events were collected and how block finality was established. Applying replay to a later capture window requires an opening balance. Tokens whose balances change outside the recorded transfer history need additional data or replay rules. A next step is to compare a finalized Sepolia range across independently configured RPC endpoints, capture the opening `balanceOf`, and verify the replay against an archival `balanceOf` at the end block.
+**Input coverage.** The event Merkle root commits to the history the members replayed. Coverage depends on how the source logs were collected and on the finality of their blocks. A partial window needs an opening balance to reconstruct absolute state. A follow-up Sepolia check could compare the same finalized range from independently configured RPC sources and reconcile opening and closing archival balances against the replay.
 
-**Committee deployment.** The four processes run on one machine and replay copies of the same dataset. This setup tests agreement and recovery under controlled conditions. A shared parser or input error can affect every member’s result. Independent operators, RPC sources and hosts would exercise failure modes beyond those observed on the local network.
+**Committee deployment.** Four local processes exercise agreement and controlled process failure. This setup shares a host and a replay implementation, so it leaves independent-host deployment, common-mode errors and network partitions open. The measured timing reflects a same-machine local devnet.
 
-**Credit policy.** Same-counterparty matching within a fixed window captures one form of repeated trading. The synthetic cases measure whether the implementation follows that rule. Estimating repayment risk would require representative data and calibration of the score and quote tiers.
+**Credit calibration.** The synthetic cases test the behavior of the fixed-window matching rule and the score mapping. They provide no basis for calibrating lending risk against real outcomes. Representative account histories and a separate calibration study would be needed before using the quotes for lending decisions.
 
-**Reproduction.** The CLI and live web console require compatible versions of Rust, Lyquor and Foundry and available local ports. Both completed external sessions used the same macOS host. Testing on a separate supported host would provide evidence about installation and startup outside the team’s environment. The Windows session identifies the LDK as a prerequisite for further platform testing.
+**Reproduction.** E01’s logs identify a concrete native Windows toolchain barrier. The two successful Web sessions establish task completion under the recorded macOS setup. Fresh installations on independently managed hosts and further platform trials would extend the reproducibility evidence. [Environment requirements](../guides/TESTING.md)
 
 ## 7. Contributions and Attribution
 
-| Contributor | Contributions evidenced in Git |
+| Contributor | Git-evidenced contribution |
 |---|---|
-| `jerryluo0517-cyber` | Balance certification and shared gate validation, Airdrop and Governance integration, historical EVM comparison, local acceptance, live Web console and trial documentation. |
-| `hwzhang0317` | Credit replay, scoring and Credit Gate, checkpoint and Sepolia certification paths and fixtures, and the dispersion check. |
-| Third team member | |
+| `jerryluo0517-cyber` | Balance certification, common gate checks, dual-gate integration, historical EVM comparison, Web console and external-trial tooling. [`154939c`](https://github.com/jerryluo0517-cyber/holderproof/commit/154939c) · [`b87c980`](https://github.com/jerryluo0517-cyber/holderproof/commit/b87c980) · [`46ef730`](https://github.com/jerryluo0517-cyber/holderproof/commit/46ef730) |
+| `hwzhang0317` | Credit replay and Gate, checkpoint and Sepolia paths, related fixtures and the dispersion check. [`5f3a904`](https://github.com/jerryluo0517-cyber/holderproof/commit/5f3a904) · [`d55a449`](https://github.com/jerryluo0517-cyber/holderproof/commit/d55a449) |
+| Third team member | [INSERT THIRD TEAM MEMBER NAME & CONTRIBUTIONS] |
 
-[Balance and dual-gate implementation](https://github.com/jerryluo0517-cyber/holderproof/commit/154939c) · [Credit, checkpoint and Sepolia extensions](https://github.com/jerryluo0517-cyber/holderproof/commit/5f3a904) · [Dispersion check](https://github.com/jerryluo0517-cyber/holderproof/commit/d55a449) · [Live Web console](https://github.com/jerryluo0517-cyber/holderproof/commit/b87c980)
-
-The implementation uses Rust, Lyquor LDK, Python and Foundry/Anvil. The repository includes the synthetic fixtures and the captured Sepolia WETH snapshot used for reproduction. [Lyquor build, deploy and test documentation](https://docs.lyquor.dev/docs/ldk/build-deploy-test/) · [Foundry Anvil documentation](https://www.getfoundry.sh/anvil/index.html)
+The implementation relies on Lyquor LDK for execution and certified calls, and on Foundry Anvil for the local EVM comparison. The repository contains the synthetic fixtures and captured Sepolia snapshot used in evaluation. [Lyquor LDK](https://docs.lyquor.dev/docs/ldk/build-deploy-test/) · [Anvil](https://www.getfoundry.sh/anvil/index.html)
 
 ## 8. AI Use Statement
 
-OpenAI Codex assisted with certificate-code review and refactoring, test and documentation tooling, automated checks, and report drafting and editing. The team supplied the project direction and its acceptance output. The report’s technical claims were checked against the Rust code, Python reference results and saved logs. The external Web results were checked against the feedback forms and certificates, with assistance status taken from the participants’ responses.
+OpenAI Codex assisted with reviewing and refactoring certificate validation, building test and documentation tools, running automated checks, and drafting and editing this report. A team member supplied the acceptance run, and the external participants submitted their trial results and assistance status. The report’s claims were checked against Rust source, Python fixture outputs, saved logs and archived participant forms. The archived `2552c5e` technical run is recorded separately from the two completed external Web trials. [Team evidence](PLAN_06_MEMBER_EVALUATION.md) · [External and technical evidence](external-tests/EXTERNAL_USER_02_MACOS.md)
 
 ## 9. Conclusion
 
-HolderProof shows how a Lyquor committee can certify a historical balance once and let separate applications apply different rules to it. The local evaluation exercised correctness, certificate reuse and quorum recovery, and extended the same workflow to credit and periodic checkpoints. The external trials confirmed two Web workflows and identified a concrete setup barrier on native Windows.
+HolderProof certified a historical balance once and let two independently deployed policy gates act on that fact. The local evaluation checked agreement with historical EVM reads, certificate reuse, application actions and quorum recovery. VeriCredit-Idx applied the same oracle model to credit quotes, alongside separate checkpoint and Sepolia paths. The external trials confirmed the two Web scenarios and identified the toolchain boundary that blocked native Windows setup.
 
 ## References
 
 - Ethereum Improvement Proposals. [ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20).
-- Ethereum Execution APIs. [JSON-RPC logs method](https://ethereum.github.io/execution-apis/api/methods/eth_getLogs/).
+- Ethereum. [JSON-RPC API](https://ethereum.org/developers/docs/apis/json-rpc/).
+- Ethereum Execution APIs. [`eth_getLogs`](https://ethereum.github.io/execution-apis/api/methods/eth_getLogs/).
 - The Graph. [Subgraphs Overview](https://thegraph.com/docs/en/subgraphs/overview/).
 - Lyquor. [Oracle and certified calls](https://docs.lyquor.dev/docs/ldk/oracle/) and [Build, deploy and test](https://docs.lyquor.dev/docs/ldk/build-deploy-test/).
 - Miguel Castro and Barbara Liskov. [Practical Byzantine Fault Tolerance](https://pdos.lcs.mit.edu/6.824/papers/castro-practicalbft.pdf). OSDI, 1999.
 - Foundry. [Anvil documentation](https://www.getfoundry.sh/anvil/index.html).
-- HolderProof project. [Source code, reproducibility scripts and evidence summaries](https://github.com/jerryluo0517-cyber/holderproof).
+- HolderProof project. [Source, test scripts and archived evidence](https://github.com/jerryluo0517-cyber/holderproof).
