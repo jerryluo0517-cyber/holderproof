@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "participant_id": "external-user-02",
+  "study_record": "technical_reproduction",
+  "feedback_form_received": false,
+  "independence_recorded": false,
+  "elapsed_time_recorded": false,
+  "environment": {
+    "os": "macOS",
+    "kernel": "Darwin 25.6.0",
+    "architecture": "arm64",
+    "python": "3.10.22",
+    "rust": "1.99.0",
+    "lyquor_ldk": "0.8.4+54c5e11",
+    "foundry": "1.7.1",
+    "solidity": "0.8.28"
+  },
+  "repository": "https://github.com/jerryluo0517-cyber/holderproof",
+  "commit": "383e7e116fd1193ee6d0b58715b60991fdbe8234",
+  "date": "2026-11-23",
+  "overall": "passed",
+  "environment_adaptation": "temporary LDK path adjustment; restored after testing",
+  "checks": {
+    "make check": {
+      "exit_code": 0,
+      "fixture_checks": 9,
+      "python_tests": 6
+    },
+    "guest-test": {
+      "exit_code": 0,
+      "indexer_passed": 21,
+      "gate_core_passed": 15
+    },
+    "manual_demo_and_query": {
+      "exit_code": 0
+    },
+    "run-3of4-acceptance.sh": {
+      "exit_code": 0,
+      "e3": "passed",
+      "epoch": "passed",
+      "credit": "passed",
+      "sepolia": "passed"
+    },
+    "browser_live_query": {
+      "1000": {
+        "balance": "62685",
+        "airdrop": "Eligible",
+        "governance": "Ineligible"
+      },
+      "950": {
+        "balance": "57685",
+        "airdrop": "Not evaluated",
+        "governance": "Not evaluated"
+      }
+    }
+  },
+  "git_status": "",
+  "verification": {
+    "balance_signer_count": 3,
+    "gate_query_hash_match": true,
+    "evm_transfer_count": 308,
+    "archival_balance_checks": 18,
+    "epoch_blocks": [
+      250,
+      500,
+      750,
+      1000
+    ],
+    "sepolia_block": 12184649,
+    "sepolia_events": 169,
+    "sepolia_weth_wei": "2000000000000000"
+  }
+}
