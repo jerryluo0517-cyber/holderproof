@@ -5,6 +5,11 @@
   "repository": "https://github.com/jerryluo0517-cyber/holderproof",
   "feedback_form_received": false,
   "independent_human_trial_verified": false,
+  "execution_account": {
+    "participant_declaration": "The participant states that they ran the test with Codex assistance.",
+    "original_evidence_bundle": "The bundle attributes command execution and browser interactions to Codex.",
+    "verification_status": "operator_roles_unresolved"
+  },
   "commit": "2552c5e91c3231d924179841dbab7d7e770aad7a",
   "date": "2026-11-23",
   "timezone": "Asia/Hong_Kong",
