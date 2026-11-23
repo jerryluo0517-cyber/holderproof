@@ -14,14 +14,17 @@ import time
 from urllib.request import urlopen
 
 from run_proof import ROOT
+from serve_web import GATE_BLOCK as BLOCK
 from serve_web import ORIGIN as WEB_URL
 from verify_step4 import read_json
 
-HOLDER = "0x" + "aa" * 20
-BLOCK = 1000
+sys.path.insert(0, str(ROOT))
+from fixtures.generate_fixture import HOLDERS  # noqa: E402
+
+WEB_HOLDERS = ("alice", "bob", "carol", "dave")
 GATES = {
-    "airdrop": ("空投", 8080, "60000", True),
-    "governance": ("治理", 8082, "70000", False),
+    "airdrop": ("空投", 8080, "60000"),
+    "governance": ("治理", 8082, "70000"),
 }
 
 
@@ -30,6 +33,7 @@ class Trial:
     tester_id: str
     commit: str
     route: str = "终端"
+    holder_name: str = "alice"
     step: str = "环境检查"
     environment_ready: bool = False
     completed: bool = False
@@ -63,12 +67,12 @@ def run_step(command: list[str], log_path: Path) -> None:
 
 def run_terminal_query(trial: Trial, run_dir: Path) -> None:
     trial.step = "查询余额证书"
-    confirm_step("查询 Alice 在 fixture 区块 1000 的余额证书。")
+    confirm_step(f"查询 {trial.holder_name.title()} 在 fixture 区块 {BLOCK} 的余额证书。")
     proof_path = run_dir / "certificate.json"
     log_path = run_dir / "query.log"
     with proof_path.open("w", encoding="utf-8") as proof, log_path.open("w", encoding="utf-8") as log:
         result = subprocess.run(
-            ["./scripts/run-proof.sh", "--holder", HOLDER, "--block", str(BLOCK)],
+            ["./scripts/run-proof.sh", "--holder", HOLDERS[trial.holder_name], "--block", str(BLOCK)],
             cwd=ROOT, stdout=proof, stderr=log, check=False,
         )
     if result.returncode:
@@ -85,7 +89,7 @@ def run_terminal_query(trial: Trial, run_dir: Path) -> None:
     )
 
     trial.step = "核对空投和治理"
-    for key, (name, port, _, _) in GATES.items():
+    for key, (name, port, _) in GATES.items():
         gate = read_json(port)
         if not isinstance(gate, dict):
             raise RuntimeError(f"{name}接口缺少结果对象")
@@ -103,17 +107,19 @@ def validate_result(trial: Trial) -> None:
 
     expected = json.loads((ROOT / "fixtures/expected_results.json").read_text(encoding="utf-8"))
     snapshot = next(item for item in expected["snapshots"] if item["block_number"] == BLOCK)
+    expected_balance = snapshot["balances"][trial.holder_name]
     if (
-        str(trial.certificate.get("holder")).lower() != HOLDER
+        str(trial.certificate.get("holder")).lower() != HOLDERS[trial.holder_name]
         or trial.certificate.get("block_number") != BLOCK
-        or trial.certificate.get("balance") != str(snapshot["balances"]["alice"])
+        or trial.certificate.get("balance") != str(expected_balance)
         or trial.certificate.get("status") != "Finalized"
         or signer_count(trial.certificate) not in (3, 4)
         or not trial.matching_query
     ):
         raise RuntimeError("证书或两个 Gate 的查询哈希与试用预期不一致")
-    for key, (name, _, threshold, eligible) in GATES.items():
+    for key, (name, _, threshold) in GATES.items():
         gate = trial.gates[key]
+        eligible = expected_balance >= int(threshold)
         if str(gate.get("threshold")) != threshold or gate.get("eligible") is not eligible:
             raise RuntimeError(f"{name}的门槛或资格结果与试用预期不一致")
 
@@ -134,6 +140,8 @@ def wait_for_web(process: subprocess.Popen, log_path: Path) -> dict:
 
 def run_web_query(trial: Trial, run_dir: Path) -> None:
     trial.step = "启动网页"
+    holder = HOLDERS[trial.holder_name]
+    holder_label = trial.holder_name.title()
     log_path = run_dir / "web.log"
     with log_path.open("w", encoding="utf-8") as log, subprocess.Popen(
         [sys.executable, "scripts/serve_web.py"], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
@@ -144,17 +152,20 @@ def run_web_query(trial: Trial, run_dir: Path) -> None:
             trial.step = "浏览器查询与核对资格"
             while True:
                 confirm_step(
-                    f"打开 {WEB_URL}/，选择 Alice 和区块 1000，点击 Run live query。\n"
+                    f"打开 {WEB_URL}/，选择 {holder_label} 和区块 {BLOCK}，点击 Run live query。\n"
                     "看到 Query complete. 后，查看余额证书、空投和治理结果，再回到终端继续。"
                 )
                 observed = read_web_snapshot()
                 certificate = observed["certificate"]
                 gates = observed["gates"]
-                expected_query = certificate.get("holder") == HOLDER and certificate.get("block_number") == BLOCK
+                expected_query = (
+                    str(certificate.get("holder")).lower() == holder
+                    and certificate.get("block_number") == BLOCK
+                )
                 fresh_gates = all(gates.get(key, {}).get("checkCount", 0) > initial_counts[key] for key in GATES)
                 if expected_query and fresh_gates:
                     break
-                print("请在网页完成 Alice 在区块 1000 的查询，并看到两个资格结果后再继续。")
+                print(f"请在网页完成 {holder_label} 在区块 {BLOCK} 的查询，并看到两个资格结果后再继续。")
 
             trial.certificate = certificate
             trial.gates = gates
@@ -213,6 +224,7 @@ def render_form(trial: Trial, elapsed: float, assistance: str, feedback: str) ->
         "",
         f"- 匿名编号：{trial.tester_id}",
         f"- 测试路线：{trial.route}",
+        f"- 查询任务：{trial.holder_name.title()}，区块 {BLOCK}",
         f"- 测试提交：`{trial.commit}`",
         f"- 环境：{platform.system()} {system} / {platform.machine()} / Python {platform.python_version()}",
         f"- 环境检查：{'通过' if trial.environment_ready else '未通过'}",
@@ -253,9 +265,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("tester_id", help="团队分配的匿名编号，例如 E01")
     parser.add_argument("--web", action="store_true", help="在浏览器完成查询和资格核对")
+    parser.add_argument("--holder", choices=WEB_HOLDERS, help="指定 Web 路线的持有者，默认 Alice")
     args = parser.parse_args()
     if not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_-]{0,15}", args.tester_id):
         parser.error("请使用团队分配的匿名编号，例如 E01")
+    if args.holder and not args.web:
+        parser.error("--holder 需要与 --web 一起使用")
 
     base_dir = ROOT / ".run/external-tests"
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -263,7 +278,12 @@ def main() -> int:
     form = run_dir / "feedback.md"
     print(f"本轮记录将保存到 {form.relative_to(ROOT)}", flush=True)
 
-    trial = Trial(tester_id=args.tester_id, commit="未读取", route="Web" if args.web else "终端")
+    trial = Trial(
+        tester_id=args.tester_id,
+        commit="未读取",
+        route="Web" if args.web else "终端",
+        holder_name=args.holder or "alice",
+    )
     started = time.monotonic()
     try:
         revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True)
