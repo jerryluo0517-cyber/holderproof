@@ -127,7 +127,22 @@
   "outcome": "incomplete_environment_blocked",
   "source_materials": [
     "participant's README.md",
-    "participant's summary.json"
+    "participant's summary.json",
+    "participant's original test logs"
   ],
-  "raw_logs_received": false
+  "raw_logs_received": true,
+  "raw_log_count": 15,
+  "published_evidence": "EXTERNAL_USER_01_WINDOWS.md#反馈与证据",
+  "additional_attempts": [
+    {
+      "log": "04-cargo-test.log",
+      "stage": "host-target compilation",
+      "detail": "Lyquid dependency could not resolve NativeGuestAbi"
+    },
+    {
+      "log": "05-cargo-test-wasm-build-gate-core.log",
+      "stage": "WASM guest test build",
+      "detail": "rust-lld: Permission denied"
+    }
+  ]
 }

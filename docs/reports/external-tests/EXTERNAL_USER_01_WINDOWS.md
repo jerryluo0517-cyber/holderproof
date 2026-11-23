@@ -25,10 +25,22 @@
 | Rust WASM 类型检查 | `cargo check --workspace --all-targets --target wasm32-unknown-unknown` 通过，覆盖业务与测试目标的类型检查。 |
 | `make guest-test` | 命令退出码为 2，找不到 `shaker`。36 项 Guest 测试均未执行。 |
 | `make demo` | 命令退出码为 2，缺少 `shaker`。实时证书、两个 Gate、Web 查询与 E3 验收均未启动。 |
+| 补充测试尝试 | 宿主目标的 `cargo test` 在编译 Lyquid 依赖时找不到 `NativeGuestAbi`。尝试构建 WASM 测试时，`rust-lld` 返回 `Permission denied`。 |
 | Rust 格式与静态检查 | `cargo fmt --all -- --check` 在 11 个文件报告 31 处格式差异。Clippy 退出码为 0，共报告 6 条警告。 |
 
 ## 反馈与证据
 
 测试者建议下一轮使用 WSL2 + Ubuntu、原生 Linux 或 macOS 跑完整流程。本轮记录的结果来自原生 Windows，WSL2 运行情况待复测。这条反馈可用于在试用指南中提前说明 LDK 的平台要求。
 
-本记录整理自参与者提供的文字报告和 JSON 摘要，已去除本机目录。原始日志待归档，优先保留环境检查、`make check` 和 `make demo` 的输出。
+已收到参与者提供的文字报告、JSON 摘要和 15 份原始日志。下表摘录能复核主要结论的日志内容，已去除本机路径。
+
+| 日志文件 | 关键输出 |
+|---|---|
+| `00-environment-check.log` | `[FAIL] Lyquor LDK not found at ~/.shakenup/ldk` |
+| `01a-generate-fixture.log`、`01-verify-fixture.log` | `events=308`，包含 `[PASS] event count` 和 `[PASS] Merkle root` 在内的 9 项校验通过。 |
+| `10-make-check.log` | 9 项 fixture 校验通过，Python 显示 `Ran 6 tests` 与 `OK`，Rust 显示 `Finished dev profile`。 |
+| `03b-cargo-check-all-targets.log` | WASM 全目标类型检查完成，报告 5 条 `unused doc comment` 警告。 |
+| `04-cargo-test.log` | `error[E0432]: unresolved import super::NativeGuestAbi` |
+| `05-cargo-test-wasm-build-gate-core.log` | `error: linking with rust-lld failed: exit code: 1`，原因是 `rust-lld: Permission denied`。 |
+| `11-make-guest-test.log` | `shaker: command not found` |
+| `12-make-demo.log` | `Missing required tool: shaker` |
