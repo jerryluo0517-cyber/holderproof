@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "participant_id": "E03",
+  "participant_status": "outside_project_team",
+  "study_record": "usability_trial",
+  "test_date": "2026-11-23",
+  "timezone": "Asia/Hong_Kong",
+  "commit": "cd15cecd23034c4f019624b524265ca904838c3a",
+  "host": {
+    "os": "macOS",
+    "version": "27.0",
+    "architecture": "arm64",
+    "python": "3.12.10",
+    "provided_by": "project_team"
+  },
+  "completed_trial": {
+    "route": "web",
+    "environment_check": "passed",
+    "elapsed_seconds": 358.4,
+    "outcome": "completed_without_assistance",
+    "assistance_source": "participant_feedback",
+    "participant_feedback": "无",
+    "query": {
+      "fixture_holder": "Alice",
+      "block": 1000,
+      "balance": "62685",
+      "certificate_status": "Finalized",
+      "distinct_signers": 3,
+      "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "gate_query_hashes_match": true
+    },
+    "gates": {
+      "airdrop": {
+        "threshold": "60000",
+        "eligible": true
+      },
+      "governance": {
+        "threshold": "70000",
+        "eligible": false
+      }
+    },
+    "evidence_reviewed": ["feedback.md", "certificate.json", "web.log"]
+  },
+  "earlier_attempt": {
+    "route": "terminal",
+    "environment_check": "passed",
+    "elapsed_seconds": 8.8,
+    "outcome": "participant_ended_before_demo_start",
+    "evidence_reviewed": ["feedback.md"]
+  }
+}
