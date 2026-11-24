@@ -160,6 +160,8 @@ Each completed trial produced a `Finalized` certificate with three distinct sign
 
 The Windows trial used the terminal recorder in WSL2 and captured the certificate and both eligibility results. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder, which checks eligibility against the selected holder’s reference balance and records the holder in the feedback form. [Windows trial instructions](../guides/EXTERNAL_USER_TEST.md#windows-外部试用) · [Web trial recorder](../../scripts/record_external_test.py)
 
+### 5.6 Multi Host Node Deployment Tests
+
 ## 6. Limitations and Reflection
 
 **Input coverage.** The event Merkle root commits to the history the members replayed. Coverage depends on how the source logs were collected and on the finality of their blocks. A partial window needs an opening balance to reconstruct absolute state. A follow-up Sepolia check could compare the same finalized range from independently configured RPC sources and reconcile opening and closing archival balances against the replay.
