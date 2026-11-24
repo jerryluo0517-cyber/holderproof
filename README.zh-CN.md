@@ -6,7 +6,7 @@
 
 四个本地委员会节点重放同一份有序事件。至少三个节点就完整事实达成一致后，Lyquor 原生两阶段预言机对该事实出证，Indexer 将结果写入网络状态。空投和治理 Gate 共用余额证书，各自判断资格。信用 Gate 读取信用证书，并给出费率和借贷 LTV。
 
-[课程报告（英文 PDF）](docs/reports/HolderProof_Academic_Report_Cover_Updated.pdf) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md) · [Windows WSL2 启动](docs/guides/WINDOWS_WSL.md)
+[课程报告（英文 PDF）](docs/reports/HolderProof_Academic_Report_Cover_Updated.pdf) · [测试指引](docs/guides/TESTING.md) · [Web 使用说明](docs/guides/WEB_GUIDE.md) · [Windows WSL2 启动](docs/guides/WINDOWS_WSL.md)· [AWS 四主机分布式部署与验证 (E2)](docs/guides/holderproof_aws_e2_verification_proof.md)
 
 ---
 
@@ -77,7 +77,7 @@ flowchart TB
 | **VeriCredit-Idx 信用评分与动态费率** | 自动剔除短窗口同对手方反向对敲洗盘量；用纯整数 `u128::ilog2` 计算 $S(u) \in [0, 1000]$；支持默认权重（`35/20/2/3`）与 `initializer` 自定义配置；下游 `lyquid-credit-gate` 同步返回动态费率（`5/15/30 bps`）与借贷 LTV（`85%/75%/60%`），并提供 `quote_or_fallback()` 在证书缺失/吊销/超期（Audit-05 TTL）时自动回退保守档 | `lyquid-indexer/src/credit.rs`, `holderproof-gate-core/src/credit.rs`, `lyquid-credit-gate/`, `scripts/verify_credit.py`                  |
 | **真实 Sepolia 链双轨接入**           | `fetch_sepolia_logs.py` 从公共 Sepolia RPC 分页拉取官方 WETH 合约 169 条真实 `Transfer` 日志与真实区块头哈希（块 `12184050..12184649`）；`sepolia_proof` 通道走 3-of-4 签发真实链证书（余额 `0.002 WETH`），消费端按 `dataset_id` 双轨分流校验                                                                            | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
 | **双重安全防线（NDSS 2026 防御）**    | 确定性历史查询采用 `ChainPos` 区块锚定 + 字节级全等；时间差观测查询在 Network State 实现诚实核心区间离散度校验 $(v_{m-f} - v_{f+1}) \times 10000 \le M \times \epsilon_{\max}$（默认 `100 bps` = 1%），抵御单节点极端值与 Leader 挑拣攻击                                                                                 | `lyquid-indexer/src/dispersion.rs`                                                                                                        |
-| **独立 EVM 归档对账与 Web 控制台**    | `FixtureToken.sol` 在独立 Anvil（Chain ID `31338`）重放 308 笔转账并核对 18 组归档 `eth_call balanceOf`；全部 HTTP 诊断接口均带 `content-type` 与 CORS 头，配套全英文 4 标签页交互演示台 `holderproof_vericredit_idx_console.html`                                                                                                          | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                                                |
+| **独立 EVM 归档对账与 Web 控制台**    | `FixtureToken.sol` 在独立 Anvil（Chain ID `31338`）重放 308 笔转账并核对 18 组归档 `eth_call balanceOf`；全部 HTTP 诊断接口均带 `content-type` 与 CORS 头，配套全英文 4 标签页交互演示台 `holderproof_vericredit_idx_console.html`                                                                                        | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                              |
 
 ---
 
@@ -95,7 +95,7 @@ flowchart TB
 | `evm/`                    | Foundry (Solidity 0.8.28) | `FixtureToken.sol`，用于独立 Anvil 归档 `balanceOf` 正确性交叉验证                                                                                                                              |
 | `scripts/`                | Shell + Python + JS       | 环境安装、4 节点 Devnet 起停、P0/E3/周期检查点/VeriCredit/Sepolia 自动化验收脚本、Sepolia RPC 抓取工具与文档导出工具                                                                            |
 | `tests/`                  | Python `unittest`         | `test_ground_truth.py`（**6 项**基准单测：确定性生成、边界包含、Merkle 证明与篡改检测）                                                                                                         |
-| `ui/`                     | HTML + JS                 | 零依赖单文件全英文交互控制台 `holderproof_vericredit_idx_console.html`（4 个标签页 + 本地证据 JSON 导入）                                                                                                         |
+| `ui/`                     | HTML + JS                 | 零依赖单文件全英文交互控制台 `holderproof_vericredit_idx_console.html`（4 个标签页 + 本地证据 JSON 导入）                                                                                       |
 
 ---
 
@@ -188,6 +188,8 @@ PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器�
 
 **macOS 和 Linux**。运行 `make web` 启动本地 devnet。
 
+**AWS 四主机分布式部署（Bonus E2）。** 可复现的四台 EC2 独立主机部署步骤与跨机延迟实测记录见 [AWS 四主机部署与验证证明](docs/guides/holderproof_aws_e2_verification_proof.md)。
+
 启动后在浏览器打开 `http://127.0.0.1:8765`。
 选择样例持有者和 `0–1000` 内的区块，即可查询该区块的余额证书。
 空投和治理的资格快照固定在区块 `1000`。
@@ -200,7 +202,7 @@ PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器�
 | `./scripts/setup-env.sh --check`                              | 检查本地 Rust / LDK / Foundry / Python 环境                                          |
 | `make check && make guest-test`                               | 秒级本地自检：Python 基准（6 项）+ 全量编译 + Rust Guest 单测（**21 + 15 = 36 项**） |
 | `./scripts/stop-step4.sh && make e3`                          | 完整 P0 3-of-4 验收 + 独立 EVM 归档对账 + E3 动作/吊销/节点宕机自审计                |
-| `make epoch-check`                                           | 激活 `checkpoint_proof` 并提交验证 `250 / 500 / 750 / 1000` 四个周期检查点           |
+| `make epoch-check`                                            | 激活 `checkpoint_proof` 并提交验证 `250 / 500 / 750 / 1000` 四个周期检查点           |
 | `make credit-check`                                           | 部署 `lyquid-credit-gate`（`8083`）并验证 4 个画像、反洗盘与自定义权重权限           |
 | `python3 scripts/fetch_sepolia_logs.py && make sepolia-check` | 从真实 Sepolia RPC 拉取 WETH 日志并通过 3-of-4 委员会签发真实链证书                  |
 | `./scripts/run-proof.sh --holder 0x... --block 1000`          | 对运行中的本地 Indexer 发起任意合规地址/区块的按需出证                               |

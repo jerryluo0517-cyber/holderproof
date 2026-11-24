@@ -6,7 +6,7 @@ A **3-of-4 Byzantine Fault Tolerant (BFT) Verifiable Historical On-Chain Indexer
 
 Four local committee nodes replay the same ordered events. When at least three agree on a full fact, Lyquor's two-phase oracle certifies it and the Indexer writes it to network state. The Airdrop and Governance gates read the same balance certificate and apply their own policies. The Credit Gate reads a credit certificate and returns a fee and loan-to-value quote.
 
-[Course report (PDF)](docs/reports/HolderProof_Academic_Report_Cover_Updated.pdf) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md) · [Windows WSL2 startup](docs/guides/WINDOWS_WSL.md)
+[Course report](docs/reports/CS5298_FINAL_REPORT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md) · [Windows WSL2 startup](docs/guides/WINDOWS_WSL.md) · [AWS 4-host deployment (E2)](docs/guides/holderproof_aws_e2_verification_proof.md)
 
 ---
 
@@ -77,7 +77,7 @@ flowchart TB
 | **VeriCredit-Idx Anti-Wash Credit & Dynamic Pricing** | Automatically strips wash-trading volume (same counterparty, opposite direction, `delta_block <= wash_window`); computes deterministic integer credit scores $S(u) \in [0, 1000]$ via `u128::ilog2`; supports default (`35/20/2/3`) and `initializer`-configurable weights; `lyquid-credit-gate` synchronously quotes dynamic DEX fees (`5/15/30 bps`) and lending LTV (`85%/75%/60%`) with `quote_or_fallback()` fail-safe on missing, revoked, or stale (Audit-05 TTL) certificates | `lyquid-indexer/src/credit.rs`, `holderproof-gate-core/src/credit.rs`, `lyquid-credit-gate/`, `scripts/verify_credit.py`                  |
 | **Dual-Track Real Ethereum Sepolia Verification**     | `fetch_sepolia_logs.py` paginates authentic Sepolia WETH `Transfer` logs (`169` events across blocks `12184050..12184649`) and real block hashes; `sepolia_proof` certifies authentic chain balances (`0.002 WETH`) via 3-of-4 quorum; `holderproof-gate-core` cleanly dispatches validation by `dataset_id` without altering offline tests                                                                                                                                           | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
 | **Dual-Mechanism Security (NDSS 2026 Defense)**       | Historical queries enforce deterministic `ChainPos` binding + byte-level consensus; time-skewed observation queries enforce a Network State honest-core dispersion guard $(v_{m-f} - v_{f+1}) \times 10000 \le M \times \epsilon_{\max}$ (default `100 bps` = 1%) to defeat Byzantine outliers and leader cherry-picking                                                                                                                                                              | `lyquid-indexer/src/dispersion.rs`                                                                                                        |
-| **Archival EVM Cross-Check & Web Console**            | `FixtureToken.sol` replays all 308 transfers on an isolated Anvil (Chain ID `31338`) to cross-verify 18 archival `eth_call balanceOf` snapshots; all HTTP endpoints return JSON + CORS headers, paired with a standalone 4-tab English web console (`ui/holderproof_vericredit_idx_console.html`)                                                                                                                                                                                                       | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                                                |
+| **Archival EVM Cross-Check & Web Console**            | `FixtureToken.sol` replays all 308 transfers on an isolated Anvil (Chain ID `31338`) to cross-verify 18 archival `eth_call balanceOf` snapshots; all HTTP endpoints return JSON + CORS headers, paired with a standalone 4-tab English web console (`ui/holderproof_vericredit_idx_console.html`)                                                                                                                                                                                     | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                              |
 
 ---
 
@@ -95,7 +95,7 @@ flowchart TB
 | `evm/`                    | Foundry (Solidity 0.8.28) | `FixtureToken.sol` test ledger for archival `balanceOf` verification                                                                                                                                               |
 | `scripts/`                | Shell + Python + JS       | Environment setup, 4-node devnet lifecycle, P0/E3/Epoch/VeriCredit/Sepolia verification suites, Sepolia RPC fetcher, and doc exporters                                                                             |
 | `tests/`                  | Python `unittest`         | `test_ground_truth.py` (**6** baseline tests for determinism, block boundaries, Merkle proofs, and tamper detection)                                                                                               |
-| `ui/`                     | HTML + JS                 | Zero-dependency standalone interactive English console `holderproof_vericredit_idx_console.html` (4 tabs + local evidence JSON import)                                                                                               |
+| `ui/`                     | HTML + JS                 | Zero-dependency standalone interactive English console `holderproof_vericredit_idx_console.html` (4 tabs + local evidence JSON import)                                                                             |
 
 ---
 
@@ -188,6 +188,8 @@ from the repository root. PowerShell manages the runtime and Ubuntu runs the dev
 
 **macOS and Linux.** Run `make web` to start a fresh local devnet.
 
+**AWS 4-host distributed deployment (Bonus E2).** Follow the reproducible four-host EC2 setup and cross-host latency verification record in [AWS 4-host deployment & proof](docs/guides/holderproof_aws_e2_verification_proof.md).
+
 Open the live console at `http://127.0.0.1:8765`. Choose a fixture holder and a block from 0 to 1000
 to inspect a historical certificate. Both gate decisions are available at
 their policy snapshot, block 1000. The Web guide explains the controls and
@@ -200,7 +202,7 @@ Verified with Rust `1.99.0` (`wasm32-unknown-unknown`), Lyquor LDK `0.8.4`, Foun
 | `./scripts/setup-env.sh --check`                              | Inspect local Rust / LDK / Foundry / Python toolchain                                                           |
 | `make check && make guest-test`                               | Fast local check: Python ground truth (6 tests) + workspace compile + Rust Guest tests (**21 + 15 = 36 tests**) |
 | `./scripts/stop-step4.sh && make e3`                          | Full 3-of-4 P0 acceptance + archival EVM cross-check + E3 action/revocation/SIGSTOP audit                       |
-| `make epoch-check`                                           | Activate `checkpoint_proof` and commit/verify periodic epochs (`250 / 500 / 750 / 1000`)                        |
+| `make epoch-check`                                            | Activate `checkpoint_proof` and commit/verify periodic epochs (`250 / 500 / 750 / 1000`)                        |
 | `make credit-check`                                           | Deploy `lyquid-credit-gate` (`8083`) and verify all 4 VeriCredit personas, wash removal & custom weights        |
 | `python3 scripts/fetch_sepolia_logs.py && make sepolia-check` | Fetch authentic Sepolia WETH logs and issue a 3-of-4 certified Sepolia balance proof                            |
 | `./scripts/run-proof.sh --holder 0x... --block 1000`          | Submit an on-demand P0 query to the running local Indexer                                                       |
