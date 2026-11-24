@@ -40,12 +40,5 @@
       }
     },
     "evidence_reviewed": ["feedback.md", "certificate.json", "web.log"]
-  },
-  "earlier_attempt": {
-    "route": "terminal",
-    "environment_check": "passed",
-    "elapsed_seconds": 8.8,
-    "outcome": "participant_ended_before_demo_start",
-    "evidence_reviewed": ["feedback.md"]
   }
 }
