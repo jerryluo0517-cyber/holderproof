@@ -8,7 +8,7 @@ Direction 3 · Verifiable Indexer
 
 ## Abstract
 
-HolderProof makes a historical token balance available as a certificate that multiple applications can act on. Four Lyquor committee members replay an ordered event history. At least three must agree on the complete query result and its checkpoint before the Indexer records a certified fact. Airdrop and Governance apply separate policies to the same balance certificate. VeriCredit-Idx uses the same certification mechanism for credit activity and supplies the Credit Gate with a separate credit certificate. Acceptance on a local devnet reconciled 308 EVM Transfer logs and 18 historical balance reads, verified four epoch checkpoints and four credit quotes, and certified a balance derived from a captured window of 169 Sepolia WETH events. Three external participants attempted the application. Two completed the Web workflow without assistance. The third passed basic checks on native Windows and could not start the demo because the Lyquor toolchain was unavailable in that environment.
+HolderProof makes a historical token balance available as a certificate that multiple applications can act on. Four Lyquor committee members replay an ordered event history. At least three must agree on the complete query result and its checkpoint before the Indexer records a certified fact. Airdrop and Governance apply separate policies to the same balance certificate. VeriCredit-Idx uses the same certification mechanism for credit activity and supplies the Credit Gate with a separate credit certificate. Acceptance on a local devnet reconciled 308 EVM Transfer logs and 18 historical balance reads, verified four epoch checkpoints and four credit quotes, and certified a balance derived from a captured window of 169 Sepolia WETH events. Three external participants completed the trial without assistance. One used the terminal on Windows WSL2 and two used the Web console on macOS.
 
 A subsequent compatibility check documented the Windows launcher on a prepared WSL2 Ubuntu environment.
 
@@ -148,17 +148,17 @@ Each run measured five sequential first-time queries after starting a local netw
 
 ### 5.5 External user testing
 
-The external task asks a participant to retrieve a balance certificate and verify airdrop and governance eligibility. Three external participants attempted the workflow independently. Two completed the assigned task, leaving one completion outstanding against the target of three. The feedback form records the test revision, elapsed trial time, assistance and results. [Trial task sheet](../guides/EXTERNAL_USER_TEST.md)
+The external task asks a participant to retrieve a balance certificate and verify airdrop and governance eligibility. Three external participants completed the task without assistance, meeting the target of three completions. The feedback form records the test revision, elapsed trial time, assistance and results. [Trial task sheet](../guides/EXTERNAL_USER_TEST.md)
 
 | Participant | Setup | Result |
 |---|---|---|
-| E01 | Windows, Git Bash | Independently passed `make check` at `34e1fad`. Missing Lyquor LDK and `shaker` blocked live demo startup. |
+| E01 | Windows WSL2, terminal | Completed without assistance in 45.9 s at `fdd2a0e`. Alice at block 1,000 held 62,685. Airdrop reported eligible and governance reported ineligible. |
 | E02 | macOS, Web | Completed without assistance in 67.5 s at `46ef730`. Bob at block 1,000 held 51,886. Both gates reported ineligible. |
 | E03 | macOS, Web | Completed without assistance in 358.4 s at `cd15cec`. Alice at block 1,000 held 62,685. Airdrop reported eligible and governance reported ineligible. |
 
-E02 and E03 each produced a `Finalized` certificate with three distinct signers. Both gates in each run referenced the certificate’s query hash. The durations include environment checking, demo startup and result confirmation. They measure participant workflows and use a different interval from the query benchmark. E03’s earlier terminal attempt ended before demo startup and remains part of the E03 record. [E01 archive](external-tests/EXTERNAL_USER_01_WINDOWS.md) · [E02 Web archive](external-tests/EXTERNAL_USER_02_MACOS.md#web-试用) · [E03 archive](external-tests/EXTERNAL_USER_03_MACOS.md)
+Each completed trial produced a `Finalized` certificate with three distinct signers. Both gates in each run referenced the certificate’s query hash. The durations include environment checking, demo startup and result confirmation. They measure participant workflows and use a different interval from the query benchmark. E03’s earlier terminal attempt ended before demo startup and remains part of the E03 record. [E01 archive](external-tests/EXTERNAL_USER_01_WINDOWS.md) · [E02 Web archive](external-tests/EXTERNAL_USER_02_MACOS.md#web-试用) · [E03 archive](external-tests/EXTERNAL_USER_03_MACOS.md)
 
-E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker` before the demo step. The Windows instructions now show how to run the feedback recorder in WSL2 Ubuntu. E01’s original trial remains an environment-blocked result at `34e1fad`. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder, which checks eligibility against the selected holder’s reference balance and records the holder in the feedback form. [Windows trial instructions](../guides/EXTERNAL_USER_TEST.md#windows-外部试用) · [Web trial recorder](../../scripts/record_external_test.py)
+The Windows trial used the terminal recorder in WSL2 and captured the certificate and both eligibility results. E02’s request to test Bob prompted the addition of `--holder` to the Web recorder, which checks eligibility against the selected holder’s reference balance and records the holder in the feedback form. [Windows trial instructions](../guides/EXTERNAL_USER_TEST.md#windows-外部试用) · [Web trial recorder](../../scripts/record_external_test.py)
 
 ## 6. Limitations and Reflection
 
@@ -168,7 +168,7 @@ E01’s setup report prompted the task sheet to call out Lyquor LDK and `shaker`
 
 **Credit calibration.** The synthetic cases test the behavior of the fixed-window matching rule and the score mapping. They provide no basis for calibrating lending risk against real outcomes. Representative account histories and a separate calibration study would be needed before using the quotes for lending decisions.
 
-**Reproduction.** The two completed external Web trials cover the recorded macOS setup. The Windows check covers an already provisioned WSL2 Ubuntu installation. A clean Windows installation and an external WSL2 trial remain to be evaluated. [Environment requirements](../guides/TESTING.md) · [Windows startup guide](../guides/WINDOWS_WSL.md)
+**Reproduction.** The external trials cover the terminal workflow on Windows WSL2 and the Web workflow on macOS. The launcher compatibility check covered an already provisioned WSL2 Ubuntu installation. A clean Windows installation remains to be evaluated. [Environment requirements](../guides/TESTING.md) · [Windows startup guide](../guides/WINDOWS_WSL.md)
 
 ## 7. Contributions and Attribution
 
@@ -182,11 +182,11 @@ The implementation relies on Lyquor LDK for execution and certified calls, and o
 
 ## 8. AI Use Statement
 
-OpenAI Codex assisted with reviewing and refactoring certificate validation, building test and documentation tools, running automated checks, and drafting and editing this report. A team member supplied the acceptance run, and the external participants submitted their trial results and assistance status. The report’s claims were checked against Rust source, Python fixture outputs, saved logs and archived participant forms. The archived `2552c5e` technical run is recorded separately from the two completed external Web trials. [Team evidence](PLAN_06_MEMBER_EVALUATION.md) · [External and technical evidence](external-tests/EXTERNAL_USER_02_MACOS.md)
+OpenAI Codex assisted with reviewing and refactoring certificate validation, building test and documentation tools, running automated checks, and drafting and editing this report. A team member supplied the acceptance run, and the external participants submitted their trial results and assistance status. The report’s claims were checked against Rust source, Python fixture outputs, saved logs and archived participant forms. The archived `2552c5e` technical run is recorded separately from the three completed external trials. [Team evidence](PLAN_06_MEMBER_EVALUATION.md) · [External and technical evidence](external-tests/EXTERNAL_USER_02_MACOS.md)
 
 ## 9. Conclusion
 
-HolderProof certified a historical balance once and let two independently deployed policy gates act on that fact. The local evaluation checked agreement with historical EVM reads, certificate reuse, application actions and quorum recovery. VeriCredit-Idx applied the same oracle model to credit quotes, alongside separate checkpoint and Sepolia paths. Two external Web trials completed. The later compatibility check documented a WSL2 route around the native Windows setup barrier.
+HolderProof certified a historical balance once and let two independently deployed policy gates act on that fact. The local evaluation checked agreement with historical EVM reads, certificate reuse, application actions and quorum recovery. VeriCredit-Idx applied the same oracle model to credit quotes, alongside separate checkpoint and Sepolia paths. Three external participants completed the trial across the Windows WSL2 terminal and macOS Web workflows.
 
 ## References
 

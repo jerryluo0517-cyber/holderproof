@@ -21,7 +21,7 @@
 ## 方案 06 评测
 
 - [用户 1 操作记录与实测结果](reports/PLAN_06_MEMBER_EVALUATION.md)（3-of-4 本人验收及 2-of-3 早期基准）
-- [外部用户 1 · 原生 Windows 测试结果](reports/external-tests/EXTERNAL_USER_01_WINDOWS.md)（基础检查通过，Lyquor LDK 环境受阻）
+- [外部用户 1 · Windows WSL2 试用结果](reports/external-tests/EXTERNAL_USER_01_WINDOWS.md)（E01 独立完成终端试用）
 - [外部用户 2 · macOS 测试结果](reports/external-tests/EXTERNAL_USER_02_MACOS.md)（E02 独立完成 Web 试用，附功能验收与查询计时）
 - [外部用户 3 · macOS Web 试用结果](reports/external-tests/EXTERNAL_USER_03_MACOS.md)（E03 独立完成）
 

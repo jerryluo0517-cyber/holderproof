@@ -236,4 +236,4 @@ PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器�
 2. **完整 P1 持仓窗口证书族**：`lyquid-indexer` 已完成 `TWAB` 只读算法与单测，但 `MIN_BALANCE` 与 `ACTIVE_RATIO` 尚未接入委员会出证；后续可沿用 `VeriCredit` 的窗口证书模式无缝并入 `QueryType`。
 3. **跨链 L1 独立验签合约**：当前消费端依托 Lyquor 同一网络内的 `call!` 信任锚点；若未来需将 `QueryCertificate` 交付给以太坊主网 Solidity 合约消费，可在 L1 部署维护委员会公钥集合的独立密码学验签器。
 4. **实时多源价格风控场景（VeriRisk-Idx）**：目前 `dispersion.rs` 已完成核心离散度校验器与单测，未来可接入多 DEX/CEX 实时行情源实现截尾 TWAP 与实现波动率 $\sigma_{\text{realized}}^2$ 清算熔断。
-5. **外部用户测试与自动化 CI**。已归档 3 位外部用户的试用记录，其中 2 位完成 Web 试用，1 位在原生 Windows 环境受阻。后续可补充独立主机复现，并将 `make check && make guest-test` 接入 GitHub Actions。[外部用户评测](docs/reports/CS5298_FINAL_REPORT.md#55-external-user-testing)
+5. **外部用户测试与自动化 CI**。3 位外部用户均无协助完成试用，其中 1 位使用 Windows WSL2 终端，2 位使用 macOS Web。后续可验证全新 Windows 环境的配置，并将 `make check && make guest-test` 接入 GitHub Actions。[外部用户评测](docs/reports/CS5298_FINAL_REPORT.md#55-external-user-testing)

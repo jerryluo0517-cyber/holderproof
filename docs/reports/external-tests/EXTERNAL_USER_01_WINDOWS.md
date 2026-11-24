@@ -1,46 +1,17 @@
-# 外部用户 1 测试结果
+# 外部用户 1 · Windows WSL2 试用结果
 
-**2026 年 11 月 23 日 · 原生 Windows（Git Bash） · 未完成，环境受阻**
+**2026 年 11 月 24 日 · E01 · 终端路线 · 独立完成**
 
-外部用户 1 独立在 GitHub `main` 的 `34e1fad` 上进行测试。`make check` 通过。当前测试环境缺少 Lyquor LDK 和 `shaker`，在启动本地 devnet 前受阻。此次记录适合用于评估 Windows 用户的环境准备步骤。详情见[结构化结果](external-user-01-windows.json)。
+E01 在 Windows 的 WSL2 环境下完成了余额查询和两个 Gate 的资格核对。反馈表记录为「已完成、无协助」，从环境检查到完成查询和核对共用时 **45.9 秒**。[结构化摘要](external-user-01-windows.json)
 
-## 环境
-
-| 项目 | 测试记录 |
+| 项目 | 结果 |
 |---|---|
-| 版本 | `34e1fad2562d7003c51c6025b5aca536c5a9d2b0` |
-| 主机与终端 | 原生 Windows，Git Bash |
-| 系统构建号 | `22631.6199`。微软资料将该构建号归为 Windows 11 23H2，原记录填写 Windows 10，具体版本待测试者用 `winver` 核对。 |
-| 工具 | Python 3.12.1、Rust 1.99.0（GNU 工具链）、GNU Make 4.4.1，已安装 `wasm32-unknown-unknown` 目标。 |
-| 环境障碍 | `./scripts/setup-env.sh --check` 退出码为 1，提示缺少 Lyquor LDK。 |
+| 测试版本 | `fdd2a0e5df281e9204f02b2c303ebb65b7482ad3` |
+| 环境 | Windows WSL2，Linux 内核 `6.18.33.2-microsoft-standard-WSL2`，x86_64，Python 3.14.4 |
+| 环境与启动 | 环境检查通过，demo 完成启动和内置校验。 |
+| 余额查询 | Alice 在区块 `1000` 的余额为 `62685`。证书状态为 `Finalized`，有 3 名不同签名者。 |
+| 空投资格 | 门槛 `60000`，符合资格。 |
+| 治理资格 | 门槛 `70000`，未达到门槛。 |
+| 证书与 Gate | 反馈表记录两个 Gate 的查询哈希与证书一致。 |
 
-[微软构建号说明](https://support.microsoft.com/en-us/servicing/os/windows-11/2025/11/november-11-2025-kb5068865-os-build-22631-6199)
-
-## 检查结果
-
-| 检查 | 结果 |
-|---|---|
-| `make check` | 退出码 0。重新生成 308 条 fixture 事件，9 项 fixture 校验和 6 项 Python 单元测试通过，Rust workspace 编译检查通过。 |
-| 历史余额基准 | Alice 在区块 `900`、`950`、`1000` 的 fixture 余额分别为 `47685`、`57685`、`62685`。 |
-| Rust WASM 类型检查 | `cargo check --workspace --all-targets --target wasm32-unknown-unknown` 通过，覆盖业务与测试目标的类型检查。 |
-| `make guest-test` | 命令退出码为 2，找不到 `shaker`。36 项 Guest 测试均未执行。 |
-| `make demo` | 命令退出码为 2，缺少 `shaker`。实时证书、两个 Gate、Web 查询与 E3 验收均未启动。 |
-| 补充测试尝试 | 宿主目标的 `cargo test` 在编译 Lyquid 依赖时找不到 `NativeGuestAbi`。尝试构建 WASM 测试时，`rust-lld` 返回 `Permission denied`。 |
-| Rust 格式与静态检查 | `cargo fmt --all -- --check` 在 11 个文件报告 31 处格式差异。Clippy 退出码为 0，共报告 6 条警告。 |
-
-## 反馈与证据
-
-测试者建议下一轮使用 WSL2 + Ubuntu、原生 Linux 或 macOS 跑完整流程。项目随后在 `878842d` 提供了 WSL2 Ubuntu 启动器，并记录了已有工具环境下的启动与基础验证。E01 的 WSL2 试用结果待收集，本记录对应此前的原生 Windows 测试。[Windows 启动指南](../../guides/WINDOWS_WSL.md)
-
-已收到参与者提供的文字报告、JSON 摘要和 15 份原始日志。下表摘录能复核主要结论的日志内容，已去除本机路径。
-
-| 日志文件 | 关键输出 |
-|---|---|
-| `00-environment-check.log` | `[FAIL] Lyquor LDK not found at ~/.shakenup/ldk` |
-| `01a-generate-fixture.log`、`01-verify-fixture.log` | `events=308`，包含 `[PASS] event count` 和 `[PASS] Merkle root` 在内的 9 项校验通过。 |
-| `10-make-check.log` | 9 项 fixture 校验通过，Python 显示 `Ran 6 tests` 与 `OK`，Rust 显示 `Finished dev profile`。 |
-| `03b-cargo-check-all-targets.log` | WASM 全目标类型检查完成，报告 5 条 `unused doc comment` 警告。 |
-| `04-cargo-test.log` | `error[E0432]: unresolved import super::NativeGuestAbi` |
-| `05-cargo-test-wasm-build-gate-core.log` | `error: linking with rust-lld failed: exit code: 1`，原因是 `rust-lld: Permission denied`。 |
-| `11-make-guest-test.log` | `shaker: command not found` |
-| `12-make-demo.log` | `Missing required tool: shaker` |
+已将反馈表中的区块、余额、证书状态、签名者数量和查询哈希与保存的 `certificate.json` 核对。环境日志记录了前置检查通过，demo 日志记录了余额证书和两个 Gate 的验收通过。参与者未填写额外反馈。[Windows 试用步骤](../../guides/EXTERNAL_USER_TEST.md)

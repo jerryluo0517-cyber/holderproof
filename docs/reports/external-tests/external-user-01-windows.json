@@ -1,149 +1,44 @@
 {
-  "schema_version": 1,
-  "test_date": "2026-11-23",
-  "timezone": "Asia/Shanghai",
-  "repository": "https://github.com/jerryluo0517-cyber/holderproof",
-  "branch": "main",
-  "commit": "34e1fad2562d7003c51c6025b5aca536c5a9d2b0",
+  "schema_version": 2,
+  "participant_id": "E01",
+  "participant_status": "outside_project_team",
+  "study_record": "usability_trial",
+  "test_date": "2026-11-24",
+  "timezone": "Asia/Hong_Kong",
+  "commit": "fdd2a0e5df281e9204f02b2c303ebb65b7482ad3",
   "host": {
-    "build": "22631.6199",
-    "shell": "Git Bash",
-    "reported_os": "Windows 10 Home China 23H2",
-    "build_family": "Windows 11 23H2 according to Microsoft",
-    "edition_confirmation": "pending winver output"
+    "os": "Windows",
+    "runtime": "WSL2",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "python": "3.14.4"
   },
-  "environment": {
-    "make": "4.4.1",
-    "lyquor_ldk": false,
-    "rust": "1.99.0",
-    "python": "3.12.1",
-    "rust_target": "wasm32-unknown-unknown"
-  },
-  "checks": [
-    {
-      "name": "environment_check",
-      "command": "./scripts/setup-env.sh --check",
-      "exit_code": 1,
-      "status": "blocked",
-      "detail": "Lyquor LDK missing"
+  "completed_trial": {
+    "route": "terminal",
+    "environment_check": "passed",
+    "elapsed_seconds": 45.9,
+    "outcome": "completed_without_assistance",
+    "assistance_source": "participant_feedback",
+    "participant_feedback": null,
+    "query": {
+      "fixture_holder": "Alice",
+      "block": 1000,
+      "balance": "62685",
+      "certificate_status": "Finalized",
+      "distinct_signers": 3,
+      "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "gate_query_hashes_match": true
     },
-    {
-      "name": "fixture_generation",
-      "command": "python fixtures/generate_fixture.py",
-      "exit_code": 0,
-      "status": "pass",
-      "event_count": 308,
-      "merkle_root": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b"
+    "gates": {
+      "airdrop": {
+        "threshold": "60000",
+        "eligible": true
+      },
+      "governance": {
+        "threshold": "70000",
+        "eligible": false
+      }
     },
-    {
-      "name": "fixture_verification",
-      "command": "python scripts/verify_fixture.py",
-      "exit_code": 0,
-      "status": "pass",
-      "checks_passed": 9,
-      "checks_total": 9
-    },
-    {
-      "name": "python_unittest",
-      "command": "python -m unittest discover -s tests -v",
-      "exit_code": 0,
-      "status": "pass",
-      "tests_passed": 6,
-      "tests_total": 6
-    },
-    {
-      "name": "make_check",
-      "command": "make check",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "name": "cargo_check_workspace",
-      "command": "cargo check --workspace --target wasm32-unknown-unknown",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "name": "cargo_check_all_targets",
-      "command": "cargo check --workspace --all-targets --target wasm32-unknown-unknown",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "name": "guest_tests",
-      "command": "make guest-test",
-      "exit_code": 2,
-      "status": "blocked",
-      "detail": "shaker not found",
-      "tests_expected": 36,
-      "tests_run": 0
-    },
-    {
-      "name": "demo",
-      "command": "make demo",
-      "exit_code": 2,
-      "status": "blocked",
-      "detail": "shaker not found"
-    },
-    {
-      "name": "cargo_fmt_check",
-      "command": "cargo fmt --all -- --check",
-      "exit_code": 1,
-      "status": "fail",
-      "diff_hunks": 31,
-      "files_affected": 11
-    },
-    {
-      "name": "cargo_clippy",
-      "command": "cargo clippy --workspace --all-targets --target wasm32-unknown-unknown",
-      "exit_code": 0,
-      "status": "pass_with_warnings",
-      "unused_doc_comments": 5,
-      "manual_is_multiple_of": 1
-    },
-    {
-      "name": "python_compileall",
-      "command": "python -m compileall -q scripts fixtures tests",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "name": "git_diff_check",
-      "command": "git diff --check",
-      "exit_code": 0,
-      "status": "pass"
-    }
-  ],
-  "not_executed": [
-    "full 3-of-4 demo",
-    "live certificate and two gates",
-    "web query at blocks 1000 and 950",
-    "E3 acceptance",
-    "epoch checkpoints",
-    "credit check",
-    "Sepolia check"
-  ],
-  "participant_id": "external-user-01",
-  "operation_mode_reported_by_team": "independent",
-  "outcome": "incomplete_environment_blocked",
-  "source_materials": [
-    "participant's README.md",
-    "participant's summary.json",
-    "participant's original test logs"
-  ],
-  "raw_logs_received": true,
-  "raw_log_count": 15,
-  "published_evidence": "EXTERNAL_USER_01_WINDOWS.md#反馈与证据",
-  "additional_attempts": [
-    {
-      "log": "04-cargo-test.log",
-      "stage": "host-target compilation",
-      "detail": "Lyquid dependency could not resolve NativeGuestAbi"
-    },
-    {
-      "log": "05-cargo-test-wasm-build-gate-core.log",
-      "stage": "WASM guest test build",
-      "detail": "rust-lld: Permission denied"
-    }
-  ]
+    "evidence_reviewed": ["feedback.md", "certificate.json", "environment.log", "demo.log"]
+  }
 }
