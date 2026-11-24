@@ -1,0 +1,13 @@
+{
+  "source_commit": "878842da7ef8e666de3ee667f8e6fe582cf802b9",
+  "original_archive_sha256": "55c3f2d133bb76965577de83cc28df367c8df3854c85d6f2dff02486e260e9d1",
+  "publication_note": "Omitted four captured RocksDB write-ahead logs; retained test stdout/stderr, node text logs, result JSON, certificates, receipts, source snapshot and runner scripts without altering their bytes.",
+  "omitted_files": [
+    "runtime-logs/node0/data/db/devnet/000004.log",
+    "runtime-logs/node1/data/db/devnet/000004.log",
+    "runtime-logs/node2/data/db/devnet/000004.log",
+    "runtime-logs/node3/data/db/devnet/000004.log"
+  ],
+  "published_archive_sha256": "d5857990bf024389dbc54a7d8a84db01e486d0193d2b172f5c9bdb2f80bd3c7b",
+  "published_archive_bytes": 3597162
+}

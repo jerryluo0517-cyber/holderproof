@@ -1,0 +1,355 @@
+{
+  "scope": "Fresh single-host 3-of-4 acceptance on Windows with Ubuntu WSL2",
+  "started_at": "2026-11-24T03:20:44.712440+00:00",
+  "port_map": {
+    "8545": 18545,
+    "10087": 20087,
+    "11087": 21087,
+    "12087": 22087,
+    "13087": 23087,
+    "8080": 18080,
+    "8081": 18081,
+    "8082": 18082,
+    "8083": 18083
+  },
+  "public_chain_transactions_sent": 0,
+  "stages": [
+    {
+      "stage": "environment",
+      "command": [
+        "bash",
+        "scripts/setup-env.sh",
+        "--check"
+      ],
+      "started_at": "2026-11-24T03:20:48.071933+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.17
+    },
+    {
+      "stage": "baseline",
+      "command": [
+        "make",
+        "check"
+      ],
+      "started_at": "2026-11-24T03:20:48.246781+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 1.02
+    },
+    {
+      "stage": "guest-tests",
+      "command": [
+        "make",
+        "guest-test"
+      ],
+      "started_at": "2026-11-24T03:20:49.274376+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 59.71
+    },
+    {
+      "stage": "demo",
+      "command": [
+        "bash",
+        "scripts/reproduce-step4.sh"
+      ],
+      "started_at": "2026-11-24T03:21:48.991250+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 88.12
+    },
+    {
+      "stage": "solidity-build",
+      "command": [
+        "forge",
+        "build",
+        "--root",
+        "/mnt/d/CyberSecurity/CS5298 BlockChain/FinalProject/test-records/acceptance-20261124-112044/isolated-project/evm",
+        "--offline"
+      ],
+      "started_at": "2026-11-24T03:25:38.659596+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.22
+    },
+    {
+      "stage": "demo",
+      "command": [
+        "bash",
+        "scripts/reproduce-step4.sh"
+      ],
+      "started_at": "2026-11-24T03:25:38.883747+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 37.68
+    },
+    {
+      "stage": "historical",
+      "command": [
+        "python3",
+        "scripts/verify_historical_balance.py"
+      ],
+      "started_at": "2026-11-24T03:26:16.605126+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 13.86
+    },
+    {
+      "stage": "gate-actions",
+      "command": [
+        "python3",
+        "scripts/verify_e3.py"
+      ],
+      "started_at": "2026-11-24T03:26:30.464778+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 8.74
+    },
+    {
+      "stage": "committee-availability",
+      "command": [
+        "python3",
+        "scripts/verify_committee_availability.py"
+      ],
+      "started_at": "2026-11-24T03:26:39.209639+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 32.52
+    },
+    {
+      "stage": "epoch",
+      "command": [
+        "python3",
+        "scripts/verify_epoch_checkpoints.py"
+      ],
+      "started_at": "2026-11-24T03:27:11.734692+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 7.09
+    },
+    {
+      "stage": "credit",
+      "command": [
+        "python3",
+        "scripts/verify_credit.py"
+      ],
+      "started_at": "2026-11-24T03:27:18.849914+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 16.38
+    },
+    {
+      "stage": "sepolia",
+      "command": [
+        "python3",
+        "scripts/verify_sepolia.py"
+      ],
+      "started_at": "2026-11-24T03:27:35.234329+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 2.22
+    }
+  ],
+  "source_commit": "878842da7ef8e666de3ee667f8e6fe582cf802b9",
+  "source_status_before": "",
+  "original_web_before": {
+    "certificate": {
+      "query_type": "Balance",
+      "fact_hash": "897a0b566a68a85759ae8f8c6afc0e996967a25e1b15a376ebda77495c716612",
+      "node_signatures": [
+        {
+          "node_id": "Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia",
+          "signer_id": 0,
+          "signature": "a598d55f0770fbe9d26026adacbdea0f9aed9cafdfbacfa88d279362d5193c5c41455254c5c2443960f6f8ad60d98bd3360d78bad774f98d220161bb6cfb8b0d"
+        },
+        {
+          "node_id": "Node-j3fcdy5twah7csa6pr4jhgxcvszycxdms2hsen5m7lrvtezqlv52cqaa",
+          "signer_id": 1,
+          "signature": "0dcf46335a1e9ad9e8a791143ae986877e9bdc44b3e7b2c99dc32f85743b5a25a34951c6760ae376435a4ea5494e127a20d65de5c8763dc5e1373c8bb06afc03"
+        },
+        {
+          "node_id": "Node-oq2lcra5u4ksufzsv2ciqbl56dkp5c653ikzkx3lh62tai566d7dseia",
+          "signer_id": 3,
+          "signature": "8eb3c3f89832d3084db0b3af29e6372e2cbd037f78c46e7958cba12c7673924621dfdb6e173d3f4b09f9b4822823a92ff71eed71c00217ae9bfac5c5aa5ac204"
+        }
+      ],
+      "runtime_certificate": "{\"header\":{\"proposer\":\"Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia\",\"target\":{\"target\":{\"LVM\":\"Lyquid-ahjg4huwvban3bvhxue7rcbaw4mnltwyolhqa\"},\"seq_id\":[184,19,225,45,50,43,147,18,208,153,251,162,218,105,184,247,237,200,101,111,220,103,63,94,69,75,137,68,113,202,60,189]},\"config_hash\":[117,153,132,245,45,241,124,142,203,203,235,75,65,100,168,81,168,95,22,118,145,44,72,69,195,126,9,11,33,179,249,177],\"epoch\":1,\"nonce\":[43,139,36,245,141,25,3,212,112,10,239,48,86,206,98,153,33,120,174,128,179,209,240,182,132,227,16,249,69,19,73,7]},\"signers\":[0,1,3],\"signatures\":[[165,152,213,95,7,112,251,233,210,96,38,173,172,189,234,15,154,237,156,175,223,186,207,168,141,39,147,98,213,25,60,92,65,69,82,84,197,194,68,57,96,246,248,173,96,217,139,211,54,13,120,186,215,116,249,141,34,1,97,187,108,251,139,13],[13,207,70,51,90,30,154,217,232,167,145,20,58,233,134,135,126,155,220,68,179,231,178,201,157,195,47,133,116,59,90,37,163,73,81,198,118,10,227,118,67,90,78,165,73,78,18,122,32,214,93,229,200,118,61,197,225,55,60,139,176,106,252,3],[142,179,195,248,152,50,211,8,77,176,179,175,41,230,55,46,44,189,3,127,120,196,110,121,88,203,161,44,118,115,146,70,33,223,219,110,23,61,63,75,9,249,180,130,40,35,169,47,247,30,237,113,192,2,23,174,155,250,197,197,170,90,194,4]]}",
+      "network_state_id": "Lyquid-ahjg4huwvban3bvhxue7rcbaw4mnltwyolhqa@11",
+      "certificate_id": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "chain_id": 11155111,
+      "token": "0x5298000000000000000000000000000000000001",
+      "holder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "block_number": 1000,
+      "balance": "62685",
+      "checkpoint": {
+        "dataset_id": "holderproof-fixture-5298-v1",
+        "block_hash_start": "0x11200e3c12d66629d9b48b8a908f2c54e26dc6e40d709de9d62007d1c96f0332",
+        "from_block": 0,
+        "to_block": 1000,
+        "block_hash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
+        "event_count": 308,
+        "event_merkle_root": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b",
+        "parser_version": "holderproof-v1"
+      },
+      "signer_ids": [
+        "Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia",
+        "Node-j3fcdy5twah7csa6pr4jhgxcvszycxdms2hsen5m7lrvtezqlv52cqaa",
+        "Node-oq2lcra5u4ksufzsv2ciqbl56dkp5c653ikzkx3lh62tai566d7dseia"
+      ],
+      "status": "Finalized",
+      "created_at": 11
+    },
+    "gates": {
+      "airdrop": {
+        "balance": "62685",
+        "block": 1000,
+        "blockHash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
+        "certificateStatus": "Finalized",
+        "checkCount": 1,
+        "claimCount": 0,
+        "eligible": true,
+        "eventMerkleRoot": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b",
+        "holder": "0x0000000000000000000000000000000000000000",
+        "indexer": "0x01D26E1e96A840dD86A7BD09F88820b718D5CEd8",
+        "queryHash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+        "role": "AirdropGateLyquid",
+        "signerCount": 3,
+        "threshold": "60000"
+      },
+      "governance": {
+        "balance": "62685",
+        "block": 1000,
+        "checkCount": 1,
+        "eligible": false,
+        "factHash": "897a0b566a68a85759ae8f8c6afc0e996967a25e1b15a376ebda77495c716612",
+        "holder": "0x0000000000000000000000000000000000000000",
+        "proposalId": 1,
+        "queryHash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+        "role": "GovernanceGateLyquid",
+        "threshold": "70000",
+        "voteCount": 0
+      }
+    },
+    "gateBlock": 1000
+  },
+  "localnet_runtime_directory": "/tmp/holderproof-acceptance-20261124-xx1yxtuh",
+  "run_directory": "/mnt/d/CyberSecurity/CS5298 BlockChain/FinalProject/test-records/acceptance-20261124-112044",
+  "all_stages_passed": true,
+  "cleanup": [
+    "SERVE_INDEXER_PID",
+    "SERVE_CONSUMER_PID",
+    "SERVE_GOVERNANCE_PID",
+    "isolated localnet group"
+  ],
+  "original_web_after": {
+    "certificate": {
+      "query_type": "Balance",
+      "fact_hash": "897a0b566a68a85759ae8f8c6afc0e996967a25e1b15a376ebda77495c716612",
+      "node_signatures": [
+        {
+          "node_id": "Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia",
+          "signer_id": 0,
+          "signature": "a598d55f0770fbe9d26026adacbdea0f9aed9cafdfbacfa88d279362d5193c5c41455254c5c2443960f6f8ad60d98bd3360d78bad774f98d220161bb6cfb8b0d"
+        },
+        {
+          "node_id": "Node-j3fcdy5twah7csa6pr4jhgxcvszycxdms2hsen5m7lrvtezqlv52cqaa",
+          "signer_id": 1,
+          "signature": "0dcf46335a1e9ad9e8a791143ae986877e9bdc44b3e7b2c99dc32f85743b5a25a34951c6760ae376435a4ea5494e127a20d65de5c8763dc5e1373c8bb06afc03"
+        },
+        {
+          "node_id": "Node-oq2lcra5u4ksufzsv2ciqbl56dkp5c653ikzkx3lh62tai566d7dseia",
+          "signer_id": 3,
+          "signature": "8eb3c3f89832d3084db0b3af29e6372e2cbd037f78c46e7958cba12c7673924621dfdb6e173d3f4b09f9b4822823a92ff71eed71c00217ae9bfac5c5aa5ac204"
+        }
+      ],
+      "runtime_certificate": "{\"header\":{\"proposer\":\"Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia\",\"target\":{\"target\":{\"LVM\":\"Lyquid-ahjg4huwvban3bvhxue7rcbaw4mnltwyolhqa\"},\"seq_id\":[184,19,225,45,50,43,147,18,208,153,251,162,218,105,184,247,237,200,101,111,220,103,63,94,69,75,137,68,113,202,60,189]},\"config_hash\":[117,153,132,245,45,241,124,142,203,203,235,75,65,100,168,81,168,95,22,118,145,44,72,69,195,126,9,11,33,179,249,177],\"epoch\":1,\"nonce\":[43,139,36,245,141,25,3,212,112,10,239,48,86,206,98,153,33,120,174,128,179,209,240,182,132,227,16,249,69,19,73,7]},\"signers\":[0,1,3],\"signatures\":[[165,152,213,95,7,112,251,233,210,96,38,173,172,189,234,15,154,237,156,175,223,186,207,168,141,39,147,98,213,25,60,92,65,69,82,84,197,194,68,57,96,246,248,173,96,217,139,211,54,13,120,186,215,116,249,141,34,1,97,187,108,251,139,13],[13,207,70,51,90,30,154,217,232,167,145,20,58,233,134,135,126,155,220,68,179,231,178,201,157,195,47,133,116,59,90,37,163,73,81,198,118,10,227,118,67,90,78,165,73,78,18,122,32,214,93,229,200,118,61,197,225,55,60,139,176,106,252,3],[142,179,195,248,152,50,211,8,77,176,179,175,41,230,55,46,44,189,3,127,120,196,110,121,88,203,161,44,118,115,146,70,33,223,219,110,23,61,63,75,9,249,180,130,40,35,169,47,247,30,237,113,192,2,23,174,155,250,197,197,170,90,194,4]]}",
+      "network_state_id": "Lyquid-ahjg4huwvban3bvhxue7rcbaw4mnltwyolhqa@11",
+      "certificate_id": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+      "chain_id": 11155111,
+      "token": "0x5298000000000000000000000000000000000001",
+      "holder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "block_number": 1000,
+      "balance": "62685",
+      "checkpoint": {
+        "dataset_id": "holderproof-fixture-5298-v1",
+        "block_hash_start": "0x11200e3c12d66629d9b48b8a908f2c54e26dc6e40d709de9d62007d1c96f0332",
+        "from_block": 0,
+        "to_block": 1000,
+        "block_hash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
+        "event_count": 308,
+        "event_merkle_root": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b",
+        "parser_version": "holderproof-v1"
+      },
+      "signer_ids": [
+        "Node-ve3tav5jw5ico7or34gcb6ni7rtmd35uokriuijygabd3tsltd7fj6ia",
+        "Node-j3fcdy5twah7csa6pr4jhgxcvszycxdms2hsen5m7lrvtezqlv52cqaa",
+        "Node-oq2lcra5u4ksufzsv2ciqbl56dkp5c653ikzkx3lh62tai566d7dseia"
+      ],
+      "status": "Finalized",
+      "created_at": 11
+    },
+    "gates": {
+      "airdrop": {
+        "balance": "62685",
+        "block": 1000,
+        "blockHash": "0x1f1057f10cbab9cb537ec95ad57e4ccd5ba52ef4efd7d00dfd3aedb64e65a28e",
+        "certificateStatus": "Finalized",
+        "checkCount": 1,
+        "claimCount": 0,
+        "eligible": true,
+        "eventMerkleRoot": "2e89babbc7b45637458bd08a2d843087354bf175eb559e5c1ddc7fcc0e79617b",
+        "holder": "0x0000000000000000000000000000000000000000",
+        "indexer": "0x01D26E1e96A840dD86A7BD09F88820b718D5CEd8",
+        "queryHash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+        "role": "AirdropGateLyquid",
+        "signerCount": 3,
+        "threshold": "60000"
+      },
+      "governance": {
+        "balance": "62685",
+        "block": 1000,
+        "checkCount": 1,
+        "eligible": false,
+        "factHash": "897a0b566a68a85759ae8f8c6afc0e996967a25e1b15a376ebda77495c716612",
+        "holder": "0x0000000000000000000000000000000000000000",
+        "proposalId": 1,
+        "queryHash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+        "role": "GovernanceGateLyquid",
+        "threshold": "70000",
+        "voteCount": 0
+      }
+    },
+    "gateBlock": 1000
+  },
+  "source_status_after": "",
+  "prior_setup_failures": [
+    {
+      "stage": "historical",
+      "command": [
+        "python3",
+        "scripts/verify_historical_balance.py"
+      ],
+      "started_at": "2026-11-24T03:23:17.150253+00:00",
+      "exit_code": 1,
+      "elapsed_seconds": 0.42
+    }
+  ],
+  "epoch_independent_checks": [
+    {
+      "block": 250,
+      "event_count": 89,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 500,
+      "event_count": 172,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 750,
+      "event_count": 255,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 1000,
+      "event_count": 308,
+      "signer_count": 3,
+      "distinct_signers": true
+    }
+  ],
+  "finished_at": "2026-11-24T03:27:39.369559+00:00"
+}

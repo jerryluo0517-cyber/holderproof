@@ -1,0 +1,116 @@
+{
+  "source_commit": "878842da7ef8e666de3ee667f8e6fe582cf802b9",
+  "fixture_checks": 9,
+  "python_tests": 6,
+  "rust_guest_tests": {
+    "indexer": 21,
+    "gate_core": 15
+  },
+  "balance": {
+    "amount": "62685",
+    "signer_count": 3,
+    "query_hash": "1613062534e5d67e47f7bff3afe047f17be2e8f724311d9005eb41681279a884",
+    "both_gates_reuse_query": true,
+    "repeat_query_identical": true
+  },
+  "evm": {
+    "transfer_logs": 308,
+    "historical_reads": 18
+  },
+  "gate_actions": [
+    {
+      "case": "absent holder",
+      "balance": "0"
+    },
+    {
+      "case": "claim()",
+      "below_threshold_tx": "0xdf6cc37a5f25711b38ed4cc76572a34617efb774cc9f0797151724c5957f6c1d",
+      "different_holder_tx": "0xda1a400c480874331a5120a112a7efda535c826a18a57f893f51b90d26157536",
+      "non_initializer_configuration_tx": "0x5ca7f59befa60dea567a068c1341cf255ccd25fbaf47c670c7027bfcc4fbdd13",
+      "accepted_tx": "0x1a932aa171025fe82e10213af112849eecac0b365498ca6b36973148b8666ce2",
+      "duplicate_tx": "0xc09fe5d7e0b7ad33481a3fceffefc5dbe940444a9acf9fbe92410f5a3119d758",
+      "committed_actions": 1
+    },
+    {
+      "case": "vote()",
+      "below_threshold_tx": "0xd4a27cd0a8e1cad4fe06a1ae102d9a0fc8184c724138028aac101e6640caf392",
+      "different_holder_tx": "0xaf50221ac37726b861f0b0689fdfb02ce636ecd38656d52a3ca5dfb360a3272b",
+      "non_initializer_configuration_tx": "0x1841bcd351ef8d4f727bba71449c30b760be2f710931fd9fa5f35ca3a2c7ab7d",
+      "accepted_tx": "0x309357b07ddb84b3a55323cfd7eac1db76f3108d31ec02ccb70dc2db705d6c68",
+      "duplicate_tx": "0x03432eb3d32d65e299d692fba2c7f5b9ea01ced5b9142aa4e54ce34a475b4d60",
+      "committed_actions": 1
+    },
+    {
+      "case": "revoked claim()",
+      "tx": "0xf20679d08aa6a3773dab71ef54ad0e8160aa1b98a0e0933574852d4f19c24b5a",
+      "committed_actions": 1
+    },
+    {
+      "case": "revoked vote()",
+      "tx": "0xe8111ce5ede89db7d59a88cede168a01e0665fd9db2b95b2db12108c4b846121",
+      "committed_actions": 1
+    },
+    {
+      "case": "revocation",
+      "non_initializer_tx": "0xc7529f3d8dc6f74c64dba6a9f7c8ec3f3447bc595619c357f1725e9470e728cc",
+      "initializer_tx": "0xf0128ed4e2ec0c2d959d6bdd3d81a93802e9250a01c820feb6922e71d11c0a6c",
+      "certificate": "c18c276e817a4587383c0dcb5fac3c2814ddd85119cc1fa50de6fdbc28970a11"
+    },
+    {
+      "case": "committee availability",
+      "paused_ports": [
+        22087
+      ],
+      "certified_while_paused": true,
+      "observation_seconds": 0.32,
+      "report_outcome": "true",
+      "recovered_certificate": "b21d8b45fed78d3c3d4917ae5821bb8165c839f638a3cce3067bd24bc852a8e8"
+    },
+    {
+      "case": "committee availability",
+      "paused_ports": [
+        21087,
+        22087
+      ],
+      "certified_while_paused": false,
+      "observation_seconds": 30.09,
+      "report_outcome": "report_balance timed out after 25 seconds",
+      "recovered_certificate": "6df0639f977ec0c24efed2616b2c29c51a3e4beeb34a9546d5bd01164923fd99"
+    }
+  ],
+  "epochs": [
+    {
+      "block": 250,
+      "event_count": 89,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 500,
+      "event_count": 172,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 750,
+      "event_count": 255,
+      "signer_count": 3,
+      "distinct_signers": true
+    },
+    {
+      "block": 1000,
+      "event_count": 308,
+      "signer_count": 3,
+      "distinct_signers": true
+    }
+  ],
+  "sepolia": {
+    "block": 12184649,
+    "event_count": 169,
+    "window_net_wei": "2000000000000000",
+    "signer_count": 3
+  },
+  "original_web_unchanged": true,
+  "source_worktree_unchanged": true,
+  "all_rust_and_fixture_files_unchanged": true
+}

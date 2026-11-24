@@ -1,6 +1,6 @@
 # HolderProof 文档索引
 
-更新于 2026-11-23。当前 `main` 使用 3-of-4 委员会。课程报告中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
+更新于 2026-11-24。当前 `main` 使用 3-of-4 委员会。课程报告中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
 
 ## 课程报告
 
@@ -12,6 +12,7 @@
 
 - [测试操作指引](guides/TESTING.md)
 - [3-of-4 完整验收脚本](../scripts/run-3of4-acceptance.sh)
+- [2026-11-24 Windows/WSL2 原始验收证据](../test-records/acceptance-20261124-112044/README.md)（被测版本 `878842d`，含日志、证书、JSON 和完整 ZIP）
 - [05 E3 自审计和本地回归](reports/PLAN_05_E3_AUDIT.md)
 - [外部用户试用任务单](guides/EXTERNAL_USER_TEST.md)
 - [Windows 外部试用（WSL2 Ubuntu）](guides/EXTERNAL_USER_TEST.md#windows-外部试用)
