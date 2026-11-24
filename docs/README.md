@@ -4,8 +4,7 @@
 
 ## 课程报告
 
-- CS5298 课程报告（英文）[PDF](reports/CS5298_FINAL_REPORT.pdf) · [Markdown](reports/CS5298_FINAL_REPORT.md)
-- [CS5298 课程报告 Word 版 · 封面信息更新](reports/HolderProof_Academic_Report_Cover_Updated.docx)
+- CS5298 课程定稿（英文）[Word](reports/HolderProof_Academic_Report_Cover_Updated.docx) · [PDF](reports/HolderProof_Academic_Report_Cover_Updated.pdf)
 - [Web 使用说明](guides/WEB_GUIDE.md)
 - [Windows 启动指南（WSL2 Ubuntu）](guides/WINDOWS_WSL.md)
 

@@ -6,7 +6,7 @@ A **3-of-4 Byzantine Fault Tolerant (BFT) Verifiable Historical On-Chain Indexer
 
 Four local committee nodes replay the same ordered events. When at least three agree on a full fact, Lyquor's two-phase oracle certifies it and the Indexer writes it to network state. The Airdrop and Governance gates read the same balance certificate and apply their own policies. The Credit Gate reads a credit certificate and returns a fee and loan-to-value quote.
 
-[Course report](docs/reports/CS5298_FINAL_REPORT.md) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md) · [Windows WSL2 startup](docs/guides/WINDOWS_WSL.md)
+[Course report (PDF)](docs/reports/HolderProof_Academic_Report_Cover_Updated.pdf) · [Testing guide](docs/guides/TESTING.md) · [Web user guide](docs/guides/WEB_GUIDE.md) · [Windows WSL2 startup](docs/guides/WINDOWS_WSL.md)
 
 ---
 
@@ -236,4 +236,4 @@ Verified with Rust `1.99.0` (`wasm32-unknown-unknown`), Lyquor LDK `0.8.4`, Foun
 2. **Full P1 Window Certificate Family**: `TWAB` replay and unit tests are implemented as read-only queries, while `MIN_BALANCE` and `ACTIVE_RATIO` can be integrated into the two-phase oracle pipeline using the same window pattern already proven by `VeriCredit`.
 3. **Standalone L1 Solidity Verifier**: Exporting `QueryCertificate` verification to external Ethereum L1 contracts requires deploying a committee public-key registry and signature verifier on L1.
 4. **Real-Time Volatility & Trimmed TWAP (`VeriRisk-Idx`)**: Building on the implemented `dispersion.rs` guard, future work can ingest live multi-venue price feeds to compute trimmed TWAP and realized variance $\sigma_{\text{realized}}^2$ for liquidation circuit breakers.
-5. **External user testing and CI.** Three external participants completed the trial without assistance. One used the terminal on Windows WSL2 and two used the Web console on macOS. Follow-up work includes fresh Windows setup validation and running `make check && make guest-test` in GitHub Actions. [External user evaluation](docs/reports/CS5298_FINAL_REPORT.md#55-external-user-testing)
+5. **External user testing and CI.** Three external participants completed the trial without assistance. One used the terminal on Windows WSL2 and two used the Web console on macOS. Follow-up work includes fresh Windows setup validation and running `make check && make guest-test` in GitHub Actions. [External user evaluation](docs/reports/external-tests/)

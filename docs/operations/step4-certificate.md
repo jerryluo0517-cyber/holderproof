@@ -2,7 +2,7 @@
 
 Four committee members replay the input history. Certification requires at
 least three members to agree on the full fact. This page describes balance
-certificates. The [course report](../reports/CS5298_FINAL_REPORT.md)
+certificates. The [course report](../reports/HolderProof_Academic_Report_Cover_Updated.pdf)
 covers the credit, epoch, and Sepolia paths alongside fixture balances.
 
 ## From query to certificate

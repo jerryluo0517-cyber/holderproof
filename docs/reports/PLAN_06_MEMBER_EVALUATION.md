@@ -1,6 +1,6 @@
 # HolderProof 个人评测报告
 
-用户 1 于 2026 年 11 月 22 日在本机完成 3-of-4 端到端验收。Alice 在 fixture 区块 1000 的余额为 **62685**，证书状态为 `Finalized`，有三名签名者。[课程报告](CS5298_FINAL_REPORT.md)
+用户 1 于 2026 年 11 月 22 日在本机完成 3-of-4 端到端验收。Alice 在 fixture 区块 1000 的余额为 **62685**，证书状态为 `Finalized`，有三名签名者。[课程报告](HolderProof_Academic_Report_Cover_Updated.pdf)
 
 ## 用户 1 操作记录（3-of-4）
 
