@@ -260,22 +260,22 @@ cast call --rpc-url "ws://${IP3}:13087/ws" "$INDEXER_CONTRACT" \
 
 ## 五、原始运行证据截图归档
 
-> ![](C:\Users\72737\AppData\Roaming\marktext\images\256e8c6e8a8c8be4c9c5296ecc1ce03f7441c079.png)
->
-> ![](C:\Users\72737\AppData\Roaming\marktext\images\a4c3d145223f0307c20ddae1d0b7aee85b168844.png)
->
-> ![](C:\Users\72737\AppData\Roaming\marktext\images\907b8ebefceaed6f4304a98520de2e6dde6eedf5.png)
+![Evidence](image/256e8c6e8a8c8be4c9c5296ecc1ce03f7441c079.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\c02e31d2d6f576be3ea2afff3e678ccd37efd831.png)
+![Evidence](image/a4c3d145223f0307c20ddae1d0b7aee85b168844.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\891610fe966e930978a5d871513b5ee3dbd26cab.png)
+![Evidence](image/907b8ebefceaed6f4304a98520de2e6dde6eedf5.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\7552355a7c2e7292b35f9bb4dac604c34b9b86cd.png)
+![Evidence](image/c02e31d2d6f576be3ea2afff3e678ccd37efd831.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\2d11e7c6091b5756609e2a8b8b6c1f54fa33c9fd.png)
+![Evidence](image/891610fe966e930978a5d871513b5ee3dbd26cab.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\1925dfbd1ac0f22010d801a2fd466c2597d85206.png)
+![Evidence](image/7552355a7c2e7292b35f9bb4dac604c34b9b86cd.png)
 
-![](C:\Users\72737\AppData\Roaming\marktext\images\55a6a4167dfe85df62066817021d8ff553c8596d.png)
+![Evidence](image/2d11e7c6091b5756609e2a8b8b6c1f54fa33c9fd.png)
 
-!
+![Evidence](image/1925dfbd1ac0f22010d801a2fd466c2597d85206.png)
+
+![Evidence](image/55a6a4167dfe85df62066817021d8ff553c8596d.png)
+
+![Evidence](image/370818d7b3933d134fcd3a385fc0187c87804514.png)
