@@ -19,7 +19,7 @@ flowchart TB
     subgraph DataSources["双轨数据源（离线确定性 + 真实 Sepolia 链）"]
         DS1["本地确定性 ERC-20 Fixture<br/>308 条 Transfer，区块 0..1000"]
         DS2["VeriCredit 行为日志 Fixture<br/>40 条 Swap / Repay / Liquidation"]
-        DS3["Sepolia 公共 RPC 抓取<br/>169 条真实 WETH Transfer，区块 12184050..12184649"]
+        DS3["Sepolia 公共 RPC 抓取<br/>215 条真实 WETH Transfer，区块 12188186..12188785"]
     end
 
     subgraph Committee["Lyquor 4 节点本地网络 · 3-of-4 BFT 委员会"]
@@ -75,7 +75,7 @@ flowchart TB
 | **HolderProof 历史余额与双门控**      | 确定性重放 308 条 `Transfer` 生成带 SHA-256 Merkle Root 的 `QueryCertificate`；空投门控（60,000 → `true`）与治理门控（70,000 → `false`）复用同一 `queryHash`，支持单用户与 `configure_policy` / `check_eligible_for` 多用户模式、防重放 `claim()` / `vote()` 及 `invalidate_certificate` 吊销                             | `lyquid-indexer/`, `holderproof-gate-core/`, `lyquid-consumer/`, `lyquid-governance-gate/`                                                |
 | **周期性全局检查点（Layer 2）**       | `checkpoint_proof` 通道按 `epoch_interval = 250` 块（`250 / 500 / 750 / 1000`）周期性提交 3-of-4 背书的全局检查点（累计交易量、活跃地址数、事件数、摘要根），供下游零重算直读                                                                                                                                             | `lyquid-indexer/src/fixture.rs`, `scripts/verify_epoch_checkpoints.py`                                                                    |
 | **VeriCredit-Idx 信用评分与动态费率** | 自动剔除短窗口同对手方反向对敲洗盘量；用纯整数 `u128::ilog2` 计算 $S(u) \in [0, 1000]$；支持默认权重（`35/20/2/3`）与 `initializer` 自定义配置；下游 `lyquid-credit-gate` 同步返回动态费率（`5/15/30 bps`）与借贷 LTV（`85%/75%/60%`），并提供 `quote_or_fallback()` 在证书缺失/吊销/超期（Audit-05 TTL）时自动回退保守档 | `lyquid-indexer/src/credit.rs`, `holderproof-gate-core/src/credit.rs`, `lyquid-credit-gate/`, `scripts/verify_credit.py`                  |
-| **真实 Sepolia 链双轨接入**           | `fetch_sepolia_logs.py` 从公共 Sepolia RPC 分页拉取官方 WETH 合约 169 条真实 `Transfer` 日志与真实区块头哈希（块 `12184050..12184649`）；`sepolia_proof` 通道走 3-of-4 签发真实链证书（余额 `0.002 WETH`），消费端按 `dataset_id` 双轨分流校验                                                                            | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
+| **真实 Sepolia 链双轨接入**           | `fetch_sepolia_logs.py` 抓取 Sepolia WETH 日志与边界区块哈希；提交快照包含 215 条真实 `Transfer`（块 `12188186..12188785`），`sepolia_proof` 经 3-of-4 认证样例持有者的窗口净转入量 `0.061398085361568879 WETH`；该值不是完整历史余额，消费端按 `dataset_id` 双轨分流校验                                                                            | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
 | **双重安全防线（NDSS 2026 防御）**    | 确定性历史查询采用 `ChainPos` 区块锚定 + 字节级全等；时间差观测查询在 Network State 实现诚实核心区间离散度校验 $(v_{m-f} - v_{f+1}) \times 10000 \le M \times \epsilon_{\max}$（默认 `100 bps` = 1%），抵御单节点极端值与 Leader 挑拣攻击                                                                                 | `lyquid-indexer/src/dispersion.rs`                                                                                                        |
 | **独立 EVM 归档对账与 Web 控制台**    | `FixtureToken.sol` 在独立 Anvil（Chain ID `31338`）重放 308 笔转账并核对 18 组归档 `eth_call balanceOf`；全部 HTTP 诊断接口均带 `content-type` 与 CORS 头，配套全英文 4 标签页交互演示台 `holderproof_vericredit_idx_console.html`                                                                                        | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                              |
 
@@ -182,6 +182,8 @@ flowchart LR
 
 ### 7.1 环境要求与一键命令
 
+请先阅读[课程项目复现指南（英文）](docs/guides/REPRODUCIBILITY.md)，其中列出了固定版本、环境准备、预期结果和报告证据。提交基线是 `af54fe7`，报告表 4 的归档验收对应 `878842d`。
+
 **Windows（WSL2 Ubuntu）**。准备好环境后，从仓库根目录运行
 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`。
 PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器还支持 `setup`、`check`、`test`、`status` 和 `stop`。Bash 命令和外部试用记录脚本在 Ubuntu 中执行。[Windows 启动指南](docs/guides/WINDOWS_WSL.md) · [外部试用说明](docs/guides/EXTERNAL_USER_TEST.md#windows-外部试用)
@@ -204,9 +206,11 @@ PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器�
 | `./scripts/stop-step4.sh && make e3`                          | 完整 P0 3-of-4 验收 + 独立 EVM 归档对账 + E3 动作/吊销/节点宕机自审计                |
 | `make epoch-check`                                            | 激活 `checkpoint_proof` 并提交验证 `250 / 500 / 750 / 1000` 四个周期检查点           |
 | `make credit-check`                                           | 部署 `lyquid-credit-gate`（`8083`）并验证 4 个画像、反洗盘与自定义权重权限           |
-| `python3 scripts/fetch_sepolia_logs.py && make sepolia-check` | 从真实 Sepolia RPC 拉取 WETH 日志并通过 3-of-4 委员会签发真实链证书                  |
+| `make sepolia-check` | 在运行中的 demo 上验证仓库内置的 Sepolia 快照；复现报告前不要重新抓取 |
 | `./scripts/run-proof.sh --holder 0x... --block 1000`          | 对运行中的本地 Indexer 发起任意合规地址/区块的按需出证                               |
 | `./scripts/stop-step4.sh`                                     | 停止后台 4 节点与 HTTP 代理并释放端口                                                |
+
+完整本地验收：先停止此前启动的 demo，再运行 `./scripts/run-3of4-acceptance.sh`。日志与结果保存在 `.run/acceptance/3of4-*`。重新抓取 Sepolia 属于可选实验，会覆盖 fixture 文件，之后需要重新构建和部署 Indexer，详见[复现指南](docs/guides/REPRODUCIBILITY.md#6-preserve-the-captured-data-during-reproduction)。
 
 ### 7.2 本地端口与 HTTP 诊断接口（均支持 JSON + CORS）
 
@@ -228,9 +232,11 @@ PowerShell 管理启停，devnet 和 Web 服务在 Ubuntu 内运行。启动器�
 | `.run/acceptance/e3-results.json`                 | E3 全部 8 项回归证据（含真实交易哈希、吊销拦截、`SIGSTOP` 0.78s 出证 / 30.2s 阻塞恢复）  |
 | `.run/acceptance/epoch-checkpoints.json`          | 4 个周期性全局检查点（`250 / 500 / 750 / 1000`）及其 Merkle Root 与活跃统计              |
 | `.run/acceptance/credit-results.json`             | VeriCredit 4 个用户画像、反洗盘 200 万剔除、动态费率/LTV 与自定义权重对比证据            |
-| `.run/acceptance/sepolia-certificate.json`        | 真实 Sepolia 官方 WETH（块 `12184649`，`0.002 WETH`）由 `[0, 1, 3]` 节点签发的真实链证书 |
+| `.run/acceptance/sepolia-certificate.json`        | 内置 Sepolia WETH 窗口证书：块 `12188785`、净转入量 `0.061398085361568879 WETH`，至少 3 名不同签名者 |
 
 ---
+
+报告归档验收使用的是旧版 169 条事件的 Sepolia 快照（块 `12184649`，窗口净转入量 `0.002 WETH`）。原记录保留在 [test-records](test-records/README.md)，这些旧数值不是新版 215 条事件快照的预期输出。
 
 ## 8. 已知局限与未来改进方向
 

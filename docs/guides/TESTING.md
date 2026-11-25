@@ -1,5 +1,7 @@
 # HolderProof 测试操作指引
 
+提交与报告复现请先看[英文复现指南](REPRODUCIBILITY.md)：提交基线为 `af54fe7`，报告表 4 的归档实测版本为 `878842d`。两者的 Sepolia 快照不同，应按所选提交的 `fixtures/sepolia_expected.json` 核对结果。
+
 第一次试用请从「手动查询与资格判断」开始。团队验收可以直接使用
 `make e3`，它包含 P0 验收和 E3 回归。下文的 Bash 命令从 macOS、Linux 或 WSL2 Ubuntu 的仓库根目录运行。
 
@@ -131,7 +133,9 @@ Windows 启动器的 `-Action test` 覆盖 `make check guest-test`。要执行�
 | `make e3` | 完整 P0 验收，加上权限、撤销、重复动作、委员会暂停和恢复 | 合格动作各记录一次，拒绝用例不增加计数。一名成员暂停时仍能出证，两名暂停时观察窗口内无证书，恢复后可出证 |
 | `make epoch-check` | 在运行中的 demo 上提交并检查周期检查点 | 区块 250、500、750 和 1000 的检查点与 fixture 一致 |
 | `make credit-check` | 在运行中的 demo 上部署信用 Gate 并检查分档策略，需空闲的 8083 端口 | 四个样例的评分、费率和 LTV 与断言一致 |
-| `make sepolia-check` | 在运行中的 demo 上验证仓库内置的 Sepolia WETH 快照 | 样例查询对应 169 条 Transfer 记录，窗口重放余额为 0.002 WETH |
+| `make sepolia-check` | 在运行中的 demo 上验证仓库内置的 Sepolia WETH 快照 | `af54fe7` 快照为 215 条事件、结束块 12188785，样例窗口净转入量 0.061398085361568879 WETH；旧版 `878842d` 才是 169 条、0.002 WETH |
+
+复现报告时不要先运行 `scripts/fetch_sepolia_logs.py`，它会抓取近期区块并覆盖两份 Sepolia fixture。需要新数据时，请在单独 checkout 中抓取，保存输入文件，并重新构建、部署 Indexer 后再验证。内置快照只证明捕获窗口内的净转移量；没有已验证的期初余额时，不能称为完整历史余额。
 
 `make e3` 会在隔离的本地 demo 中改变 Gate 配置及证书状态。
 要再次观察第 2 节的初始结果，先关闭 E3 启动的 demo，再运行 `make demo`。

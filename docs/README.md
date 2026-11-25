@@ -1,8 +1,10 @@
 # HolderProof 文档索引
 
-更新于 2026-11-24。当前 `main` 使用 3-of-4 委员会。课程报告中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
+更新于 2026-11-25。当前 `main` 使用 3-of-4 委员会。课程报告中的架构图覆盖余额、信用、周期检查点和 Sepolia 四条认证路径。
 
 ## 课程报告
+
+- [课程项目复现指南（英文）](guides/REPRODUCIBILITY.md)：固定版本、环境准备、核心流程、完整验收、预期结果与原始证据。
 
 - CS5298 课程定稿（英文）[Word](reports/HolderProof_Academic_Report_Cover_Updated.docx) · [PDF](reports/HolderProof_Academic_Report_Cover_Updated.pdf)
 - [Web 使用说明](guides/WEB_GUIDE.md)

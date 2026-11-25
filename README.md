@@ -19,7 +19,7 @@ flowchart TB
     subgraph DataSources["Dual-Track Data Sources"]
         DS1["Local ERC-20 Fixture<br/>308 Transfers, Blocks 0..1000"]
         DS2["VeriCredit Behavior Fixture<br/>40 Swap / Repay / Liquidation Events"]
-        DS3["Real Sepolia RPC Fetcher<br/>169 WETH Transfers, Blocks 12184050..12184649"]
+        DS3["Real Sepolia RPC Fetcher<br/>215 WETH Transfers, Blocks 12188186..12188785"]
     end
 
     subgraph Committee["Lyquor 4-Node Localnet · 3-of-4 BFT Committee"]
@@ -75,7 +75,7 @@ flowchart TB
 | **HolderProof Historical Balance & Dual Gates**       | Deterministically replays 308 `Transfer` events into a SHA-256 Merkle-anchored `QueryCertificate`; Airdrop Gate (threshold `60,000` → `true`) and Governance Gate (threshold `70,000` → `false`) reuse the same `queryHash`; supports both locked single-user mode and multi-user `configure_policy` / `check_eligible_for`, one-time `claim()` / `vote()`, and `invalidate_certificate` revocation                                                                                   | `lyquid-indexer/`, `holderproof-gate-core/`, `lyquid-consumer/`, `lyquid-governance-gate/`                                                |
 | **Periodic Global Epoch Checkpoints (Layer 2)**       | Dedicated `checkpoint_proof` oracle commits 3-of-4 certified global summaries every `250` blocks (`250 / 500 / 750 / 1000`), persisting cumulative transfer volume, unique holder count, event count, and Merkle root for zero-recomputation downstream reads                                                                                                                                                                                                                         | `lyquid-indexer/src/fixture.rs`, `scripts/verify_epoch_checkpoints.py`                                                                    |
 | **VeriCredit-Idx Anti-Wash Credit & Dynamic Pricing** | Automatically strips wash-trading volume (same counterparty, opposite direction, `delta_block <= wash_window`); computes deterministic integer credit scores $S(u) \in [0, 1000]$ via `u128::ilog2`; supports default (`35/20/2/3`) and `initializer`-configurable weights; `lyquid-credit-gate` synchronously quotes dynamic DEX fees (`5/15/30 bps`) and lending LTV (`85%/75%/60%`) with `quote_or_fallback()` fail-safe on missing, revoked, or stale (Audit-05 TTL) certificates | `lyquid-indexer/src/credit.rs`, `holderproof-gate-core/src/credit.rs`, `lyquid-credit-gate/`, `scripts/verify_credit.py`                  |
-| **Dual-Track Real Ethereum Sepolia Verification**     | `fetch_sepolia_logs.py` paginates authentic Sepolia WETH `Transfer` logs (`169` events across blocks `12184050..12184649`) and real block hashes; `sepolia_proof` certifies authentic chain balances (`0.002 WETH`) via 3-of-4 quorum; `holderproof-gate-core` cleanly dispatches validation by `dataset_id` without altering offline tests                                                                                                                                           | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
+| **Dual-Track Real Ethereum Sepolia Verification**     | `fetch_sepolia_logs.py` captures Sepolia WETH `Transfer` logs and boundary block hashes. The submitted snapshot has `215` events across blocks `12188186..12188785`; `sepolia_proof` certifies a sample window net transfer amount of `0.061398085361568879 WETH` via 3-of-4 quorum; `holderproof-gate-core` cleanly dispatches validation by `dataset_id` without altering offline tests                                                                                                                                           | `scripts/fetch_sepolia_logs.py`, `lyquid-indexer/src/sepolia.rs`, `holderproof-gate-core/src/certificate.rs`, `scripts/verify_sepolia.py` |
 | **Dual-Mechanism Security (NDSS 2026 Defense)**       | Historical queries enforce deterministic `ChainPos` binding + byte-level consensus; time-skewed observation queries enforce a Network State honest-core dispersion guard $(v_{m-f} - v_{f+1}) \times 10000 \le M \times \epsilon_{\max}$ (default `100 bps` = 1%) to defeat Byzantine outliers and leader cherry-picking                                                                                                                                                              | `lyquid-indexer/src/dispersion.rs`                                                                                                        |
 | **Archival EVM Cross-Check & Web Console**            | `FixtureToken.sol` replays all 308 transfers on an isolated Anvil (Chain ID `31338`) to cross-verify 18 archival `eth_call balanceOf` snapshots; all HTTP endpoints return JSON + CORS headers, paired with a standalone 4-tab English web console (`ui/holderproof_vericredit_idx_console.html`)                                                                                                                                                                                     | `evm/`, `scripts/verify_historical_balance.py`, `ui/holderproof_vericredit_idx_console.html`                                              |
 
@@ -182,6 +182,8 @@ flowchart LR
 
 ### 7.1 Prerequisites & Commands
 
+Start with the [course project reproduction guide](docs/guides/REPRODUCIBILITY.md) for pinned revisions, setup, expected outputs and archived report evidence. The submitted baseline is `af54fe7`; the archived Table 4 run used `878842d`.
+
 **Windows (WSL2 Ubuntu).** Complete setup, then run
 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\holderproof.ps1 -Action start`
 from the repository root. PowerShell manages the runtime and Ubuntu runs the devnet and Web service. The launcher also supports `setup`, `check`, `test`, `status` and `stop`. Run Bash commands and the external feedback recorder in Ubuntu. [Windows startup guide](docs/guides/WINDOWS_WSL.md) · [External trial instructions](docs/guides/EXTERNAL_USER_TEST.md#windows-外部试用)
@@ -204,9 +206,11 @@ Verified with Rust `1.99.0` (`wasm32-unknown-unknown`), Lyquor LDK `0.8.4`, Foun
 | `./scripts/stop-step4.sh && make e3`                          | Full 3-of-4 P0 acceptance + archival EVM cross-check + E3 action/revocation/SIGSTOP audit                       |
 | `make epoch-check`                                            | Activate `checkpoint_proof` and commit/verify periodic epochs (`250 / 500 / 750 / 1000`)                        |
 | `make credit-check`                                           | Deploy `lyquid-credit-gate` (`8083`) and verify all 4 VeriCredit personas, wash removal & custom weights        |
-| `python3 scripts/fetch_sepolia_logs.py && make sepolia-check` | Fetch authentic Sepolia WETH logs and issue a 3-of-4 certified Sepolia balance proof                            |
+| `make sepolia-check` | Verify the bundled Sepolia snapshot on the running demo; do not refetch before report reproduction |
 | `./scripts/run-proof.sh --holder 0x... --block 1000`          | Submit an on-demand P0 query to the running local Indexer                                                       |
 | `./scripts/stop-step4.sh`                                     | Stop all background devnet nodes and HTTP proxies                                                               |
+
+For the full local suite, stop an earlier demo and run `./scripts/run-3of4-acceptance.sh`. Logs and results are saved under `.run/acceptance/3of4-*`. Fresh Sepolia fetching is an optional experiment that overwrites fixture files and requires rebuilding/redeploying the Indexer; see the [reproduction guide](docs/guides/REPRODUCIBILITY.md#6-preserve-the-captured-data-during-reproduction).
 
 ### 7.2 Local Ports & HTTP Diagnostic Endpoints (JSON + CORS Enabled)
 
@@ -228,9 +232,11 @@ Verified with Rust `1.99.0` (`wasm32-unknown-unknown`), Lyquor LDK `0.8.4`, Foun
 | `.run/acceptance/e3-results.json`                 | All 8 E3 audit records (tx hashes, revocation blocking, `0.78s` 1-node pause certified, `30.2s` 2-node pause blocked) |
 | `.run/acceptance/epoch-checkpoints.json`          | 4 periodic global Epoch Checkpoints (`250 / 500 / 750 / 1000`) with Merkle roots & holder counts                      |
 | `.run/acceptance/credit-results.json`             | 4 VeriCredit personas, `2,000,000` wash volume stripped, dynamic fee/LTV quotes & custom-weight delta                 |
-| `.run/acceptance/sepolia-certificate.json`        | Authentic Sepolia WETH certificate (block `12184649`, `0.002 WETH`) signed by committee nodes `[0, 1, 3]`             |
+| `.run/acceptance/sepolia-certificate.json`        | Bundled Sepolia WETH window certificate: block `12188785`, net `0.061398085361568879 WETH`, at least 3 distinct signers             |
 
 ---
+
+The report's archived acceptance run used the earlier 169-event Sepolia snapshot (block `12184649`, net `0.002 WETH`). That record is retained unchanged in [test-records](test-records/README.md); it is not the expected output of the newer 215-event snapshot.
 
 ## 8. Limitations & Future Work
 
